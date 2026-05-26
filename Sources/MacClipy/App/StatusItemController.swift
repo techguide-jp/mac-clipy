@@ -54,7 +54,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         rebuild()
     }
 
-    func menuNeedsUpdate(_ menu: NSMenu) {
+    func menuNeedsUpdate(_: NSMenu) {
         rebuild()
     }
 
@@ -153,7 +153,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     @objc private func copyMenuItem(_ sender: NSMenuItem) {
         guard let idString = sender.representedObject as? String,
               let id = UUID(uuidString: idString),
-              let item = historyModel.items.first(where: { $0.id == id }) else {
+              let item = historyModel.items.first(where: { $0.id == id })
+        else {
             return
         }
 

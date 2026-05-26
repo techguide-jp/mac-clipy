@@ -23,7 +23,7 @@ public final class ClipboardMonitor {
         self.excludedBundleIdentifiers = excludedBundleIdentifiers
         self.pasteboard = pasteboard
         self.onChange = onChange
-        self.lastChangeCount = pasteboard.changeCount
+        lastChangeCount = pasteboard.changeCount
     }
 
     public func start() {

@@ -81,7 +81,7 @@ final class SettingsModel {
     var statusMessage = ""
 
     init() {
-        self.excludedBundleIdentifiers = SettingsDefaults.normalizedBundleIdentifiers(
+        excludedBundleIdentifiers = SettingsDefaults.normalizedBundleIdentifiers(
             Defaults[.excludedBundleIdentifiers]
         )
     }
@@ -114,7 +114,8 @@ final class SettingsModel {
 
     func addExcludedApp(from url: URL) {
         guard let bundle = Bundle(url: url),
-              let bundleIdentifier = bundle.bundleIdentifier else {
+              let bundleIdentifier = bundle.bundleIdentifier
+        else {
             statusMessage = L10n.tr("settings.status.appReadFailed")
             return
         }

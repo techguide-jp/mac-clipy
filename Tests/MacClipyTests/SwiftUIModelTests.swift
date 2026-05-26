@@ -1,5 +1,5 @@
-import XCTest
 @testable import MacClipy
+import XCTest
 
 @MainActor
 final class SwiftUIModelTests: XCTestCase {

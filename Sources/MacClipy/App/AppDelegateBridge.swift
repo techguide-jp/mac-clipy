@@ -4,15 +4,15 @@ import AppKit
 final class AppDelegateBridge: NSObject, NSApplicationDelegate {
     let appModel = AppModel()
 
-    func applicationDidFinishLaunching(_ notification: Notification) {
+    func applicationDidFinishLaunching(_: Notification) {
         appModel.applicationDidFinishLaunching()
     }
 
-    func applicationWillTerminate(_ notification: Notification) {
+    func applicationWillTerminate(_: Notification) {
         appModel.applicationWillTerminate()
     }
 
-    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
         appModel.showHistoryPopup()
         return true
     }

@@ -17,14 +17,14 @@ public final class ClipboardStore {
         self.historyURL = historyURL
         self.maxItems = maxItems
         self.maxItemSize = maxItemSize
-        self.items = []
+        items = []
 
-        self.encoder = JSONEncoder()
-        self.encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        self.encoder.dateEncodingStrategy = .iso8601
+        encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
 
-        self.decoder = JSONDecoder()
-        self.decoder.dateDecodingStrategy = .iso8601
+        decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
     }
 
     public func load() throws {
@@ -131,6 +131,6 @@ public final class ClipboardStore {
             return
         }
 
-        items.removeSubrange(maxItems..<items.count)
+        items.removeSubrange(maxItems ..< items.count)
     }
 }

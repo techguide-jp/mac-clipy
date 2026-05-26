@@ -20,14 +20,14 @@ public enum L10n {
         }
 
         #if SWIFT_PACKAGE
-        let moduleValue = Bundle.module.localizedString(forKey: key, value: nil, table: tableName)
-        if moduleValue != key {
-            return moduleValue
-        }
+            let moduleValue = Bundle.module.localizedString(forKey: key, value: nil, table: tableName)
+            if moduleValue != key {
+                return moduleValue
+            }
 
-        if let fallbackValue = localizedString(forKey: key, localization: fallbackLocalization, in: Bundle.module) {
-            return fallbackValue
-        }
+            if let fallbackValue = localizedString(forKey: key, localization: fallbackLocalization, in: Bundle.module) {
+                return fallbackValue
+            }
         #endif
 
         if let fallbackValue = localizedString(forKey: key, localization: fallbackLocalization, in: Bundle.main) {
@@ -39,7 +39,8 @@ public enum L10n {
 
     private static func localizedString(forKey key: String, localization: String, in bundle: Bundle) -> String? {
         guard let path = bundle.path(forResource: localization, ofType: "lproj"),
-              let localizedBundle = Bundle(path: path) else {
+              let localizedBundle = Bundle(path: path)
+        else {
             return nil
         }
 

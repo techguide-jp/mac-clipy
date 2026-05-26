@@ -185,7 +185,7 @@ final class LocalizationTests: XCTestCase {
 
             if isInsideString {
                 result.append(character)
-                if character == "\\" && nextIndex < source.endIndex {
+                if character == "\\", nextIndex < source.endIndex {
                     result.append(source[nextIndex])
                     index = source.index(after: nextIndex)
                     continue
@@ -197,7 +197,7 @@ final class LocalizationTests: XCTestCase {
                 continue
             }
 
-            if character == "/" && nextCharacter == "/" {
+            if character == "/", nextCharacter == "/" {
                 index = source.index(after: nextIndex)
                 while index < source.endIndex, !source[index].isNewline {
                     index = source.index(after: index)
@@ -205,7 +205,7 @@ final class LocalizationTests: XCTestCase {
                 continue
             }
 
-            if character == "/" && nextCharacter == "*" {
+            if character == "/", nextCharacter == "*" {
                 index = source.index(after: nextIndex)
                 while index < source.endIndex {
                     if source[index].isNewline {

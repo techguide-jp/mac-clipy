@@ -1,5 +1,5 @@
-import XCTest
 @testable import MacClipy
+import XCTest
 
 final class FavoriteStoreTests: XCTestCase {
     func testToggleFavoritePersistsSnapshot() throws {

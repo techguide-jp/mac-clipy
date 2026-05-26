@@ -22,7 +22,8 @@ enum LegacyShortcutConverter {
 
     static func convert(_ shortcut: Shortcut?) -> KeyboardShortcuts.Shortcut? {
         guard let shortcut,
-              let key = key(named: shortcut.key) else {
+              let key = key(named: shortcut.key)
+        else {
             return nil
         }
 

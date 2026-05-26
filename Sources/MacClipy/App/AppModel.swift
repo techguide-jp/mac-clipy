@@ -21,7 +21,7 @@ final class AppModel {
 
     init() {
         let popupModel = HistoryPopupModel(historyModel: historyModel, favoritesModel: favoritesModel)
-        self.historyPopupModel = popupModel
+        historyPopupModel = popupModel
         popupModel.onChoose = { [weak self] item in
             self?.copyAndPaste(item)
         }
@@ -81,9 +81,9 @@ final class AppModel {
                 guard let self else {
                     return
                 }
-                self.historyModel.refreshFromStore()
-                self.floatingPanelController?.refresh()
-                self.refreshStatusMenu()
+                historyModel.refreshFromStore()
+                floatingPanelController?.refresh()
+                refreshStatusMenu()
             }
         )
         monitor?.start()

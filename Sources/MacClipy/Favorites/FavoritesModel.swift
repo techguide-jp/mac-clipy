@@ -37,13 +37,15 @@ final class FavoritesModel {
         folders = store.folders
         memberships = store.memberships
 
-        if case .folder(let folderID) = selectedFolderFilter,
-           !folders.contains(where: { $0.id == folderID }) {
+        if case let .folder(folderID) = selectedFolderFilter,
+           !folders.contains(where: { $0.id == folderID })
+        {
             selectedFolderFilter = .all
         }
 
         if let selectedFavoriteID,
-           !items.contains(where: { $0.id == selectedFavoriteID }) {
+           !items.contains(where: { $0.id == selectedFavoriteID })
+        {
             self.selectedFavoriteID = nil
             draftFavoriteTitle = ""
         }
@@ -55,7 +57,7 @@ final class FavoritesModel {
             store.search(query, folderID: nil, sort: selectedSort)
         case .unclassified:
             store.unclassifiedItems(sort: selectedSort).filter { favoriteMatches($0, query: query) }
-        case .folder(let folderID):
+        case let .folder(folderID):
             store.search(query, folderID: folderID, sort: selectedSort)
         }
     }
@@ -78,7 +80,7 @@ final class FavoritesModel {
             store.search(query, folderID: nil, sort: selectedSort)
         case .unclassified:
             store.unclassifiedItems(sort: selectedSort).filter { favoriteMatches($0, query: query) }
-        case .folder(let folderID):
+        case let .folder(folderID):
             store.search(query, folderID: folderID, sort: selectedSort)
         }
     }
@@ -91,7 +93,7 @@ final class FavoritesModel {
     func selectFolderFilter(_ filter: FavoriteFolderFilter) {
         selectedFolderFilter = filter
         switch filter {
-        case .folder(let folderID):
+        case let .folder(folderID):
             selectedFolderName = folders.first(where: { $0.id == folderID })?.name ?? ""
         case .all, .unclassified:
             selectedFolderName = ""
@@ -112,7 +114,7 @@ final class FavoritesModel {
     }
 
     func renameSelectedFolder(to name: String) {
-        guard case .folder(let folderID) = selectedFolderFilter else {
+        guard case let .folder(folderID) = selectedFolderFilter else {
             statusMessage = L10n.tr("settings.favorites.status.selectConcreteFolder")
             return
         }
@@ -127,7 +129,7 @@ final class FavoritesModel {
     }
 
     func deleteSelectedFolder() {
-        guard case .folder(let folderID) = selectedFolderFilter else {
+        guard case let .folder(folderID) = selectedFolderFilter else {
             statusMessage = L10n.tr("settings.favorites.status.selectConcreteFolder")
             return
         }
@@ -143,7 +145,7 @@ final class FavoritesModel {
     }
 
     func moveSelectedFolder(by offset: Int) {
-        guard case .folder(let folderID) = selectedFolderFilter else {
+        guard case let .folder(folderID) = selectedFolderFilter else {
             statusMessage = L10n.tr("settings.favorites.status.selectConcreteFolder")
             return
         }

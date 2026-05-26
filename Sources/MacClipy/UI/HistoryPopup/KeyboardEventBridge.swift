@@ -12,11 +12,11 @@ struct KeyboardEventBridge: NSViewRepresentable {
         return view
     }
 
-    func updateNSView(_ nsView: KeyBridgeView, context: Context) {
+    func updateNSView(_: KeyBridgeView, context: Context) {
         context.coordinator.onEvent = onEvent
     }
 
-    static func dismantleNSView(_ nsView: KeyBridgeView, coordinator: Coordinator) {
+    static func dismantleNSView(_: KeyBridgeView, coordinator: Coordinator) {
         coordinator.removeMonitor()
     }
 
@@ -43,7 +43,8 @@ struct KeyboardEventBridge: NSViewRepresentable {
                     guard let unsafeSelf,
                           let view = unsafeSelf.view,
                           unsafeEvent.window === view.window,
-                          let onEvent = unsafeSelf.onEvent else {
+                          let onEvent = unsafeSelf.onEvent
+                    else {
                         return false
                     }
 
@@ -102,7 +103,8 @@ enum HistoryPopupKeyAction {
         default:
             guard !isTextEditing,
                   shouldAppendToSearch(event),
-                  let text = event.charactersIgnoringModifiers else {
+                  let text = event.charactersIgnoringModifiers
+            else {
                 return false
             }
 
@@ -117,7 +119,8 @@ enum HistoryPopupKeyAction {
         guard modifiers.contains(.command),
               !modifiers.contains(.option),
               !modifiers.contains(.control),
-              let key = event.charactersIgnoringModifiers?.lowercased() else {
+              let key = event.charactersIgnoringModifiers?.lowercased()
+        else {
             return false
         }
 
@@ -133,8 +136,9 @@ enum HistoryPopupKeyAction {
 
         if !modifiers.contains(.shift),
            let index = Int(key),
-           (AppConstants.Keyboard.firstFolderShortcutIndex...AppConstants.Keyboard.lastFolderShortcutIndex)
-            .contains(index) {
+           (AppConstants.Keyboard.firstFolderShortcutIndex ... AppConstants.Keyboard.lastFolderShortcutIndex)
+           .contains(index)
+        {
             model.selectFolderByShortcut(index)
             return true
         }
@@ -146,7 +150,8 @@ enum HistoryPopupKeyAction {
         let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
         guard !modifiers.contains(.command),
               !modifiers.contains(.option),
-              !modifiers.contains(.control) else {
+              !modifiers.contains(.control)
+        else {
             return false
         }
 

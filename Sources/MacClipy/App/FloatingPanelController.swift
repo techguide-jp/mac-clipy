@@ -8,7 +8,7 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
 
     init(model: HistoryPopupModel) {
         self.model = model
-        self.panel = PopupPanel(
+        panel = PopupPanel(
             contentRect: NSRect(origin: .zero, size: NSSize(width: 520, height: 460)),
             styleMask: [.borderless],
             backing: .buffered,
@@ -43,7 +43,7 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         model.refresh()
     }
 
-    func windowDidResignKey(_ notification: Notification) {
+    func windowDidResignKey(_: Notification) {
         guard !model.isShowingFavoriteNamePrompt else {
             return
         }
@@ -80,7 +80,7 @@ final class PopupPanel: NSPanel {
         true
     }
 
-    override func cancelOperation(_ sender: Any?) {
+    override func cancelOperation(_: Any?) {
         orderOut(nil)
     }
 }

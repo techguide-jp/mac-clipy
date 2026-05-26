@@ -254,7 +254,7 @@ private struct FavoritesManagementView: View {
                 .disabled(model.selectedFavoriteID == nil)
 
                 Picker(selection: $assignmentFolderID) {
-                    Text(L10n.tr("settings.favorites.folder.none")).tag(Optional<UUID>.none)
+                    Text(L10n.tr("settings.favorites.folder.none")).tag(UUID?.none)
                     ForEach(model.folders) { folder in
                         Text(verbatim: folder.name).tag(Optional(folder.id))
                     }
@@ -273,8 +273,9 @@ private struct FavoritesManagementView: View {
                 .disabled(model.selectedFavoriteID == nil || assignmentFolderID == nil)
 
                 if let selectedFavoriteID = model.selectedFavoriteID,
-                   case .folder(let folderID) = model.selectedFolderFilter,
-                   model.folderIDs(for: selectedFavoriteID).contains(folderID) {
+                   case let .folder(folderID) = model.selectedFolderFilter,
+                   model.folderIDs(for: selectedFavoriteID).contains(folderID)
+                {
                     Button {
                         model.removeSelectedFavorite(from: folderID)
                     } label: {

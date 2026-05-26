@@ -1,7 +1,7 @@
 import Defaults
 import KeyboardShortcuts
-import XCTest
 @testable import MacClipy
+import XCTest
 
 final class SettingsMigrationTests: XCTestCase {
     override func setUp() {
