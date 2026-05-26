@@ -12,18 +12,22 @@ public struct AppSettings: Codable, Equatable {
 
     public var excludedBundleIdentifiers: [String]
     public var hotKey: KeyboardShortcut
+    public var favoriteHotKey: KeyboardShortcut
 
     public init(
         excludedBundleIdentifiers: [String] = Self.defaultExcludedBundleIdentifiers,
-        hotKey: KeyboardShortcut = .defaultShortcut
+        hotKey: KeyboardShortcut = .defaultShortcut,
+        favoriteHotKey: KeyboardShortcut = .defaultFavoriteShortcut
     ) {
         self.excludedBundleIdentifiers = Self.normalizedBundleIdentifiers(excludedBundleIdentifiers)
         self.hotKey = hotKey
+        self.favoriteHotKey = favoriteHotKey
     }
 
     private enum CodingKeys: String, CodingKey {
         case excludedBundleIdentifiers
         case hotKey
+        case favoriteHotKey
     }
 
     public init(from decoder: Decoder) throws {
@@ -32,9 +36,16 @@ public struct AppSettings: Codable, Equatable {
             ?? Self.defaultExcludedBundleIdentifiers
 
         let decodedHotKey = try container.decodeIfPresent(KeyboardShortcut.self, forKey: .hotKey) ?? .defaultShortcut
+        let decodedFavoriteHotKey = try container.decodeIfPresent(
+            KeyboardShortcut.self,
+            forKey: .favoriteHotKey
+        ) ?? .defaultFavoriteShortcut
 
         self.excludedBundleIdentifiers = Self.normalizedBundleIdentifiers(identifiers)
         self.hotKey = decodedHotKey.isRegisterable ? decodedHotKey : .defaultShortcut
+        self.favoriteHotKey = decodedFavoriteHotKey.isRegisterable
+            ? decodedFavoriteHotKey
+            : .defaultFavoriteShortcut
     }
 
     public func isExcluded(bundleIdentifier: String?) -> Bool {
@@ -115,9 +126,14 @@ public final class SettingsStore {
         try save()
     }
 
-    public func update(excludedBundleIdentifiers identifiers: [String], hotKey: KeyboardShortcut) throws {
+    public func update(
+        excludedBundleIdentifiers identifiers: [String],
+        hotKey: KeyboardShortcut,
+        favoriteHotKey: KeyboardShortcut
+    ) throws {
         settings.excludedBundleIdentifiers = AppSettings.normalizedBundleIdentifiers(identifiers)
         settings.hotKey = hotKey.isRegisterable ? hotKey : .defaultShortcut
+        settings.favoriteHotKey = favoriteHotKey.isRegisterable ? favoriteHotKey : .defaultFavoriteShortcut
         try save()
     }
 }

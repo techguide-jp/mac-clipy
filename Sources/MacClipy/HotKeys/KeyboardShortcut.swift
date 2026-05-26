@@ -61,6 +61,7 @@ public enum KeyboardShortcutParseError: LocalizedError, Equatable, Sendable {
 
 public struct KeyboardShortcut: Codable, Equatable, Sendable {
     public static let defaultShortcut = KeyboardShortcut(key: "v", modifiers: [.shift, .command])
+    public static let defaultFavoriteShortcut = KeyboardShortcut(key: "v", modifiers: [.option, .command])
 
     public var key: String
     public var modifiers: [ShortcutModifier]

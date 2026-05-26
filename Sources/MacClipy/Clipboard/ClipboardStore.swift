@@ -11,8 +11,8 @@ public final class ClipboardStore {
 
     public init(
         historyURL: URL = AppPaths.historyURL,
-        maxItems: Int = 200,
-        maxItemSize: Int = 100 * 1024
+        maxItems: Int = AppConstants.Clipboard.defaultMaxItems,
+        maxItemSize: Int = AppConstants.Clipboard.defaultMaxItemSizeBytes
     ) {
         self.historyURL = historyURL
         self.maxItems = maxItems
@@ -60,8 +60,8 @@ public final class ClipboardStore {
             var item = items.remove(at: existingIndex)
             item.sourceBundleID = sourceBundleID ?? item.sourceBundleID
             item.lastUsedAt = date
-            item.useCount += 1
-            items.insert(item, at: 0)
+            item.useCount += AppConstants.Clipboard.useCountIncrement
+            items.insert(item, at: AppConstants.Clipboard.mostRecentInsertIndex)
             try save()
             return item
         }
@@ -71,11 +71,11 @@ public final class ClipboardStore {
             sourceBundleID: sourceBundleID,
             createdAt: date,
             lastUsedAt: date,
-            useCount: 1,
+            useCount: AppConstants.Clipboard.initialUseCount,
             checksum: checksum
         )
 
-        items.insert(item, at: 0)
+        items.insert(item, at: AppConstants.Clipboard.mostRecentInsertIndex)
         trimToLimit()
         try save()
         return item
@@ -89,8 +89,8 @@ public final class ClipboardStore {
 
         var item = items.remove(at: index)
         item.lastUsedAt = date
-        item.useCount += 1
-        items.insert(item, at: 0)
+        item.useCount += AppConstants.Clipboard.useCountIncrement
+        items.insert(item, at: AppConstants.Clipboard.mostRecentInsertIndex)
         try save()
         return item
     }

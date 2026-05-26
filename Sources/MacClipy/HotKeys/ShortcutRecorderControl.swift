@@ -1,6 +1,19 @@
 import AppKit
 import Carbon
 
+private enum ShortcutRecorderMetrics {
+    static let intrinsicHeight: CGFloat = 54
+    static let borderInset: CGFloat = 1
+    static let cornerRadius: CGFloat = 8
+    static let recordingFillAlpha: CGFloat = 0.08
+    static let recordingBorderWidth: CGFloat = 2
+    static let idleBorderWidth: CGFloat = 1
+    static let recordingTitleFontSize: CGFloat = 16
+    static let idleTitleFontSize: CGFloat = 18
+    static let subtitleFontSize: CGFloat = 12
+    static let titleSubtitleSpacing: CGFloat = 3
+}
+
 @MainActor
 final class ShortcutRecorderControl: NSControl {
     var shortcut: KeyboardShortcut {
@@ -39,7 +52,7 @@ final class ShortcutRecorderControl: NSControl {
     }
 
     override var intrinsicContentSize: NSSize {
-        NSSize(width: NSView.noIntrinsicMetric, height: 54)
+        NSSize(width: NSView.noIntrinsicMetric, height: ShortcutRecorderMetrics.intrinsicHeight)
     }
 
     override func becomeFirstResponder() -> Bool {
@@ -92,8 +105,11 @@ final class ShortcutRecorderControl: NSControl {
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
 
-        let bounds = bounds.insetBy(dx: 1, dy: 1)
-        let radius: CGFloat = 8
+        let bounds = bounds.insetBy(
+            dx: ShortcutRecorderMetrics.borderInset,
+            dy: ShortcutRecorderMetrics.borderInset
+        )
+        let radius = ShortcutRecorderMetrics.cornerRadius
         let path = NSBezierPath(roundedRect: bounds, xRadius: radius, yRadius: radius)
 
         let isFocused = window?.firstResponder === self
@@ -101,14 +117,16 @@ final class ShortcutRecorderControl: NSControl {
             ? .controlAccentColor
             : (isFocused ? .keyboardFocusIndicatorColor : .separatorColor)
         let fillColor: NSColor = isRecording
-            ? NSColor.controlAccentColor.withAlphaComponent(0.08)
+            ? NSColor.controlAccentColor.withAlphaComponent(ShortcutRecorderMetrics.recordingFillAlpha)
             : NSColor.controlBackgroundColor
 
         fillColor.setFill()
         path.fill()
 
         borderColor.setStroke()
-        path.lineWidth = isRecording ? 2 : 1
+        path.lineWidth = isRecording
+            ? ShortcutRecorderMetrics.recordingBorderWidth
+            : ShortcutRecorderMetrics.idleBorderWidth
         path.stroke()
 
         let title = isRecording ? L10n.tr("shortcutRecorder.recordingTitle") : shortcut.displayName
@@ -117,24 +135,31 @@ final class ShortcutRecorderControl: NSControl {
             : L10n.tr("shortcutRecorder.idleSubtitle")
 
         let titleAttributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: isRecording ? 16 : 18, weight: .semibold),
+            .font: NSFont.systemFont(
+                ofSize: isRecording
+                    ? ShortcutRecorderMetrics.recordingTitleFontSize
+                    : ShortcutRecorderMetrics.idleTitleFontSize,
+                weight: .semibold
+            ),
             .foregroundColor: NSColor.labelColor
         ]
         let subtitleAttributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 12),
+            .font: NSFont.systemFont(ofSize: ShortcutRecorderMetrics.subtitleFontSize),
             .foregroundColor: NSColor.secondaryLabelColor
         ]
 
         let titleString = NSAttributedString(string: title, attributes: titleAttributes)
         let subtitleString = NSAttributedString(string: subtitle, attributes: subtitleAttributes)
-        let totalHeight = titleString.size().height + 3 + subtitleString.size().height
+        let totalHeight = titleString.size().height
+            + ShortcutRecorderMetrics.titleSubtitleSpacing
+            + subtitleString.size().height
         let titleOrigin = NSPoint(
             x: bounds.midX - titleString.size().width / 2,
             y: bounds.midY + totalHeight / 2 - titleString.size().height
         )
         let subtitleOrigin = NSPoint(
             x: bounds.midX - subtitleString.size().width / 2,
-            y: titleOrigin.y - subtitleString.size().height - 3
+            y: titleOrigin.y - subtitleString.size().height - ShortcutRecorderMetrics.titleSubtitleSpacing
         )
 
         titleString.draw(at: titleOrigin)

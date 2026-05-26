@@ -16,7 +16,7 @@ public struct ClipboardItem: Codable, Equatable, Identifiable {
         sourceBundleID: String?,
         createdAt: Date = Date(),
         lastUsedAt: Date = Date(),
-        useCount: Int = 1,
+        useCount: Int = AppConstants.Clipboard.initialUseCount,
         checksum: String? = nil
     ) {
         self.id = id
@@ -39,11 +39,11 @@ public struct ClipboardItem: Codable, Equatable, Identifiable {
             .filter { !$0.isEmpty }
             .joined(separator: " ")
 
-        if collapsed.count <= 64 {
+        if collapsed.count <= AppConstants.Clipboard.menuTitleCharacterLimit {
             return collapsed.isEmpty ? L10n.tr("clipboard.emptyWhitespace") : collapsed
         }
 
-        let index = collapsed.index(collapsed.startIndex, offsetBy: 64)
+        let index = collapsed.index(collapsed.startIndex, offsetBy: AppConstants.Clipboard.menuTitleCharacterLimit)
         return String(collapsed[..<index]) + "..."
     }
 }

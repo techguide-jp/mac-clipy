@@ -16,7 +16,7 @@ enum PasteController {
 
         application.activate(options: [.activateIgnoringOtherApps])
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + AppConstants.Paste.delayBeforeSendingCommandV) {
             sendCommandV()
         }
 
@@ -25,7 +25,7 @@ enum PasteController {
 
     private static func sendCommandV() {
         let source = CGEventSource(stateID: .combinedSessionState)
-        let keyCodeForV = CGKeyCode(9)
+        let keyCodeForV = AppConstants.Paste.commandVKeyCode
 
         let keyDown = CGEvent(keyboardEventSource: source, virtualKey: keyCodeForV, keyDown: true)
         keyDown?.flags = .maskCommand
