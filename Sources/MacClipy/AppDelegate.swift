@@ -3,10 +3,12 @@ import AppKit
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let store = ClipboardStore()
+    private let favoriteStore = FavoriteStore()
     private let settingsStore = SettingsStore()
 
     private var monitor: ClipboardMonitor?
-    private var hotKeyController: HotKeyController?
+    private var historyHotKeyController: HotKeyController?
+    private var favoriteHotKeyController: HotKeyController?
     private var statusItem: NSStatusItem?
     private var previousApplication: NSRunningApplication?
 
@@ -16,6 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private lazy var historyPopupController = HistoryPopupController(
         store: store,
+        favoriteStore: favoriteStore,
         onItemChosen: { [weak self] item in
             self?.copyAndPaste(item)
         },
@@ -26,16 +29,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private lazy var settingsWindowController = SettingsWindowController(
         settingsStore: settingsStore,
+        favoriteStore: favoriteStore,
         onSave: { [weak self] in
             guard let self else {
                 return
             }
 
-            try self.setupHotKey()
+            try self.setupHotKeys()
             self.rebuildStatusMenu()
         },
         onDismiss: { [weak self] in
-            self?.restoreHotKeyAfterSettings()
+            self?.restoreHotKeysAfterSettings()
         }
     )
 
@@ -45,6 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         do {
             try settingsStore.load()
             try store.load()
+            try favoriteStore.load()
         } catch {
             showAlert(title: L10n.tr("alert.initializationFailed.title"), message: error.localizedDescription)
         }
@@ -57,7 +62,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         setupStatusItem()
         do {
-            try setupHotKey()
+            try setupHotKeys()
         } catch {
             showAlert(title: L10n.tr("alert.hotKeyRegistrationFailed.title"), message: error.localizedDescription)
         }
@@ -65,7 +70,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         monitor?.stop()
-        hotKeyController?.unregister()
+        historyHotKeyController?.unregister()
+        favoriteHotKeyController?.unregister()
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
@@ -95,27 +101,67 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         rebuildStatusMenu()
     }
 
-    private func setupHotKey() throws {
-        let shortcut = settingsStore.settings.hotKey
-        if let hotKeyController, hotKeyController.shortcut == shortcut {
-            if !hotKeyController.isRegistered {
-                try hotKeyController.register()
+    private func setupHotKeys() throws {
+        let previousHistoryController = historyHotKeyController
+        let previousFavoriteController = favoriteHotKeyController
+        var registeredControllers: [HotKeyController] = []
+
+        do {
+            let historyController = try preparedHotKeyController(
+                currentController: previousHistoryController,
+                shortcut: settingsStore.settings.hotKey,
+                identifier: 1,
+                registeredControllers: &registeredControllers
+            ) { [weak self] in
+                self?.showHistoryPopup()
             }
-            return
-        }
+            let favoriteController = try preparedHotKeyController(
+                currentController: previousFavoriteController,
+                shortcut: settingsStore.settings.favoriteHotKey,
+                identifier: 2,
+                registeredControllers: &registeredControllers
+            ) { [weak self] in
+                self?.showFavoritePopup()
+            }
 
-        let controller = HotKeyController(shortcut: shortcut) { [weak self] in
-            self?.showHistoryPopup()
-        }
+            if historyController !== previousHistoryController {
+                previousHistoryController?.unregister()
+            }
+            if favoriteController !== previousFavoriteController {
+                previousFavoriteController?.unregister()
+            }
 
-        try controller.register()
-        hotKeyController?.unregister()
-        hotKeyController = controller
+            historyHotKeyController = historyController
+            favoriteHotKeyController = favoriteController
+        } catch {
+            registeredControllers.forEach { $0.unregister() }
+            throw error
+        }
     }
 
-    private func restoreHotKeyAfterSettings() {
+    private func preparedHotKeyController(
+        currentController: HotKeyController?,
+        shortcut: KeyboardShortcut,
+        identifier: UInt32,
+        registeredControllers: inout [HotKeyController],
+        onPressed: @MainActor @escaping () -> Void
+    ) throws -> HotKeyController {
+        if let currentController, currentController.shortcut == shortcut {
+            if !currentController.isRegistered {
+                try currentController.register()
+            }
+            return currentController
+        }
+
+        let controller = HotKeyController(shortcut: shortcut, identifier: identifier, onPressed: onPressed)
+        try controller.register()
+        registeredControllers.append(controller)
+        return controller
+    }
+
+    private func restoreHotKeysAfterSettings() {
         do {
-            try setupHotKey()
+            try setupHotKeys()
         } catch {
             showAlert(title: L10n.tr("alert.hotKeyRegistrationFailed.title"), message: error.localizedDescription)
         }
@@ -150,6 +196,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                     keyEquivalent: "")
         hotKeyItem.isEnabled = false
         menu.addItem(hotKeyItem)
+
+        let favoriteHotKeyItem = NSMenuItem(
+            title: L10n.tr("menu.favoriteHotKey", settingsStore.settings.favoriteHotKey.displayName),
+            action: nil,
+            keyEquivalent: ""
+        )
+        favoriteHotKeyItem.isEnabled = false
+        menu.addItem(favoriteHotKeyItem)
 
         let searchItem = NSMenuItem(title: L10n.tr("menu.search"),
                                     action: #selector(showHistoryPanel),
@@ -200,7 +254,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func showHistoryPopup() {
         rememberFrontmostApplication()
-        historyPopupController.show(at: NSEvent.mouseLocation)
+        historyPopupController.show(at: NSEvent.mouseLocation, initialMode: .all)
+    }
+
+    @objc private func showFavoritePopup() {
+        rememberFrontmostApplication()
+        historyPopupController.show(at: NSEvent.mouseLocation, initialMode: .favorites)
     }
 
     @objc private func showHistoryPanel() {
@@ -218,7 +277,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func showSettings() {
-        hotKeyController?.unregister()
+        historyHotKeyController?.unregister()
+        favoriteHotKeyController?.unregister()
         settingsWindowController.show()
     }
 
@@ -227,15 +287,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         alert.messageText = L10n.tr("alert.clearHistory.title")
         alert.informativeText = L10n.tr("alert.clearHistory.message")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: L10n.tr("button.delete"))
+        alert.addButton(withTitle: L10n.tr("button.deleteHistoryOnly"))
+        alert.addButton(withTitle: L10n.tr("button.deleteHistoryAndFavorites"))
         alert.addButton(withTitle: L10n.tr("button.cancel"))
 
-        guard alert.runModal() == .alertFirstButtonReturn else {
-            return
-        }
+        let response = alert.runModal()
 
         do {
-            try store.clear()
+            switch response {
+            case .alertFirstButtonReturn:
+                try store.clear()
+            case .alertSecondButtonReturn:
+                try store.clear()
+                try favoriteStore.clear()
+                historyPopupController.refresh()
+            default:
+                return
+            }
             rebuildStatusMenu()
             historyPanelController.refresh()
         } catch {

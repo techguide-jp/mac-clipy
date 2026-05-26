@@ -16,6 +16,10 @@ public enum AppPaths {
         applicationSupportDirectory.appendingPathComponent("settings.json")
     }
 
+    public static var favoritesURL: URL {
+        applicationSupportDirectory.appendingPathComponent("favorites.json")
+    }
+
     public static func ensureParentDirectory(for fileURL: URL) throws {
         let directoryURL = fileURL.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)

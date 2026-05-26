@@ -7,6 +7,11 @@ final class KeyboardShortcutTests: XCTestCase {
         XCTAssertEqual(KeyboardShortcut.defaultShortcut.displayName, "⇧⌘V")
     }
 
+    func testDefaultFavoriteShortcutIsOptionCommandV() {
+        XCTAssertEqual(KeyboardShortcut.defaultFavoriteShortcut.editingString, "option+command+v")
+        XCTAssertEqual(KeyboardShortcut.defaultFavoriteShortcut.displayName, "⌥⌘V")
+    }
+
     func testParseShortcutText() throws {
         XCTAssertEqual(try KeyboardShortcut.parse("shift + command + v"), .defaultShortcut)
         XCTAssertEqual(try KeyboardShortcut.parse("cmd shift V"), .defaultShortcut)
@@ -51,6 +56,7 @@ final class KeyboardShortcutTests: XCTestCase {
 
         XCTAssertEqual(settings.excludedBundleIdentifiers, ["com.example.Secret"])
         XCTAssertEqual(settings.hotKey, .defaultShortcut)
+        XCTAssertEqual(settings.favoriteHotKey, .defaultFavoriteShortcut)
     }
 
     func testSettingsDecodeUsesDefaultHotKeyWhenStoredHotKeyIsUnsupported() throws {
@@ -68,5 +74,23 @@ final class KeyboardShortcutTests: XCTestCase {
         let settings = try JSONDecoder().decode(AppSettings.self, from: data)
 
         XCTAssertEqual(settings.hotKey, .defaultShortcut)
+        XCTAssertEqual(settings.favoriteHotKey, .defaultFavoriteShortcut)
+    }
+
+    func testSettingsDecodeUsesDefaultFavoriteHotKeyWhenStoredHotKeyIsUnsupported() throws {
+        let json = """
+        {
+          "excludedBundleIdentifiers": ["com.example.Secret"],
+          "favoriteHotKey": {
+            "key": "escape",
+            "modifiers": ["command"]
+          }
+        }
+        """
+        let data = try XCTUnwrap(json.data(using: .utf8))
+
+        let settings = try JSONDecoder().decode(AppSettings.self, from: data)
+
+        XCTAssertEqual(settings.favoriteHotKey, .defaultFavoriteShortcut)
     }
 }

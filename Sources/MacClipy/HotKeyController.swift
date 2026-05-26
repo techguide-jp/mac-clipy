@@ -17,18 +17,19 @@ public enum HotKeyError: LocalizedError {
 
 public final class HotKeyController {
     private static let signature = HotKeyController.fourCharCode("MCLP")
-    private static let hotKeyID = UInt32(1)
-    nonisolated(unsafe) private static var callback: (@MainActor () -> Void)?
+    nonisolated(unsafe) private static var callbacks: [UInt32: @MainActor () -> Void] = [:]
+    nonisolated(unsafe) private static var eventHandlerRef: EventHandlerRef?
 
     public let shortcut: KeyboardShortcut
+    public let identifier: UInt32
     public private(set) var isRegistered = false
 
     private var hotKeyRef: EventHotKeyRef?
-    private var eventHandlerRef: EventHandlerRef?
     private let onPressed: @MainActor () -> Void
 
-    public init(shortcut: KeyboardShortcut, onPressed: @MainActor @escaping () -> Void) {
+    public init(shortcut: KeyboardShortcut, identifier: UInt32 = 1, onPressed: @MainActor @escaping () -> Void) {
         self.shortcut = shortcut
+        self.identifier = identifier
         self.onPressed = onPressed
     }
 
@@ -48,20 +49,9 @@ public final class HotKeyController {
             eventKind: UInt32(kEventHotKeyPressed)
         )
 
-        let handlerStatus = InstallEventHandler(
-            GetApplicationEventTarget(),
-            Self.handleHotKeyEvent,
-            1,
-            &eventType,
-            nil,
-            &eventHandlerRef
-        )
+        try Self.installHandlerIfNeeded(eventType: &eventType)
 
-        guard handlerStatus == noErr else {
-            throw HotKeyError.registrationFailed(handlerStatus)
-        }
-
-        let carbonHotKeyID = EventHotKeyID(signature: Self.signature, id: Self.hotKeyID)
+        let carbonHotKeyID = EventHotKeyID(signature: Self.signature, id: identifier)
         let hotKeyStatus = RegisterEventHotKey(
             keyCode,
             shortcut.carbonModifiers,
@@ -76,7 +66,7 @@ public final class HotKeyController {
             throw HotKeyError.registrationFailed(hotKeyStatus)
         }
 
-        Self.callback = onPressed
+        Self.callbacks[identifier] = onPressed
         isRegistered = true
     }
 
@@ -86,11 +76,8 @@ public final class HotKeyController {
             self.hotKeyRef = nil
         }
 
-        if let eventHandlerRef {
-            RemoveEventHandler(eventHandlerRef)
-            self.eventHandlerRef = nil
-        }
-
+        Self.callbacks[identifier] = nil
+        Self.removeHandlerIfUnused()
         isRegistered = false
     }
 
@@ -112,15 +99,43 @@ public final class HotKeyController {
 
         guard status == noErr,
               hotKeyID.signature == HotKeyController.signature,
-              hotKeyID.id == HotKeyController.hotKeyID else {
+              let callback = HotKeyController.callbacks[hotKeyID.id] else {
             return noErr
         }
 
         Task { @MainActor in
-            HotKeyController.callback?()
+            callback()
         }
 
         return noErr
+    }
+
+    private static func installHandlerIfNeeded(eventType: inout EventTypeSpec) throws {
+        guard eventHandlerRef == nil else {
+            return
+        }
+
+        let handlerStatus = InstallEventHandler(
+            GetApplicationEventTarget(),
+            Self.handleHotKeyEvent,
+            1,
+            &eventType,
+            nil,
+            &eventHandlerRef
+        )
+
+        guard handlerStatus == noErr else {
+            throw HotKeyError.registrationFailed(handlerStatus)
+        }
+    }
+
+    private static func removeHandlerIfUnused() {
+        guard callbacks.isEmpty, let eventHandlerRef else {
+            return
+        }
+
+        RemoveEventHandler(eventHandlerRef)
+        Self.eventHandlerRef = nil
     }
 
     private static func fourCharCode(_ value: String) -> OSType {
