@@ -18,6 +18,7 @@ public enum HotKeyError: LocalizedError {
 public final class HotKeyController {
     private static let signature = HotKeyController.fourCharCode("MCLP")
     nonisolated(unsafe) private static var callbacks: [UInt32: @MainActor () -> Void] = [:]
+    nonisolated(unsafe) private static var callbackOwners: [UInt32: ObjectIdentifier] = [:]
     nonisolated(unsafe) private static var eventHandlerRef: EventHandlerRef?
 
     public let shortcut: KeyboardShortcut
@@ -67,6 +68,7 @@ public final class HotKeyController {
         }
 
         Self.callbacks[identifier] = onPressed
+        Self.callbackOwners[identifier] = ObjectIdentifier(self)
         isRegistered = true
     }
 
@@ -76,7 +78,10 @@ public final class HotKeyController {
             self.hotKeyRef = nil
         }
 
-        Self.callbacks[identifier] = nil
+        if Self.callbackOwners[identifier] == ObjectIdentifier(self) {
+            Self.callbacks[identifier] = nil
+            Self.callbackOwners[identifier] = nil
+        }
         Self.removeHandlerIfUnused()
         isRegistered = false
     }
