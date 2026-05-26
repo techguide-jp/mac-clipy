@@ -10,7 +10,7 @@ enum HistoryPopupMetrics {
     static let emptyLabelFontSize: CGFloat = 13
     static let settingsButtonWidth: CGFloat = 34
     static let filterSegmentWidth: CGFloat = 172
-    static let rowHeight: CGFloat = 34
+    static let rowHeight: CGFloat = 44
     static let rowSpacing: CGFloat = 1
     static let screenEdgePadding: CGFloat = 8
 }

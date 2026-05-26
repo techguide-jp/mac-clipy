@@ -61,11 +61,24 @@ extension SettingsWindowController {
         if tableColumn?.identifier.rawValue == "favoriteFolders" {
             configureFolderNamesCell(cell, favorite: favorite)
         } else {
-            let detail = L10n.tr("settings.favorites.item.detail", favorite.useCount)
+            let detail = favoriteItemDetail(for: favorite)
             cell.configure(text: favorite.menuTitle, secondaryText: detail)
-            cell.toolTip = favorite.contentSnapshot
+            cell.toolTip = favorite.hasCustomDisplayTitle
+                ? "\(favorite.menuTitle)\n\(favorite.contentSnapshot)"
+                : favorite.contentSnapshot
         }
         return cell
+    }
+
+    private func favoriteItemDetail(for favorite: FavoriteItem) -> String {
+        guard favorite.hasCustomDisplayTitle else {
+            return L10n.tr("settings.favorites.item.detail", favorite.useCount)
+        }
+        return L10n.tr(
+            "settings.favorites.item.namedDetail",
+            favorite.contentMenuTitle,
+            favorite.useCount
+        )
     }
 
     private func configureFolderNamesCell(_ cell: SettingsTextCellView, favorite: FavoriteItem) {

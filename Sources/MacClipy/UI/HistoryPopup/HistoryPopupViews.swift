@@ -3,9 +3,13 @@ import Carbon
 
 private enum HistoryPopupCellMetrics {
     static let titleFontSize: CGFloat = 13
+    static let detailFontSize: CGFloat = 11
     static let horizontalPadding: CGFloat = 10
     static let titleToStarSpacing: CGFloat = 8
     static let starButtonSize: CGFloat = 24
+    static let titleTopPadding: CGFloat = 5
+    static let detailTopSpacing: CGFloat = 1
+    static let detailBottomPadding: CGFloat = 5
 }
 
 private enum PopupNavigationKeyCode {
@@ -39,7 +43,12 @@ final class PopupPanel: NSPanel {
 
 final class HistoryPopupCellView: NSTableCellView {
     private let titleField = NSTextField(labelWithString: "")
+    private let detailField = NSTextField(labelWithString: "")
     private let starButton = NSButton()
+    private var compactTitleCenterYConstraint: NSLayoutConstraint?
+    private var detailedTitleTopConstraint: NSLayoutConstraint?
+    private var detailTopConstraint: NSLayoutConstraint?
+    private var detailBottomConstraint: NSLayoutConstraint?
 
     var onToggleFavorite: (() -> Void)?
 
@@ -53,9 +62,11 @@ final class HistoryPopupCellView: NSTableCellView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(with item: ClipboardItem, isFavorite: Bool) {
-        titleField.stringValue = item.menuTitle
-        toolTip = item.content
+    func configure(title: String, detail: String?, content: String, isFavorite: Bool) {
+        titleField.stringValue = title
+        detailField.stringValue = detail ?? ""
+        setShowsDetail(detail?.isEmpty == false)
+        toolTip = detail == nil ? content : "\(title)\n\(content)"
         let symbolName = isFavorite ? "star.fill" : "star"
         let description = L10n.tr("favorites.toggle")
         starButton.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: description)
@@ -71,6 +82,11 @@ final class HistoryPopupCellView: NSTableCellView {
         titleField.lineBreakMode = .byTruncatingTail
         titleField.translatesAutoresizingMaskIntoConstraints = false
 
+        detailField.font = .systemFont(ofSize: HistoryPopupCellMetrics.detailFontSize)
+        detailField.textColor = .secondaryLabelColor
+        detailField.lineBreakMode = .byTruncatingTail
+        detailField.translatesAutoresizingMaskIntoConstraints = false
+
         starButton.bezelStyle = .inline
         starButton.isBordered = false
         starButton.target = self
@@ -79,7 +95,22 @@ final class HistoryPopupCellView: NSTableCellView {
         starButton.translatesAutoresizingMaskIntoConstraints = false
 
         addSubview(titleField)
+        addSubview(detailField)
         addSubview(starButton)
+
+        compactTitleCenterYConstraint = titleField.centerYAnchor.constraint(equalTo: centerYAnchor)
+        detailedTitleTopConstraint = titleField.topAnchor.constraint(
+            equalTo: topAnchor,
+            constant: HistoryPopupCellMetrics.titleTopPadding
+        )
+        detailTopConstraint = detailField.topAnchor.constraint(
+            equalTo: titleField.bottomAnchor,
+            constant: HistoryPopupCellMetrics.detailTopSpacing
+        )
+        detailBottomConstraint = detailField.bottomAnchor.constraint(
+            lessThanOrEqualTo: bottomAnchor,
+            constant: -HistoryPopupCellMetrics.detailBottomPadding
+        )
 
         NSLayoutConstraint.activate([
             titleField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: HistoryPopupCellMetrics.horizontalPadding),
@@ -87,17 +118,28 @@ final class HistoryPopupCellView: NSTableCellView {
                 equalTo: starButton.leadingAnchor,
                 constant: -HistoryPopupCellMetrics.titleToStarSpacing
             ),
-            titleField.centerYAnchor.constraint(equalTo: centerYAnchor),
+
+            detailField.leadingAnchor.constraint(equalTo: titleField.leadingAnchor),
+            detailField.trailingAnchor.constraint(equalTo: titleField.trailingAnchor),
 
             starButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -HistoryPopupCellMetrics.horizontalPadding),
             starButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             starButton.widthAnchor.constraint(equalToConstant: HistoryPopupCellMetrics.starButtonSize),
             starButton.heightAnchor.constraint(equalToConstant: HistoryPopupCellMetrics.starButtonSize)
         ])
+        detailTopConstraint?.isActive = true
+        detailBottomConstraint?.isActive = true
+        setShowsDetail(false)
     }
 
     @objc private func toggleFavorite() {
         onToggleFavorite?()
+    }
+
+    private func setShowsDetail(_ showsDetail: Bool) {
+        detailField.isHidden = !showsDetail
+        compactTitleCenterYConstraint?.isActive = !showsDetail
+        detailedTitleTopConstraint?.isActive = showsDetail
     }
 }
 

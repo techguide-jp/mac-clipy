@@ -69,6 +69,14 @@ public struct FavoriteItem: Codable, Equatable, Identifiable {
         return title.isEmpty ? Self.defaultDisplayTitle(for: contentSnapshot) : title
     }
 
+    public var contentMenuTitle: String {
+        Self.defaultDisplayTitle(for: contentSnapshot)
+    }
+
+    public var hasCustomDisplayTitle: Bool {
+        menuTitle != contentMenuTitle
+    }
+
     public var clipboardItem: ClipboardItem {
         ClipboardItem(
             id: clipboardItemID ?? id,

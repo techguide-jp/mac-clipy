@@ -489,10 +489,27 @@ extension HistoryPopupController {
         let identifier = NSUserInterfaceItemIdentifier("historyPopupCell")
         let cell = tableView.makeView(withIdentifier: identifier, owner: self) as? HistoryPopupCellView
             ?? HistoryPopupCellView(identifier: identifier)
-        cell.configure(with: results[row].item, isFavorite: results[row].favorite != nil)
+        let result = results[row]
+        cell.configure(
+            title: popupTitle(for: result),
+            detail: popupDetail(for: result),
+            content: result.item.content,
+            isFavorite: result.favorite != nil
+        )
         cell.onToggleFavorite = { [weak self] in
             self?.toggleFavorite(at: row)
         }
         return cell
+    }
+
+    private func popupTitle(for result: PopupResult) -> String {
+        result.favorite?.menuTitle ?? result.item.menuTitle
+    }
+
+    private func popupDetail(for result: PopupResult) -> String? {
+        guard let favorite = result.favorite, favorite.hasCustomDisplayTitle else {
+            return nil
+        }
+        return favorite.contentMenuTitle
     }
 }

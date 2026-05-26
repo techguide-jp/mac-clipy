@@ -96,6 +96,17 @@ final class FavoriteStoreTests: XCTestCase {
 
         XCTAssertEqual(favorite.displayTitle, "Custom Name")
         XCTAssertEqual(store.items.first?.menuTitle, "Custom Name")
+        XCTAssertEqual(store.items.first?.contentMenuTitle, "default title")
+        XCTAssertEqual(store.items.first?.hasCustomDisplayTitle, true)
+    }
+
+    func testDefaultFavoriteTitleIsNotTreatedAsCustom() throws {
+        let store = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let favorite = try store.addFavorite(for: makeItem(content: "default title", at: 10))
+
+        XCTAssertEqual(favorite.menuTitle, "default title")
+        XCTAssertEqual(favorite.contentMenuTitle, "default title")
+        XCTAssertFalse(favorite.hasCustomDisplayTitle)
     }
 
     func testFavoriteSnapshotSurvivesHistoryTrim() throws {

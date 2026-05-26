@@ -78,6 +78,7 @@
 "settings.favorites.folders" = "Folders";
 "settings.favorites.item.addToFolder" = "Add";
 "settings.favorites.item.detail" = "%d uses";
+"settings.favorites.item.namedDetail" = "Content: %@ / %d uses";
 "settings.favorites.item.remove" = "Remove Favorite";
 "settings.favorites.item.removeFromFolder" = "Remove from Folder";
 "settings.favorites.item.rename" = "Rename Title";
