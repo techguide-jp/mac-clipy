@@ -169,9 +169,9 @@ final class HistoryPopupController: NSWindowController,
         let padding: CGFloat = 8
         let proposedX = min(screenPoint.x, visibleFrame.maxX - windowSize.width - padding)
         let proposedY = min(screenPoint.y - windowSize.height, visibleFrame.maxY - windowSize.height - padding)
-        let x = max(visibleFrame.minX + padding, proposedX)
-        let y = max(visibleFrame.minY + padding, proposedY)
-        return NSPoint(x: x, y: y)
+        let clampedX = max(visibleFrame.minX + padding, proposedX)
+        let clampedY = max(visibleFrame.minY + padding, proposedY)
+        return NSPoint(x: clampedX, y: clampedY)
     }
 
     @objc private func chooseSelectedItem() {
