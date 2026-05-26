@@ -155,7 +155,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         searchItem.target = self
         menu.addItem(searchItem)
 
-        let pauseTitle = monitor?.isPaused == true ? "監視を再開" : "監視を一時停止"
+        if monitor?.isPaused == true {
+            let pausedItem = NSMenuItem(title: "状態: コピー履歴を保存していません", action: nil, keyEquivalent: "")
+            pausedItem.isEnabled = false
+            menu.addItem(pausedItem)
+        }
+
+        let pauseTitle = monitor?.isPaused == true ? "コピー履歴の保存を再開" : "コピー履歴の保存を一時停止"
         let pauseItem = NSMenuItem(title: pauseTitle, action: #selector(togglePause), keyEquivalent: "")
         pauseItem.target = self
         menu.addItem(pauseItem)
