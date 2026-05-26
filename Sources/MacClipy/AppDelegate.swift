@@ -14,9 +14,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         self?.copyAndPaste(item)
     }
 
-    private lazy var settingsWindowController = SettingsWindowController(settingsStore: settingsStore) { [weak self] in
-        self?.rebuildStatusMenu()
-    }
+    private lazy var settingsWindowController = SettingsWindowController(
+        settingsStore: settingsStore,
+        onSave: { [weak self] in
+            self?.setupHotKey()
+            self?.rebuildStatusMenu()
+        },
+        onDismiss: { [weak self] in
+            self?.setupHotKey()
+        }
+    )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -69,7 +76,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func setupHotKey() {
-        let controller = HotKeyController { [weak self] in
+        hotKeyController?.unregister()
+
+        let controller = HotKeyController(shortcut: settingsStore.settings.hotKey) { [weak self] in
             self?.showHistoryContextMenu()
         }
 
@@ -106,6 +115,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         menu.addItem(.separator())
+
+        let hotKeyItem = NSMenuItem(title: "履歴メニュー: \(settingsStore.settings.hotKey.displayName)", action: nil, keyEquivalent: "")
+        hotKeyItem.isEnabled = false
+        menu.addItem(hotKeyItem)
 
         let searchItem = NSMenuItem(title: "検索...", action: #selector(showHistoryPanel), keyEquivalent: "")
         searchItem.target = self
@@ -205,6 +218,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func showSettings() {
+        hotKeyController?.unregister()
         settingsWindowController.show()
     }
 

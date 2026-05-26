@@ -11,9 +11,28 @@ public struct AppSettings: Codable, Equatable {
     ]
 
     public var excludedBundleIdentifiers: [String]
+    public var hotKey: KeyboardShortcut
 
-    public init(excludedBundleIdentifiers: [String] = Self.defaultExcludedBundleIdentifiers) {
+    public init(
+        excludedBundleIdentifiers: [String] = Self.defaultExcludedBundleIdentifiers,
+        hotKey: KeyboardShortcut = .defaultShortcut
+    ) {
         self.excludedBundleIdentifiers = Self.normalizedBundleIdentifiers(excludedBundleIdentifiers)
+        self.hotKey = hotKey
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case excludedBundleIdentifiers
+        case hotKey
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let identifiers = try container.decodeIfPresent([String].self, forKey: .excludedBundleIdentifiers)
+            ?? Self.defaultExcludedBundleIdentifiers
+
+        self.excludedBundleIdentifiers = Self.normalizedBundleIdentifiers(identifiers)
+        self.hotKey = try container.decodeIfPresent(KeyboardShortcut.self, forKey: .hotKey) ?? .defaultShortcut
     }
 
     public func isExcluded(bundleIdentifier: String?) -> Bool {
@@ -91,6 +110,12 @@ public final class SettingsStore {
 
     public func updateExcludedBundleIdentifiers(_ identifiers: [String]) throws {
         settings.excludedBundleIdentifiers = AppSettings.normalizedBundleIdentifiers(identifiers)
+        try save()
+    }
+
+    public func update(excludedBundleIdentifiers identifiers: [String], hotKey: KeyboardShortcut) throws {
+        settings.excludedBundleIdentifiers = AppSettings.normalizedBundleIdentifiers(identifiers)
+        settings.hotKey = hotKey
         try save()
     }
 }

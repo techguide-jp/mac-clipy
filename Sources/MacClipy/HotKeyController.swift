@@ -3,11 +3,14 @@ import Foundation
 
 public enum HotKeyError: LocalizedError {
     case registrationFailed(OSStatus)
+    case unsupportedShortcut(String)
 
     public var errorDescription: String? {
         switch self {
         case .registrationFailed(let status):
             return "ホットキー登録に失敗しました: \(status)"
+        case .unsupportedShortcut(let shortcut):
+            return "\(shortcut) はホットキーとして登録できません。"
         }
     }
 }
@@ -19,9 +22,11 @@ public final class HotKeyController {
 
     private var hotKeyRef: EventHotKeyRef?
     private var eventHandlerRef: EventHandlerRef?
+    private let shortcut: KeyboardShortcut
     private let onPressed: @MainActor () -> Void
 
-    public init(onPressed: @MainActor @escaping () -> Void) {
+    public init(shortcut: KeyboardShortcut, onPressed: @MainActor @escaping () -> Void) {
+        self.shortcut = shortcut
         self.onPressed = onPressed
     }
 
@@ -51,10 +56,14 @@ public final class HotKeyController {
             throw HotKeyError.registrationFailed(handlerStatus)
         }
 
+        guard let keyCode = shortcut.carbonKeyCode else {
+            throw HotKeyError.unsupportedShortcut(shortcut.displayName)
+        }
+
         let carbonHotKeyID = EventHotKeyID(signature: Self.signature, id: Self.hotKeyID)
         let hotKeyStatus = RegisterEventHotKey(
-            UInt32(kVK_ANSI_V),
-            UInt32(controlKey | optionKey),
+            keyCode,
+            shortcut.carbonModifiers,
             carbonHotKeyID,
             GetApplicationEventTarget(),
             0,
