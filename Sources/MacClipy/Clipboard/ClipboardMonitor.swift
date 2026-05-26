@@ -7,7 +7,7 @@ public final class ClipboardMonitor {
 
     private let pasteboard: NSPasteboard
     private let store: ClipboardStore
-    private let settingsStore: SettingsStore
+    private let excludedBundleIdentifiers: () -> [String]
     private let onChange: () -> Void
 
     private var timer: Timer?
@@ -15,12 +15,12 @@ public final class ClipboardMonitor {
 
     public init(
         store: ClipboardStore,
-        settingsStore: SettingsStore,
+        excludedBundleIdentifiers: @escaping () -> [String],
         pasteboard: NSPasteboard = .general,
         onChange: @escaping () -> Void
     ) {
         self.store = store
-        self.settingsStore = settingsStore
+        self.excludedBundleIdentifiers = excludedBundleIdentifiers
         self.pasteboard = pasteboard
         self.onChange = onChange
         self.lastChangeCount = pasteboard.changeCount
@@ -74,7 +74,10 @@ public final class ClipboardMonitor {
         }
 
         let sourceBundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-        let policy = ClipboardCapturePolicy(settings: settingsStore.settings, maxItemSize: store.maxItemSize)
+        let policy = ClipboardCapturePolicy(
+            excludedBundleIdentifiers: excludedBundleIdentifiers(),
+            maxItemSize: store.maxItemSize
+        )
         guard policy.shouldCapture(content: content, sourceBundleID: sourceBundleID) else {
             return
         }

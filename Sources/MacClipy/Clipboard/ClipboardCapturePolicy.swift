@@ -1,11 +1,14 @@
 import Foundation
 
 public struct ClipboardCapturePolicy {
-    public let settings: AppSettings
+    public let excludedBundleIdentifiers: [String]
     public let maxItemSize: Int
 
-    public init(settings: AppSettings, maxItemSize: Int = AppConstants.Clipboard.defaultMaxItemSizeBytes) {
-        self.settings = settings
+    public init(
+        excludedBundleIdentifiers: [String],
+        maxItemSize: Int = AppConstants.Clipboard.defaultMaxItemSizeBytes
+    ) {
+        self.excludedBundleIdentifiers = SettingsDefaults.normalizedBundleIdentifiers(excludedBundleIdentifiers)
         self.maxItemSize = maxItemSize
     }
 
@@ -18,6 +21,9 @@ public struct ClipboardCapturePolicy {
             return false
         }
 
-        return !settings.isExcluded(bundleIdentifier: sourceBundleID)
+        return !SettingsDefaults.isExcluded(
+            bundleIdentifier: sourceBundleID,
+            in: excludedBundleIdentifiers
+        )
     }
 }

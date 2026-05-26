@@ -1,6 +1,9 @@
+import AppKit
+import Defaults
 import Foundation
+import Observation
 
-public struct AppSettings: Codable, Equatable {
+public enum SettingsDefaults {
     public static let defaultExcludedBundleIdentifiers = [
         "com.1password.1password",
         "com.agilebits.onepassword7",
@@ -9,54 +12,6 @@ public struct AppSettings: Codable, Equatable {
         "com.apple.keychainaccess",
         "com.local.MacClipy"
     ]
-
-    public var excludedBundleIdentifiers: [String]
-    public var hotKey: KeyboardShortcut
-    public var favoriteHotKey: KeyboardShortcut
-
-    public init(
-        excludedBundleIdentifiers: [String] = Self.defaultExcludedBundleIdentifiers,
-        hotKey: KeyboardShortcut = .defaultShortcut,
-        favoriteHotKey: KeyboardShortcut = .defaultFavoriteShortcut
-    ) {
-        self.excludedBundleIdentifiers = Self.normalizedBundleIdentifiers(excludedBundleIdentifiers)
-        self.hotKey = hotKey
-        self.favoriteHotKey = favoriteHotKey
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case excludedBundleIdentifiers
-        case hotKey
-        case favoriteHotKey
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let identifiers = try container.decodeIfPresent([String].self, forKey: .excludedBundleIdentifiers)
-            ?? Self.defaultExcludedBundleIdentifiers
-
-        let decodedHotKey = try container.decodeIfPresent(KeyboardShortcut.self, forKey: .hotKey) ?? .defaultShortcut
-        let decodedFavoriteHotKey = try container.decodeIfPresent(
-            KeyboardShortcut.self,
-            forKey: .favoriteHotKey
-        ) ?? .defaultFavoriteShortcut
-
-        self.excludedBundleIdentifiers = Self.normalizedBundleIdentifiers(identifiers)
-        self.hotKey = decodedHotKey.isRegisterable ? decodedHotKey : .defaultShortcut
-        self.favoriteHotKey = decodedFavoriteHotKey.isRegisterable
-            ? decodedFavoriteHotKey
-            : .defaultFavoriteShortcut
-    }
-
-    public func isExcluded(bundleIdentifier: String?) -> Bool {
-        guard let bundleIdentifier else {
-            return false
-        }
-
-        return excludedBundleIdentifiers.contains {
-            $0.caseInsensitiveCompare(bundleIdentifier) == .orderedSame
-        }
-    }
 
     public static func normalizedBundleIdentifiers(_ identifiers: [String]) -> [String] {
         var seen = Set<String>()
@@ -79,61 +34,118 @@ public struct AppSettings: Codable, Equatable {
 
         return normalized
     }
+
+    public static func isExcluded(bundleIdentifier: String?, in identifiers: [String]) -> Bool {
+        guard let bundleIdentifier else {
+            return false
+        }
+
+        return identifiers.contains {
+            $0.caseInsensitiveCompare(bundleIdentifier) == .orderedSame
+        }
+    }
+
+    public static func displayName(for bundleIdentifier: String) -> String {
+        switch bundleIdentifier {
+        case "com.1password.1password":
+            L10n.tr("appName.1password")
+        case "com.agilebits.onepassword7":
+            L10n.tr("appName.1password7")
+        case "com.bitwarden.desktop":
+            L10n.tr("appName.bitwarden")
+        case "org.keepassxc.keepassxc":
+            L10n.tr("appName.keepassxc")
+        case "com.apple.keychainaccess":
+            L10n.tr("appName.keychainAccess")
+        case "com.local.MacClipy":
+            L10n.tr("appName.macclipy")
+        default:
+            bundleIdentifier
+        }
+    }
 }
 
-public final class SettingsStore {
-    public private(set) var settings: AppSettings
-    public let settingsURL: URL
+extension Defaults.Keys {
+    static let excludedBundleIdentifiers = Key<[String]>(
+        "excludedBundleIdentifiers",
+        default: SettingsDefaults.defaultExcludedBundleIdentifiers
+    )
 
-    private let encoder: JSONEncoder
-    private let decoder: JSONDecoder
+    static let didMigrateLegacySettings = Key<Bool>("didMigrateLegacySettings", default: false)
+}
 
-    public init(settingsURL: URL = AppPaths.settingsURL) {
-        self.settingsURL = settingsURL
-        self.settings = AppSettings()
+@MainActor
+@Observable
+final class SettingsModel {
+    var excludedBundleIdentifiers: [String]
+    var statusMessage = ""
 
-        self.encoder = JSONEncoder()
-        self.encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-
-        self.decoder = JSONDecoder()
+    init() {
+        self.excludedBundleIdentifiers = SettingsDefaults.normalizedBundleIdentifiers(
+            Defaults[.excludedBundleIdentifiers]
+        )
     }
 
-    public func load() throws {
-        guard FileManager.default.fileExists(atPath: settingsURL.path) else {
-            settings = AppSettings()
-            try save()
+    func reload() {
+        excludedBundleIdentifiers = SettingsDefaults.normalizedBundleIdentifiers(
+            Defaults[.excludedBundleIdentifiers]
+        )
+    }
+
+    func setExcludedBundleIdentifiers(_ identifiers: [String]) {
+        let normalized = SettingsDefaults.normalizedBundleIdentifiers(identifiers)
+        excludedBundleIdentifiers = normalized
+        Defaults[.excludedBundleIdentifiers] = normalized
+    }
+
+    func resetExcludedApps() {
+        setExcludedBundleIdentifiers(SettingsDefaults.defaultExcludedBundleIdentifiers)
+        statusMessage = L10n.tr("settings.status.excludedAppsReset")
+    }
+
+    func removeExcludedApp(_ bundleIdentifier: String) {
+        setExcludedBundleIdentifiers(
+            excludedBundleIdentifiers.filter {
+                $0.caseInsensitiveCompare(bundleIdentifier) != .orderedSame
+            }
+        )
+        statusMessage = L10n.tr("settings.status.appCapturedAgain", SettingsDefaults.displayName(for: bundleIdentifier))
+    }
+
+    func addExcludedApp(from url: URL) {
+        guard let bundle = Bundle(url: url),
+              let bundleIdentifier = bundle.bundleIdentifier else {
+            statusMessage = L10n.tr("settings.status.appReadFailed")
             return
         }
 
-        let data = try Data(contentsOf: settingsURL)
-        guard !data.isEmpty else {
-            settings = AppSettings()
-            try save()
+        guard !SettingsDefaults.isExcluded(bundleIdentifier: bundleIdentifier, in: excludedBundleIdentifiers) else {
+            statusMessage = L10n.tr(
+                "settings.status.appAlreadyAdded",
+                SettingsDefaults.displayName(for: bundleIdentifier)
+            )
             return
         }
 
-        settings = try decoder.decode(AppSettings.self, from: data)
+        setExcludedBundleIdentifiers(excludedBundleIdentifiers + [bundleIdentifier])
+        statusMessage = L10n.tr("settings.status.appExcluded", SettingsDefaults.displayName(for: bundleIdentifier))
     }
 
-    public func save() throws {
-        try AppPaths.ensureParentDirectory(for: settingsURL)
-        let data = try encoder.encode(settings)
-        try data.write(to: settingsURL, options: .atomic)
-    }
+    func chooseExcludedApp() {
+        let panel = NSOpenPanel()
+        panel.title = L10n.tr("settings.openPanel.title")
+        panel.prompt = L10n.tr("settings.openPanel.prompt")
+        panel.message = L10n.tr("settings.openPanel.message")
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.directoryURL = URL(fileURLWithPath: "/Applications", isDirectory: true)
+        panel.allowedContentTypes = [.applicationBundle]
 
-    public func updateExcludedBundleIdentifiers(_ identifiers: [String]) throws {
-        settings.excludedBundleIdentifiers = AppSettings.normalizedBundleIdentifiers(identifiers)
-        try save()
-    }
+        guard panel.runModal() == .OK, let url = panel.url else {
+            return
+        }
 
-    public func update(
-        excludedBundleIdentifiers identifiers: [String],
-        hotKey: KeyboardShortcut,
-        favoriteHotKey: KeyboardShortcut
-    ) throws {
-        settings.excludedBundleIdentifiers = AppSettings.normalizedBundleIdentifiers(identifiers)
-        settings.hotKey = hotKey.isRegisterable ? hotKey : .defaultShortcut
-        settings.favoriteHotKey = favoriteHotKey.isRegisterable ? favoriteHotKey : .defaultFavoriteShortcut
-        try save()
+        addExcludedApp(from: url)
     }
 }

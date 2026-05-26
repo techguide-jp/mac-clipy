@@ -29,8 +29,8 @@ jobs:
           xcodebuild -version
           swift --version
 
-      - name: Install SwiftLint
-        run: brew install swiftlint
+      - name: Install lint tools
+        run: brew install swiftlint swiftformat
 
       - name: Run checks
-        run: REQUIRE_SWIFTLINT=1 scripts/check.sh
+        run: REQUIRE_SWIFTLINT=1 REQUIRE_SWIFTFORMAT=1 scripts/check.sh

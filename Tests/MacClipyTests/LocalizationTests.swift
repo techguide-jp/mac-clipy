@@ -64,6 +64,12 @@ final class LocalizationTests: XCTestCase {
         XCTAssertTrue(violations.isEmpty, "Move Japanese UI text to Localizable.strings: \(violations)")
     }
 
+    func testSwiftUISourceDoesNotUseDirectDisplayStringLiterals() throws {
+        let violations = try swiftUIDirectStringLiteralViolations()
+
+        XCTAssertTrue(violations.isEmpty, "Use L10n.tr(...) for SwiftUI display text: \(violations)")
+    }
+
     private func loadTranslations(for localization: String) throws -> [String: String] {
         let url = packageRoot()
             .appendingPathComponent("Sources/MacClipy/Resources")
@@ -130,6 +136,37 @@ final class LocalizationTests: XCTestCase {
                     let line = lineNumber(for: range.lowerBound, in: sourceWithoutComments)
                     violations.append("\(sourceURL.path):\(line): \(sourceWithoutComments[range])")
                 }
+            }
+        }
+
+        return violations.sorted()
+    }
+
+    private func swiftUIDirectStringLiteralViolations() throws -> [String] {
+        let sourceRoot = packageRoot().appendingPathComponent("Sources/MacClipy")
+        let sourcePaths = try FileManager.default.subpathsOfDirectory(atPath: sourceRoot.path)
+            .filter { $0.hasSuffix(".swift") }
+        let regex = try NSRegularExpression(
+            pattern: #"\b(?:Text|Button|Toggle|Picker|Label|TextField)\(\s*"(?:\\.|[^"\\])*""#
+        )
+        var violations: [String] = []
+
+        for sourcePath in sourcePaths {
+            let sourceURL = sourceRoot.appendingPathComponent(sourcePath)
+            let source = try String(contentsOf: sourceURL, encoding: .utf8)
+            let sourceWithoutComments = sourceByRemovingComments(from: source)
+            let matches = regex.matches(
+                in: sourceWithoutComments,
+                range: NSRange(sourceWithoutComments.startIndex..., in: sourceWithoutComments)
+            )
+
+            for match in matches {
+                guard let range = Range(match.range, in: sourceWithoutComments) else {
+                    continue
+                }
+
+                let line = lineNumber(for: range.lowerBound, in: sourceWithoutComments)
+                violations.append("\(sourceURL.path):\(line): \(sourceWithoutComments[range])")
             }
         }
 

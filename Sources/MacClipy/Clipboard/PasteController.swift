@@ -14,7 +14,7 @@ enum PasteController {
             return false
         }
 
-        application.activate(options: [.activateIgnoringOtherApps])
+        application.activate()
 
         DispatchQueue.main.asyncAfter(deadline: .now() + AppConstants.Paste.delayBeforeSendingCommandV) {
             sendCommandV()

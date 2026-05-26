@@ -65,8 +65,7 @@ final class ClipboardStoreTests: XCTestCase {
     }
 
     func testExcludedBundleIdentifierIsNotCaptured() {
-        let settings = AppSettings(excludedBundleIdentifiers: ["com.example.SecretApp"])
-        let policy = ClipboardCapturePolicy(settings: settings)
+        let policy = ClipboardCapturePolicy(excludedBundleIdentifiers: ["com.example.SecretApp"])
 
         XCTAssertFalse(policy.shouldCapture(content: "secret", sourceBundleID: "com.example.SecretApp"))
         XCTAssertTrue(policy.shouldCapture(content: "normal", sourceBundleID: "com.example.Notes"))

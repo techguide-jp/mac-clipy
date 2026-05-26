@@ -1,6 +1,6 @@
 import Foundation
 
-public enum FavoriteItemSort: String, CaseIterable, Equatable {
+public enum FavoriteItemSort: String, CaseIterable, Equatable, Hashable {
     case manual
     case title
     case lastUsed
