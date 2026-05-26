@@ -24,6 +24,16 @@ scripts/check.sh
 SwiftLint がインストールされている環境では lint も実行します。
 品質ゲートの詳細は [docs/quality-gates.md](docs/quality-gates.md) にまとめています。
 
+## 主なディレクトリ構成
+
+- `Sources/MacClipy/App`: アプリ起動、`AppDelegate`、アプリ内パス
+- `Sources/MacClipy/Clipboard`: 履歴モデル、保存、監視、貼り付け処理
+- `Sources/MacClipy/Favorites`: お気に入りとフォルダの保存
+- `Sources/MacClipy/HotKeys`: グローバルショートカットと入力 UI
+- `Sources/MacClipy/UI`: 履歴パネル、履歴ポップオーバー、設定画面
+- `Sources/MacClipy/Support`: 設定、ローカライズなどの共通処理
+- `Sources/MacClipy/Resources`: ローカライズリソース
+
 ## ローカル .app の作成
 
 ```bash
@@ -38,6 +48,7 @@ open dist/MacClipy.app
 
 - 履歴: `~/Library/Application Support/MacClipy/history.json`
 - 設定: `~/Library/Application Support/MacClipy/settings.json`
+- お気に入り: `~/Library/Application Support/MacClipy/favorites.json`
 
 ## ショートカット
 
