@@ -32,27 +32,9 @@ private struct GeneralSettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Form {
-                Section {
-                    LaunchAtLogin.Toggle {
-                        Text(L10n.tr("settings.launchAtLogin"))
-                    }
+            startupAndShortcutSection
 
-                    KeyboardShortcuts.Recorder(
-                        L10n.tr("settings.shortcut.title"),
-                        name: .showHistory,
-                        onChange: { _ in onShortcutChange() }
-                    )
-
-                    KeyboardShortcuts.Recorder(
-                        L10n.tr("settings.favoriteShortcut.title"),
-                        name: .showFavorites,
-                        onChange: { _ in onShortcutChange() }
-                    )
-                } header: {
-                    Text(L10n.tr("settings.general.startupAndShortcuts"))
-                }
-            }
+            Divider()
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.tr("settings.excludedApps.title"))
@@ -62,16 +44,19 @@ private struct GeneralSettingsView: View {
 
                 List(selection: $selectedExcludedApp) {
                     ForEach(model.excludedBundleIdentifiers, id: \.self) { bundleIdentifier in
-                        HStack {
+                        VStack(alignment: .leading, spacing: 2) {
                             Text(verbatim: SettingsDefaults.displayName(for: bundleIdentifier))
-                            Spacer()
                             Text(verbatim: bundleIdentifier)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
                         }
+                        .padding(.vertical, 2)
                         .tag(bundleIdentifier)
                     }
                 }
-                .frame(minHeight: 180)
+                .frame(maxWidth: .infinity, minHeight: 240)
 
                 HStack {
                     Button {
@@ -104,6 +89,46 @@ private struct GeneralSettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var startupAndShortcutSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L10n.tr("settings.general.startupAndShortcuts"))
+                .font(.headline)
+
+            settingRow(title: L10n.tr("settings.launchAtLogin")) {
+                LaunchAtLogin.Toggle {
+                    Text(L10n.tr("settings.launchAtLogin"))
+                }
+                .labelsHidden()
+            }
+
+            settingRow(title: L10n.tr("settings.shortcut.title")) {
+                KeyboardShortcuts.Recorder(
+                    for: .showHistory,
+                    onChange: { _ in onShortcutChange() }
+                )
+            }
+
+            settingRow(title: L10n.tr("settings.favoriteShortcut.title")) {
+                KeyboardShortcuts.Recorder(
+                    for: .showFavorites,
+                    onChange: { _ in onShortcutChange() }
+                )
+            }
+        }
+    }
+
+    private func settingRow(title: String, @ViewBuilder control: () -> some View) -> some View {
+        HStack(spacing: 16) {
+            Text(verbatim: title)
+                .frame(width: 220, alignment: .leading)
+
+            control()
+
+            Spacer()
         }
     }
 }
