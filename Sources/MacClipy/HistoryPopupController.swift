@@ -11,7 +11,6 @@ final class HistoryPopupController: NSWindowController,
 
     private let searchField = NSSearchField()
     private let tableView = PopupKeyHandlingTableView()
-    private let statusLabel = NSTextField(labelWithString: "")
     private var results: [ClipboardItem] = []
 
     init(store: ClipboardStore, onItemChosen: @escaping (ClipboardItem) -> Void) {
@@ -93,8 +92,8 @@ final class HistoryPopupController: NSWindowController,
         tableView.headerView = nil
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = 42
-        tableView.intercellSpacing = NSSize(width: 0, height: 2)
+        tableView.rowHeight = 34
+        tableView.intercellSpacing = NSSize(width: 0, height: 1)
         tableView.doubleAction = #selector(chooseSelectedItem)
         tableView.target = self
         tableView.onReturn = { [weak self] in
@@ -121,14 +120,8 @@ final class HistoryPopupController: NSWindowController,
         scrollView.drawsBackground = false
         scrollView.translatesAutoresizingMaskIntoConstraints = false
 
-        statusLabel.textColor = .secondaryLabelColor
-        statusLabel.font = .systemFont(ofSize: 11)
-        statusLabel.lineBreakMode = .byTruncatingTail
-        statusLabel.translatesAutoresizingMaskIntoConstraints = false
-
         rootView.addSubview(searchField)
         rootView.addSubview(scrollView)
-        rootView.addSubview(statusLabel)
 
         NSLayoutConstraint.activate([
             searchField.topAnchor.constraint(equalTo: rootView.topAnchor, constant: 10),
@@ -138,11 +131,7 @@ final class HistoryPopupController: NSWindowController,
             scrollView.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 8),
             scrollView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 6),
             scrollView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -6),
-            scrollView.bottomAnchor.constraint(equalTo: statusLabel.topAnchor, constant: -6),
-
-            statusLabel.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 10),
-            statusLabel.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -10),
-            statusLabel.bottomAnchor.constraint(equalTo: rootView.bottomAnchor, constant: -8)
+            scrollView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor, constant: -6)
         ])
     }
 
@@ -150,14 +139,9 @@ final class HistoryPopupController: NSWindowController,
         results = store.search(searchField.stringValue)
         tableView.reloadData()
 
-        if results.isEmpty {
-            statusLabel.stringValue = "一致する履歴はありません"
-            return
+        if !results.isEmpty {
+            tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
         }
-
-        tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
-        let countText = results.count == store.items.count ? "\(results.count) 件" : "\(results.count) / \(store.items.count) 件"
-        statusLabel.stringValue = "\(countText)  Enterで貼り付け / Escで閉じる"
     }
 
     private func origin(for screenPoint: NSPoint, windowSize: NSSize) -> NSPoint {
@@ -258,7 +242,6 @@ private final class PopupPanel: NSPanel {
 
 private final class HistoryPopupCellView: NSTableCellView {
     private let titleField = NSTextField(labelWithString: "")
-    private let subtitleField = NSTextField(labelWithString: "")
 
     init(identifier: NSUserInterfaceItemIdentifier) {
         super.init(frame: .zero)
@@ -272,7 +255,6 @@ private final class HistoryPopupCellView: NSTableCellView {
 
     func configure(with item: ClipboardItem) {
         titleField.stringValue = item.menuTitle
-        subtitleField.stringValue = item.sourceBundleID ?? "取得元不明"
         toolTip = item.content
     }
 
@@ -281,22 +263,12 @@ private final class HistoryPopupCellView: NSTableCellView {
         titleField.lineBreakMode = .byTruncatingTail
         titleField.translatesAutoresizingMaskIntoConstraints = false
 
-        subtitleField.font = .systemFont(ofSize: 11)
-        subtitleField.textColor = .secondaryLabelColor
-        subtitleField.lineBreakMode = .byTruncatingTail
-        subtitleField.translatesAutoresizingMaskIntoConstraints = false
-
         addSubview(titleField)
-        addSubview(subtitleField)
 
         NSLayoutConstraint.activate([
             titleField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
             titleField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
-            titleField.topAnchor.constraint(equalTo: topAnchor, constant: 5),
-
-            subtitleField.leadingAnchor.constraint(equalTo: titleField.leadingAnchor),
-            subtitleField.trailingAnchor.constraint(equalTo: titleField.trailingAnchor),
-            subtitleField.topAnchor.constraint(equalTo: titleField.bottomAnchor, constant: 1)
+            titleField.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
     }
 }
