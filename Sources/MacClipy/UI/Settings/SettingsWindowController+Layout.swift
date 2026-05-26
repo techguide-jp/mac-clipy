@@ -25,7 +25,7 @@ private enum SettingsLayoutMetrics {
     static let folderAssignmentPopupWidth: CGFloat = 190
     static let excludedAppRowHeight: CGFloat = 30
     static let favoriteFolderRowHeight: CGFloat = 28
-    static let favoriteItemRowHeight: CGFloat = 30
+    static let favoriteItemRowHeight: CGFloat = 38
     static let favoriteTitleColumnWidth: CGFloat = 250
     static let favoriteFoldersColumnWidth: CGFloat = 170
     static let itemToolbarSpacerSpacing: CGFloat = 14

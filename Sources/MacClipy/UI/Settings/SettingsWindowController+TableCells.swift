@@ -7,6 +7,7 @@ private enum SettingsTableCellMetrics {
     static let horizontalPadding: CGFloat = 8
     static let titleTopPadding: CGFloat = 3
     static let detailTopSpacing: CGFloat = 1
+    static let detailBottomPadding: CGFloat = 4
 }
 
 extension SettingsWindowController {
@@ -145,7 +146,11 @@ private final class SettingsTextCellView: NSTableCellView {
 
             detailField.leadingAnchor.constraint(equalTo: titleField.leadingAnchor),
             detailField.trailingAnchor.constraint(equalTo: titleField.trailingAnchor),
-            detailField.topAnchor.constraint(equalTo: titleField.bottomAnchor, constant: SettingsTableCellMetrics.detailTopSpacing)
+            detailField.topAnchor.constraint(equalTo: titleField.bottomAnchor, constant: SettingsTableCellMetrics.detailTopSpacing),
+            detailField.bottomAnchor.constraint(
+                lessThanOrEqualTo: bottomAnchor,
+                constant: -SettingsTableCellMetrics.detailBottomPadding
+            )
         ])
     }
 }
