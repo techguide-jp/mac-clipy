@@ -42,6 +42,7 @@ final class HistoryPopupController: NSWindowController,
     private var mode: PopupMode = .all
     private var folderFilter: FavoriteFolderFilter = .all
     private var results: [PopupResult] = []
+    var isShowingFavoriteNamePrompt = false
 
     init(
         store: ClipboardStore,
@@ -108,6 +109,9 @@ final class HistoryPopupController: NSWindowController,
     }
 
     func windowDidResignKey(_ notification: Notification) {
+        guard !isShowingFavoriteNamePrompt else {
+            return
+        }
         closePopup()
     }
 
@@ -322,20 +326,6 @@ extension HistoryPopupController {
         }
     }
 
-    private func origin(for screenPoint: NSPoint, windowSize: NSSize) -> NSPoint {
-        let screen = NSScreen.screens.first { NSMouseInRect(screenPoint, $0.frame, false) } ?? NSScreen.main
-        guard let visibleFrame = screen?.visibleFrame else {
-            return screenPoint
-        }
-
-        let padding = HistoryPopupMetrics.screenEdgePadding
-        let proposedX = min(screenPoint.x, visibleFrame.maxX - windowSize.width - padding)
-        let proposedY = min(screenPoint.y - windowSize.height, visibleFrame.maxY - windowSize.height - padding)
-        let clampedX = max(visibleFrame.minX + padding, proposedX)
-        let clampedY = max(visibleFrame.minY + padding, proposedY)
-        return NSPoint(x: clampedX, y: clampedY)
-    }
-
     @objc private func chooseSelectedItem() {
         guard !results.isEmpty else {
             return
@@ -436,7 +426,13 @@ extension HistoryPopupController {
             if let favorite = results[row].favorite {
                 try favoriteStore.removeFavorite(id: favorite.id)
             } else {
-                try favoriteStore.addFavorite(for: results[row].item)
+                let defaultTitle = FavoriteItem.defaultDisplayTitle(for: results[row].item.content)
+                let displayTitle = promptForFavoriteTitle(defaultTitle: defaultTitle)
+                window?.makeFirstResponder(tableView)
+                guard let displayTitle else {
+                    return
+                }
+                try favoriteStore.addFavorite(for: results[row].item, displayTitle: displayTitle)
             }
             reloadFolderPopup()
             reloadResults(selecting: row)

@@ -31,6 +31,9 @@
 "historyPanel.searchPlaceholder" = "検索";
 "historyPopup.filter.all" = "すべて";
 "historyPopup.filter.favorites" = "お気に入り";
+"historyPopup.favoriteName.add" = "登録";
+"historyPopup.favoriteName.message" = "このお気に入りの表示名を入力してください。";
+"historyPopup.favoriteName.title" = "お気に入り名";
 "historyPopup.folders.all" = "全フォルダ";
 "historyPopup.folders.unclassified" = "未分類";
 "historyPopup.noMatches" = "一致する履歴はありません";

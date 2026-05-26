@@ -242,17 +242,22 @@ public final class FavoriteStore {
     }
 
     @discardableResult
-    public func addFavorite(for item: ClipboardItem, at date: Date = Date()) throws -> FavoriteItem {
+    public func addFavorite(
+        for item: ClipboardItem,
+        displayTitle: String? = nil,
+        at date: Date = Date()
+    ) throws -> FavoriteItem {
         if let existing = favorite(for: item) {
             return existing
         }
 
+        let resolvedDisplayTitle = resolvedDisplayTitle(for: item.content, displayTitle: displayTitle)
         let favorite = FavoriteItem(
             clipboardItemID: item.id,
             checksum: item.checksum,
             contentSnapshot: item.content,
             sourceBundleID: item.sourceBundleID,
-            displayTitle: FavoriteItem.defaultDisplayTitle(for: item.content),
+            displayTitle: resolvedDisplayTitle,
             favoritedAt: date,
             lastUsedAt: item.lastUsedAt,
             useCount: item.useCount,
@@ -482,13 +487,4 @@ public final class FavoriteStore {
         }
     }
 
-    private func nextSortOrder(for values: [FavoriteItem]) -> Int {
-        values.map(\.sortOrder).max().map { $0 + AppConstants.Favorites.sortOrderStep }
-            ?? AppConstants.Favorites.initialSortOrder
-    }
-
-    private func nextSortOrder(for values: [FavoriteFolder]) -> Int {
-        values.map(\.sortOrder).max().map { $0 + AppConstants.Favorites.sortOrderStep }
-            ?? AppConstants.Favorites.initialSortOrder
-    }
 }

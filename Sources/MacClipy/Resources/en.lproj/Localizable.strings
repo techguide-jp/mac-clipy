@@ -31,6 +31,9 @@
 "historyPanel.searchPlaceholder" = "Search";
 "historyPopup.filter.all" = "All";
 "historyPopup.filter.favorites" = "Favorites";
+"historyPopup.favoriteName.add" = "Add";
+"historyPopup.favoriteName.message" = "Enter a display title for this favorite.";
+"historyPopup.favoriteName.title" = "Favorite Name";
 "historyPopup.folders.all" = "All Folders";
 "historyPopup.folders.unclassified" = "Unclassified";
 "historyPopup.noMatches" = "No matching history";
