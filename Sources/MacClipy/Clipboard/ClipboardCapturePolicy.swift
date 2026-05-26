@@ -4,7 +4,7 @@ public struct ClipboardCapturePolicy {
     public let settings: AppSettings
     public let maxItemSize: Int
 
-    public init(settings: AppSettings, maxItemSize: Int = 100 * 1024) {
+    public init(settings: AppSettings, maxItemSize: Int = AppConstants.Clipboard.defaultMaxItemSizeBytes) {
         self.settings = settings
         self.maxItemSize = maxItemSize
     }

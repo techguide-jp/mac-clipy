@@ -28,7 +28,11 @@ public final class HotKeyController {
     private var hotKeyRef: EventHotKeyRef?
     private let onPressed: @MainActor () -> Void
 
-    public init(shortcut: KeyboardShortcut, identifier: UInt32 = 1, onPressed: @MainActor @escaping () -> Void) {
+    public init(
+        shortcut: KeyboardShortcut,
+        identifier: UInt32 = AppConstants.HotKey.defaultIdentifier,
+        onPressed: @MainActor @escaping () -> Void
+    ) {
         self.shortcut = shortcut
         self.identifier = identifier
         self.onPressed = onPressed
@@ -58,7 +62,7 @@ public final class HotKeyController {
             shortcut.carbonModifiers,
             carbonHotKeyID,
             GetApplicationEventTarget(),
-            0,
+            AppConstants.HotKey.registrationOptions,
             &hotKeyRef
         )
 
@@ -123,7 +127,7 @@ public final class HotKeyController {
         let handlerStatus = InstallEventHandler(
             GetApplicationEventTarget(),
             Self.handleHotKeyEvent,
-            1,
+            AppConstants.HotKey.handlerEventCount,
             &eventType,
             nil,
             &eventHandlerRef
@@ -145,8 +149,8 @@ public final class HotKeyController {
 
     private static func fourCharCode(_ value: String) -> OSType {
         var result: UInt32 = 0
-        for byte in value.utf8.prefix(4) {
-            result = (result << 8) + UInt32(byte)
+        for byte in value.utf8.prefix(AppConstants.HotKey.fourCharCodeLength) {
+            result = (result << AppConstants.HotKey.fourCharCodeByteShift) + UInt32(byte)
         }
         return OSType(result)
     }

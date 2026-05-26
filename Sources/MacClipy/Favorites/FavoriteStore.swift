@@ -86,11 +86,11 @@ public struct FavoriteItem: Codable, Equatable, Identifiable {
             .filter { !$0.isEmpty }
             .joined(separator: " ")
 
-        if collapsed.count <= 64 {
+        if collapsed.count <= AppConstants.Clipboard.menuTitleCharacterLimit {
             return collapsed.isEmpty ? L10n.tr("clipboard.emptyWhitespace") : collapsed
         }
 
-        let index = collapsed.index(collapsed.startIndex, offsetBy: 64)
+        let index = collapsed.index(collapsed.startIndex, offsetBy: AppConstants.Clipboard.menuTitleCharacterLimit)
         return String(collapsed[..<index]) + "..."
     }
 }
@@ -279,7 +279,7 @@ public final class FavoriteStore {
         }
 
         data.items[index].lastUsedAt = date
-        data.items[index].useCount += 1
+        data.items[index].useCount += AppConstants.Clipboard.useCountIncrement
         try save()
     }
 
@@ -479,10 +479,12 @@ public final class FavoriteStore {
     }
 
     private func nextSortOrder(for values: [FavoriteItem]) -> Int {
-        (values.map(\.sortOrder).max() ?? -1) + 1
+        values.map(\.sortOrder).max().map { $0 + AppConstants.Favorites.sortOrderStep }
+            ?? AppConstants.Favorites.initialSortOrder
     }
 
     private func nextSortOrder(for values: [FavoriteFolder]) -> Int {
-        (values.map(\.sortOrder).max() ?? -1) + 1
+        values.map(\.sortOrder).max().map { $0 + AppConstants.Favorites.sortOrderStep }
+            ?? AppConstants.Favorites.initialSortOrder
     }
 }

@@ -1,12 +1,28 @@
 import AppKit
 import UniformTypeIdentifiers
 
+private enum SettingsWindowMetrics {
+    static let initialSize = NSSize(width: 780, height: 540)
+    static let minimumSize = NSSize(width: 760, height: 520)
+}
+
 @MainActor
 final class SettingsWindowController: NSWindowController {
     enum FavoriteFolderFilter: Equatable {
         case all
         case unclassified
         case folder(UUID)
+    }
+
+    enum FavoriteFolderTableRows {
+        static let all = 0
+        static let unclassified = 1
+        static let concreteFolderOffset = 2
+    }
+
+    enum FavoriteFolderMoveOffset {
+        static let up = -1
+        static let down = 1
     }
 
     let settingsStore: SettingsStore
@@ -38,14 +54,14 @@ final class SettingsWindowController: NSWindowController {
         self.onDismiss = onDismiss
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 780, height: 540),
+            contentRect: NSRect(origin: .zero, size: SettingsWindowMetrics.initialSize),
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false
         )
         window.title = L10n.tr("settings.title")
         window.isReleasedWhenClosed = false
-        window.minSize = NSSize(width: 760, height: 520)
+        window.minSize = SettingsWindowMetrics.minimumSize
 
         super.init(window: window)
         window.delegate = self

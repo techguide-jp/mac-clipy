@@ -85,7 +85,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func setupStatusItem() {
-        let item = NSStatusBar.system.statusItem(withLength: 84)
+        let item = NSStatusBar.system.statusItem(withLength: AppConstants.MenuBar.statusItemWidth)
         statusItem = item
 
         if let button = item.button {
@@ -110,7 +110,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let historyController = try preparedHotKeyController(
                 currentController: previousHistoryController,
                 shortcut: settingsStore.settings.hotKey,
-                identifier: 1,
+                identifier: AppConstants.HotKey.historyIdentifier,
                 registeredControllers: &registeredControllers
             ) { [weak self] in
                 self?.showHistoryPopup()
@@ -118,7 +118,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let favoriteController = try preparedHotKeyController(
                 currentController: previousFavoriteController,
                 shortcut: settingsStore.settings.favoriteHotKey,
-                identifier: 2,
+                identifier: AppConstants.HotKey.favoritesIdentifier,
                 registeredControllers: &registeredControllers
             ) { [weak self] in
                 self?.showFavoritePopup()
@@ -179,10 +179,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             emptyItem.isEnabled = false
             menu.addItem(emptyItem)
         } else {
-            for (index, item) in store.items.prefix(10).enumerated() {
-                let menuItem = NSMenuItem(title: "\(index + 1). \(item.menuTitle)",
+            for (index, item) in store.items.prefix(AppConstants.MenuBar.recentHistoryItemLimit).enumerated() {
+                let menuNumber = index + 1
+                let menuItem = NSMenuItem(title: "\(menuNumber). \(item.menuTitle)",
                                           action: #selector(copyMenuItem(_:)),
-                                          keyEquivalent: index < 9 ? "\(index + 1)" : "")
+                                          keyEquivalent: index < AppConstants.MenuBar.keyEquivalentItemLimit
+                                            ? "\(menuNumber)"
+                                            : "")
                 menuItem.target = self
                 menuItem.representedObject = item.id.uuidString
                 menu.addItem(menuItem)

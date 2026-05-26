@@ -29,7 +29,7 @@ public final class ClipboardMonitor {
     public func start() {
         stop()
         lastChangeCount = pasteboard.changeCount
-        timer = Timer.scheduledTimer(withTimeInterval: 0.45, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: AppConstants.ClipboardMonitor.pollingInterval, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.poll()
             }

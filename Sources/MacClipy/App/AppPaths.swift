@@ -4,7 +4,9 @@ public enum AppPaths {
     public static let applicationName = "MacClipy"
 
     public static var applicationSupportDirectory: URL {
-        let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        guard let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            preconditionFailure("Application Support directory is unavailable")
+        }
         return baseURL.appendingPathComponent(applicationName, isDirectory: true)
     }
 

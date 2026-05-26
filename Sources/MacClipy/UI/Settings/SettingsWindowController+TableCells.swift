@@ -1,5 +1,14 @@
 import AppKit
 
+private enum SettingsTableCellMetrics {
+    static let promptTextFieldSize = NSSize(width: 320, height: 24)
+    static let titleFontSize: CGFloat = 13
+    static let detailFontSize: CGFloat = 11
+    static let horizontalPadding: CGFloat = 8
+    static let titleTopPadding: CGFloat = 3
+    static let detailTopSpacing: CGFloat = 1
+}
+
 extension SettingsWindowController {
     func excludedAppCell(row: Int) -> NSView? {
         guard excludedBundleIdentifiers.indices.contains(row) else {
@@ -21,16 +30,16 @@ extension SettingsWindowController {
         let cell = favoriteFoldersTableView.makeView(withIdentifier: identifier, owner: self) as? SettingsTextCellView
             ?? SettingsTextCellView(identifier: identifier)
 
-        if row == 0 {
+        if row == Self.FavoriteFolderTableRows.all {
             cell.configure(text: L10n.tr("settings.favorites.folder.all"), secondaryText: nil)
             return cell
         }
-        if row == 1 {
+        if row == Self.FavoriteFolderTableRows.unclassified {
             cell.configure(text: L10n.tr("settings.favorites.folder.unclassified"), secondaryText: nil)
             return cell
         }
 
-        let folderIndex = row - 2
+        let folderIndex = row - Self.FavoriteFolderTableRows.concreteFolderOffset
         guard favoriteStore.folders.indices.contains(folderIndex) else {
             return nil
         }
@@ -74,7 +83,7 @@ extension SettingsWindowController {
         alert.addButton(withTitle: L10n.tr("button.ok"))
         alert.addButton(withTitle: L10n.tr("button.cancel"))
 
-        let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: 320, height: 24))
+        let textField = NSTextField(frame: NSRect(origin: .zero, size: SettingsTableCellMetrics.promptTextFieldSize))
         textField.stringValue = defaultValue
         alert.accessoryView = textField
 
@@ -116,11 +125,11 @@ private final class SettingsTextCellView: NSTableCellView {
     }
 
     private func setupFields() {
-        titleField.font = .systemFont(ofSize: 13)
+        titleField.font = .systemFont(ofSize: SettingsTableCellMetrics.titleFontSize)
         titleField.lineBreakMode = .byTruncatingTail
         titleField.translatesAutoresizingMaskIntoConstraints = false
 
-        detailField.font = .systemFont(ofSize: 11)
+        detailField.font = .systemFont(ofSize: SettingsTableCellMetrics.detailFontSize)
         detailField.textColor = .secondaryLabelColor
         detailField.lineBreakMode = .byTruncatingTail
         detailField.translatesAutoresizingMaskIntoConstraints = false
@@ -130,13 +139,13 @@ private final class SettingsTextCellView: NSTableCellView {
         textField = titleField
 
         NSLayoutConstraint.activate([
-            titleField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            titleField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
-            titleField.topAnchor.constraint(equalTo: topAnchor, constant: 3),
+            titleField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: SettingsTableCellMetrics.horizontalPadding),
+            titleField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -SettingsTableCellMetrics.horizontalPadding),
+            titleField.topAnchor.constraint(equalTo: topAnchor, constant: SettingsTableCellMetrics.titleTopPadding),
 
             detailField.leadingAnchor.constraint(equalTo: titleField.leadingAnchor),
             detailField.trailingAnchor.constraint(equalTo: titleField.trailingAnchor),
-            detailField.topAnchor.constraint(equalTo: titleField.bottomAnchor, constant: 1)
+            detailField.topAnchor.constraint(equalTo: titleField.bottomAnchor, constant: SettingsTableCellMetrics.detailTopSpacing)
         ])
     }
 }

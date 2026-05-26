@@ -1,5 +1,36 @@
 import AppKit
 
+private enum SettingsLayoutMetrics {
+    static let generalTabIndex = 0
+    static let excludedAppsTabIndex = 1
+    static let favoritesTabIndex = 2
+    static let footerStatusFontSize: CGFloat = 12
+    static let tabOuterPadding: CGFloat = 12
+    static let footerHorizontalPadding: CGFloat = 16
+    static let footerBottomPadding: CGFloat = 14
+    static let footerButtonSpacing: CGFloat = 8
+    static let sectionPadding: CGFloat = 18
+    static let labelHelpSpacing: CGFloat = 4
+    static let controlSpacing: CGFloat = 8
+    static let shortcutButtonSpacing: CGFloat = 10
+    static let shortcutRecorderHeight: CGFloat = 54
+    static let resetButtonWidth: CGFloat = 110
+    static let shortcutSectionSpacing: CGFloat = 22
+    static let tableBottomPadding: CGFloat = 16
+    static let favoriteFolderColumnWidth: CGFloat = 220
+    static let favoriteColumnSpacing: CGFloat = 20
+    static let favoriteSortPopupWidth: CGFloat = 180
+    static let favoriteSortLabelSpacing: CGFloat = 12
+    static let toolbarHeight: CGFloat = 32
+    static let folderAssignmentPopupWidth: CGFloat = 190
+    static let excludedAppRowHeight: CGFloat = 30
+    static let favoriteFolderRowHeight: CGFloat = 28
+    static let favoriteItemRowHeight: CGFloat = 30
+    static let favoriteTitleColumnWidth: CGFloat = 250
+    static let favoriteFoldersColumnWidth: CGFloat = 170
+    static let itemToolbarSpacerSpacing: CGFloat = 14
+}
+
 extension SettingsWindowController {
     func buildInterface() {
         guard let window else {
@@ -13,14 +44,14 @@ extension SettingsWindowController {
         let tabView = NSTabView()
         tabView.translatesAutoresizingMaskIntoConstraints = false
         tabView.addTabViewItem(NSTabViewItem(viewController: NSViewController()))
-        tabView.tabViewItem(at: 0).label = L10n.tr("settings.tab.general")
-        tabView.tabViewItem(at: 0).view = buildGeneralTab()
+        tabView.tabViewItem(at: SettingsLayoutMetrics.generalTabIndex).label = L10n.tr("settings.tab.general")
+        tabView.tabViewItem(at: SettingsLayoutMetrics.generalTabIndex).view = buildGeneralTab()
         tabView.addTabViewItem(NSTabViewItem(viewController: NSViewController()))
-        tabView.tabViewItem(at: 1).label = L10n.tr("settings.tab.excludedApps")
-        tabView.tabViewItem(at: 1).view = buildExcludedAppsTab()
+        tabView.tabViewItem(at: SettingsLayoutMetrics.excludedAppsTabIndex).label = L10n.tr("settings.tab.excludedApps")
+        tabView.tabViewItem(at: SettingsLayoutMetrics.excludedAppsTabIndex).view = buildExcludedAppsTab()
         tabView.addTabViewItem(NSTabViewItem(viewController: NSViewController()))
-        tabView.tabViewItem(at: 2).label = L10n.tr("settings.tab.favorites")
-        tabView.tabViewItem(at: 2).view = buildFavoritesTab()
+        tabView.tabViewItem(at: SettingsLayoutMetrics.favoritesTabIndex).label = L10n.tr("settings.tab.favorites")
+        tabView.tabViewItem(at: SettingsLayoutMetrics.favoritesTabIndex).view = buildFavoritesTab()
 
         let saveButton = NSButton(title: L10n.tr("button.save"), target: self, action: #selector(save))
         saveButton.bezelStyle = .rounded
@@ -31,7 +62,7 @@ extension SettingsWindowController {
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
 
         statusLabel.textColor = .secondaryLabelColor
-        statusLabel.font = .systemFont(ofSize: 12)
+        statusLabel.font = .systemFont(ofSize: SettingsLayoutMetrics.footerStatusFontSize)
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
 
         contentView.addSubview(tabView)
@@ -40,20 +71,38 @@ extension SettingsWindowController {
         contentView.addSubview(cancelButton)
 
         NSLayoutConstraint.activate([
-            tabView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            tabView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            tabView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
-            tabView.bottomAnchor.constraint(equalTo: statusLabel.topAnchor, constant: -12),
+            tabView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: SettingsLayoutMetrics.tabOuterPadding),
+            tabView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: SettingsLayoutMetrics.tabOuterPadding),
+            tabView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -SettingsLayoutMetrics.tabOuterPadding),
+            tabView.bottomAnchor.constraint(equalTo: statusLabel.topAnchor, constant: -SettingsLayoutMetrics.tabOuterPadding),
 
-            statusLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            statusLabel.trailingAnchor.constraint(lessThanOrEqualTo: cancelButton.leadingAnchor, constant: -12),
+            statusLabel.leadingAnchor.constraint(
+                equalTo: contentView.leadingAnchor,
+                constant: SettingsLayoutMetrics.footerHorizontalPadding
+            ),
+            statusLabel.trailingAnchor.constraint(
+                lessThanOrEqualTo: cancelButton.leadingAnchor,
+                constant: -SettingsLayoutMetrics.tabOuterPadding
+            ),
             statusLabel.centerYAnchor.constraint(equalTo: saveButton.centerYAnchor),
 
-            cancelButton.trailingAnchor.constraint(equalTo: saveButton.leadingAnchor, constant: -8),
-            cancelButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -14),
+            cancelButton.trailingAnchor.constraint(
+                equalTo: saveButton.leadingAnchor,
+                constant: -SettingsLayoutMetrics.footerButtonSpacing
+            ),
+            cancelButton.bottomAnchor.constraint(
+                equalTo: contentView.bottomAnchor,
+                constant: -SettingsLayoutMetrics.footerBottomPadding
+            ),
 
-            saveButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            saveButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -14)
+            saveButton.trailingAnchor.constraint(
+                equalTo: contentView.trailingAnchor,
+                constant: -SettingsLayoutMetrics.footerHorizontalPadding
+            ),
+            saveButton.bottomAnchor.constraint(
+                equalTo: contentView.bottomAnchor,
+                constant: -SettingsLayoutMetrics.footerBottomPadding
+            )
         ])
     }
 
@@ -90,42 +139,75 @@ extension SettingsWindowController {
          favoriteLabel, favoriteHelpLabel, favoriteShortcutRecorder, resetFavoriteShortcutButton].forEach(view.addSubview)
 
         NSLayoutConstraint.activate([
-            historyLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 18),
-            historyLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            historyLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            historyLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            historyLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            historyLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -SettingsLayoutMetrics.sectionPadding),
 
-            historyHelpLabel.topAnchor.constraint(equalTo: historyLabel.bottomAnchor, constant: 4),
-            historyHelpLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            historyHelpLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            historyHelpLabel.topAnchor.constraint(
+                equalTo: historyLabel.bottomAnchor,
+                constant: SettingsLayoutMetrics.labelHelpSpacing
+            ),
+            historyHelpLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            historyHelpLabel.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -SettingsLayoutMetrics.sectionPadding
+            ),
 
-            shortcutRecorder.topAnchor.constraint(equalTo: historyHelpLabel.bottomAnchor, constant: 8),
-            shortcutRecorder.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            shortcutRecorder.trailingAnchor.constraint(equalTo: resetShortcutButton.leadingAnchor, constant: -10),
-            shortcutRecorder.heightAnchor.constraint(equalToConstant: 54),
+            shortcutRecorder.topAnchor.constraint(
+                equalTo: historyHelpLabel.bottomAnchor,
+                constant: SettingsLayoutMetrics.controlSpacing
+            ),
+            shortcutRecorder.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            shortcutRecorder.trailingAnchor.constraint(
+                equalTo: resetShortcutButton.leadingAnchor,
+                constant: -SettingsLayoutMetrics.shortcutButtonSpacing
+            ),
+            shortcutRecorder.heightAnchor.constraint(equalToConstant: SettingsLayoutMetrics.shortcutRecorderHeight),
 
             resetShortcutButton.centerYAnchor.constraint(equalTo: shortcutRecorder.centerYAnchor),
-            resetShortcutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
-            resetShortcutButton.widthAnchor.constraint(equalToConstant: 110),
+            resetShortcutButton.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -SettingsLayoutMetrics.sectionPadding
+            ),
+            resetShortcutButton.widthAnchor.constraint(equalToConstant: SettingsLayoutMetrics.resetButtonWidth),
 
-            favoriteLabel.topAnchor.constraint(equalTo: shortcutRecorder.bottomAnchor, constant: 22),
-            favoriteLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            favoriteLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            favoriteLabel.topAnchor.constraint(
+                equalTo: shortcutRecorder.bottomAnchor,
+                constant: SettingsLayoutMetrics.shortcutSectionSpacing
+            ),
+            favoriteLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            favoriteLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -SettingsLayoutMetrics.sectionPadding),
 
-            favoriteHelpLabel.topAnchor.constraint(equalTo: favoriteLabel.bottomAnchor, constant: 4),
-            favoriteHelpLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            favoriteHelpLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            favoriteHelpLabel.topAnchor.constraint(
+                equalTo: favoriteLabel.bottomAnchor,
+                constant: SettingsLayoutMetrics.labelHelpSpacing
+            ),
+            favoriteHelpLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            favoriteHelpLabel.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -SettingsLayoutMetrics.sectionPadding
+            ),
 
-            favoriteShortcutRecorder.topAnchor.constraint(equalTo: favoriteHelpLabel.bottomAnchor, constant: 8),
-            favoriteShortcutRecorder.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
+            favoriteShortcutRecorder.topAnchor.constraint(
+                equalTo: favoriteHelpLabel.bottomAnchor,
+                constant: SettingsLayoutMetrics.controlSpacing
+            ),
+            favoriteShortcutRecorder.leadingAnchor.constraint(
+                equalTo: view.leadingAnchor,
+                constant: SettingsLayoutMetrics.sectionPadding
+            ),
             favoriteShortcutRecorder.trailingAnchor.constraint(
                 equalTo: resetFavoriteShortcutButton.leadingAnchor,
-                constant: -10
+                constant: -SettingsLayoutMetrics.shortcutButtonSpacing
             ),
-            favoriteShortcutRecorder.heightAnchor.constraint(equalToConstant: 54),
+            favoriteShortcutRecorder.heightAnchor.constraint(equalToConstant: SettingsLayoutMetrics.shortcutRecorderHeight),
 
             resetFavoriteShortcutButton.centerYAnchor.constraint(equalTo: favoriteShortcutRecorder.centerYAnchor),
-            resetFavoriteShortcutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
-            resetFavoriteShortcutButton.widthAnchor.constraint(equalToConstant: 110)
+            resetFavoriteShortcutButton.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -SettingsLayoutMetrics.sectionPadding
+            ),
+            resetFavoriteShortcutButton.widthAnchor.constraint(equalToConstant: SettingsLayoutMetrics.resetButtonWidth)
         ])
 
         return view
@@ -146,28 +228,43 @@ extension SettingsWindowController {
         [titleLabel, excludedAppsHelpLabel, scrollView, addButton, removeButton, resetButton].forEach(view.addSubview)
 
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 18),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -SettingsLayoutMetrics.sectionPadding),
 
-            excludedAppsHelpLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-            excludedAppsHelpLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            excludedAppsHelpLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            excludedAppsHelpLabel.topAnchor.constraint(
+                equalTo: titleLabel.bottomAnchor,
+                constant: SettingsLayoutMetrics.labelHelpSpacing
+            ),
+            excludedAppsHelpLabel.leadingAnchor.constraint(
+                equalTo: view.leadingAnchor,
+                constant: SettingsLayoutMetrics.sectionPadding
+            ),
+            excludedAppsHelpLabel.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -SettingsLayoutMetrics.sectionPadding
+            ),
 
-            scrollView.topAnchor.constraint(equalTo: excludedAppsHelpLabel.bottomAnchor, constant: 10),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
-            scrollView.bottomAnchor.constraint(equalTo: addButton.topAnchor, constant: -10),
+            scrollView.topAnchor.constraint(
+                equalTo: excludedAppsHelpLabel.bottomAnchor,
+                constant: SettingsLayoutMetrics.shortcutButtonSpacing
+            ),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -SettingsLayoutMetrics.sectionPadding),
+            scrollView.bottomAnchor.constraint(equalTo: addButton.topAnchor, constant: -SettingsLayoutMetrics.shortcutButtonSpacing),
 
-            addButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            addButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -16),
+            addButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            addButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -SettingsLayoutMetrics.tableBottomPadding),
 
-            removeButton.leadingAnchor.constraint(equalTo: addButton.trailingAnchor, constant: 8),
+            removeButton.leadingAnchor.constraint(equalTo: addButton.trailingAnchor, constant: SettingsLayoutMetrics.controlSpacing),
             removeButton.centerYAnchor.constraint(equalTo: addButton.centerYAnchor),
 
-            resetButton.leadingAnchor.constraint(equalTo: removeButton.trailingAnchor, constant: 8),
+            resetButton.leadingAnchor.constraint(equalTo: removeButton.trailingAnchor, constant: SettingsLayoutMetrics.controlSpacing),
             resetButton.centerYAnchor.constraint(equalTo: addButton.centerYAnchor),
-            resetButton.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -18)
+            resetButton.trailingAnchor.constraint(
+                lessThanOrEqualTo: view.trailingAnchor,
+                constant: -SettingsLayoutMetrics.sectionPadding
+            )
         ])
 
         return view
@@ -222,9 +319,9 @@ extension SettingsWindowController {
                     action: #selector(removeFavoriteItemFromFolder)
                 )
             ],
-            spacing: 8
+            spacing: SettingsLayoutMetrics.controlSpacing
         )
-        itemToolbar.setCustomSpacing(14, after: itemToolbarSpacer)
+        itemToolbar.setCustomSpacing(SettingsLayoutMetrics.itemToolbarSpacerSpacing, after: itemToolbarSpacer)
 
         let views: [NSView] = [
             foldersLabel, folderScrollView, folderToolbar, itemsLabel, favoriteSortPopup, itemScrollView, itemToolbar
@@ -232,38 +329,53 @@ extension SettingsWindowController {
         views.forEach(view.addSubview)
 
         NSLayoutConstraint.activate([
-            foldersLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 18),
-            foldersLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
+            foldersLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            foldersLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: SettingsLayoutMetrics.sectionPadding),
 
-            folderScrollView.topAnchor.constraint(equalTo: foldersLabel.bottomAnchor, constant: 8),
-            folderScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            folderScrollView.widthAnchor.constraint(equalToConstant: 220),
-            folderScrollView.bottomAnchor.constraint(equalTo: folderToolbar.topAnchor, constant: -8),
+            folderScrollView.topAnchor.constraint(
+                equalTo: foldersLabel.bottomAnchor,
+                constant: SettingsLayoutMetrics.controlSpacing
+            ),
+            folderScrollView.leadingAnchor.constraint(
+                equalTo: view.leadingAnchor,
+                constant: SettingsLayoutMetrics.sectionPadding
+            ),
+            folderScrollView.widthAnchor.constraint(equalToConstant: SettingsLayoutMetrics.favoriteFolderColumnWidth),
+            folderScrollView.bottomAnchor.constraint(equalTo: folderToolbar.topAnchor, constant: -SettingsLayoutMetrics.controlSpacing),
 
             folderToolbar.leadingAnchor.constraint(equalTo: folderScrollView.leadingAnchor),
             folderToolbar.trailingAnchor.constraint(lessThanOrEqualTo: folderScrollView.trailingAnchor),
-            folderToolbar.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -16),
-            folderToolbar.heightAnchor.constraint(equalToConstant: 32),
+            folderToolbar.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -SettingsLayoutMetrics.tableBottomPadding),
+            folderToolbar.heightAnchor.constraint(equalToConstant: SettingsLayoutMetrics.toolbarHeight),
 
-            itemsLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 18),
-            itemsLabel.leadingAnchor.constraint(equalTo: folderScrollView.trailingAnchor, constant: 20),
+            itemsLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: SettingsLayoutMetrics.sectionPadding),
+            itemsLabel.leadingAnchor.constraint(
+                equalTo: folderScrollView.trailingAnchor,
+                constant: SettingsLayoutMetrics.favoriteColumnSpacing
+            ),
 
             favoriteSortPopup.centerYAnchor.constraint(equalTo: itemsLabel.centerYAnchor),
-            favoriteSortPopup.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
-            favoriteSortPopup.widthAnchor.constraint(equalToConstant: 180),
-            itemsLabel.trailingAnchor.constraint(lessThanOrEqualTo: favoriteSortPopup.leadingAnchor, constant: -12),
+            favoriteSortPopup.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -SettingsLayoutMetrics.sectionPadding
+            ),
+            favoriteSortPopup.widthAnchor.constraint(equalToConstant: SettingsLayoutMetrics.favoriteSortPopupWidth),
+            itemsLabel.trailingAnchor.constraint(
+                lessThanOrEqualTo: favoriteSortPopup.leadingAnchor,
+                constant: -SettingsLayoutMetrics.favoriteSortLabelSpacing
+            ),
 
-            itemScrollView.topAnchor.constraint(equalTo: itemsLabel.bottomAnchor, constant: 8),
+            itemScrollView.topAnchor.constraint(equalTo: itemsLabel.bottomAnchor, constant: SettingsLayoutMetrics.controlSpacing),
             itemScrollView.leadingAnchor.constraint(equalTo: itemsLabel.leadingAnchor),
-            itemScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
-            itemScrollView.bottomAnchor.constraint(equalTo: itemToolbar.topAnchor, constant: -8),
+            itemScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -SettingsLayoutMetrics.sectionPadding),
+            itemScrollView.bottomAnchor.constraint(equalTo: itemToolbar.topAnchor, constant: -SettingsLayoutMetrics.controlSpacing),
 
             itemToolbar.leadingAnchor.constraint(equalTo: itemScrollView.leadingAnchor),
             itemToolbar.trailingAnchor.constraint(equalTo: itemScrollView.trailingAnchor),
-            itemToolbar.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -16),
-            itemToolbar.heightAnchor.constraint(equalToConstant: 32),
+            itemToolbar.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -SettingsLayoutMetrics.tableBottomPadding),
+            itemToolbar.heightAnchor.constraint(equalToConstant: SettingsLayoutMetrics.toolbarHeight),
 
-            folderAssignmentPopup.widthAnchor.constraint(equalToConstant: 190)
+            folderAssignmentPopup.widthAnchor.constraint(equalToConstant: SettingsLayoutMetrics.folderAssignmentPopupWidth)
         ])
 
         return view
@@ -281,7 +393,7 @@ extension SettingsWindowController {
         excludedAppsTableView.headerView = nil
         excludedAppsTableView.delegate = self
         excludedAppsTableView.dataSource = self
-        excludedAppsTableView.rowHeight = 30
+        excludedAppsTableView.rowHeight = SettingsLayoutMetrics.excludedAppRowHeight
         excludedAppsTableView.translatesAutoresizingMaskIntoConstraints = false
     }
 
@@ -293,7 +405,7 @@ extension SettingsWindowController {
             favoriteFoldersTableView.headerView = nil
             favoriteFoldersTableView.delegate = self
             favoriteFoldersTableView.dataSource = self
-            favoriteFoldersTableView.rowHeight = 28
+            favoriteFoldersTableView.rowHeight = SettingsLayoutMetrics.favoriteFolderRowHeight
             favoriteFoldersTableView.translatesAutoresizingMaskIntoConstraints = false
             favoriteFoldersTableView.action = #selector(favoriteFolderSelectionChanged)
             favoriteFoldersTableView.target = self
@@ -302,17 +414,17 @@ extension SettingsWindowController {
         if favoriteItemsTableView.tableColumns.isEmpty {
             let titleColumn = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("favoriteTitle"))
             titleColumn.title = L10n.tr("settings.favorites.column.title")
-            titleColumn.width = 250
+            titleColumn.width = SettingsLayoutMetrics.favoriteTitleColumnWidth
             favoriteItemsTableView.addTableColumn(titleColumn)
 
             let foldersColumn = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("favoriteFolders"))
             foldersColumn.title = L10n.tr("settings.favorites.column.folders")
-            foldersColumn.width = 170
+            foldersColumn.width = SettingsLayoutMetrics.favoriteFoldersColumnWidth
             favoriteItemsTableView.addTableColumn(foldersColumn)
 
             favoriteItemsTableView.delegate = self
             favoriteItemsTableView.dataSource = self
-            favoriteItemsTableView.rowHeight = 30
+            favoriteItemsTableView.rowHeight = SettingsLayoutMetrics.favoriteItemRowHeight
             favoriteItemsTableView.translatesAutoresizingMaskIntoConstraints = false
         }
     }

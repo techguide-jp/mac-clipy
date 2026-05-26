@@ -5,13 +5,28 @@ enum HistoryPopupInitialMode {
     case favorites
 }
 
+private enum HistoryPopupMetrics {
+    static let panelSize = NSSize(width: 520, height: 410)
+    static let cornerRadius: CGFloat = 10
+    static let outerPadding: CGFloat = 10
+    static let controlSpacing: CGFloat = 8
+    static let scrollHorizontalInset: CGFloat = 6
+    static let emptyLabelHorizontalPadding: CGFloat = 16
+    static let emptyLabelFontSize: CGFloat = 13
+    static let settingsButtonWidth: CGFloat = 34
+    static let filterSegmentWidth: CGFloat = 172
+    static let rowHeight: CGFloat = 34
+    static let rowSpacing: CGFloat = 1
+    static let screenEdgePadding: CGFloat = 8
+}
+
 @MainActor
 final class HistoryPopupController: NSWindowController,
                                     NSSearchFieldDelegate,
                                     NSTableViewDataSource,
                                     NSTableViewDelegate,
                                     NSWindowDelegate {
-    private enum PopupMode: Int {
+    private enum PopupMode: Int, CaseIterable {
         case all
         case favorites
     }
@@ -55,7 +70,7 @@ final class HistoryPopupController: NSWindowController,
         self.onSettingsRequested = onSettingsRequested
 
         let panel = PopupPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 520, height: 410),
+            contentRect: NSRect(origin: .zero, size: HistoryPopupMetrics.panelSize),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
@@ -122,7 +137,7 @@ final class HistoryPopupController: NSWindowController,
         rootView.state = .active
         rootView.translatesAutoresizingMaskIntoConstraints = false
         rootView.wantsLayer = true
-        rootView.layer?.cornerRadius = 10
+        rootView.layer?.cornerRadius = HistoryPopupMetrics.cornerRadius
         rootView.layer?.masksToBounds = true
         window.contentView = rootView
 
@@ -140,7 +155,7 @@ final class HistoryPopupController: NSWindowController,
 
         emptyLabel.stringValue = L10n.tr("historyPopup.noMatches")
         emptyLabel.textColor = .secondaryLabelColor
-        emptyLabel.font = .systemFont(ofSize: 13)
+        emptyLabel.font = .systemFont(ofSize: HistoryPopupMetrics.emptyLabelFontSize)
         emptyLabel.alignment = .center
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false
 
@@ -152,31 +167,37 @@ final class HistoryPopupController: NSWindowController,
         rootView.addSubview(emptyLabel)
 
         NSLayoutConstraint.activate([
-            searchField.topAnchor.constraint(equalTo: rootView.topAnchor, constant: 10),
-            searchField.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 10),
-            searchField.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -8),
+            searchField.topAnchor.constraint(equalTo: rootView.topAnchor, constant: HistoryPopupMetrics.outerPadding),
+            searchField.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: HistoryPopupMetrics.outerPadding),
+            searchField.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -HistoryPopupMetrics.controlSpacing),
 
             settingsButton.centerYAnchor.constraint(equalTo: searchField.centerYAnchor),
-            settingsButton.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -10),
-            settingsButton.widthAnchor.constraint(equalToConstant: 34),
+            settingsButton.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -HistoryPopupMetrics.outerPadding),
+            settingsButton.widthAnchor.constraint(equalToConstant: HistoryPopupMetrics.settingsButtonWidth),
 
-            filterSegment.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 8),
-            filterSegment.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 10),
-            filterSegment.widthAnchor.constraint(equalToConstant: 172),
+            filterSegment.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: HistoryPopupMetrics.controlSpacing),
+            filterSegment.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: HistoryPopupMetrics.outerPadding),
+            filterSegment.widthAnchor.constraint(equalToConstant: HistoryPopupMetrics.filterSegmentWidth),
 
             folderPopup.centerYAnchor.constraint(equalTo: filterSegment.centerYAnchor),
-            folderPopup.leadingAnchor.constraint(equalTo: filterSegment.trailingAnchor, constant: 8),
-            folderPopup.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -10),
+            folderPopup.leadingAnchor.constraint(equalTo: filterSegment.trailingAnchor, constant: HistoryPopupMetrics.controlSpacing),
+            folderPopup.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -HistoryPopupMetrics.outerPadding),
 
-            scrollView.topAnchor.constraint(equalTo: filterSegment.bottomAnchor, constant: 8),
-            scrollView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 6),
-            scrollView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -6),
-            scrollView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor, constant: -6),
+            scrollView.topAnchor.constraint(equalTo: filterSegment.bottomAnchor, constant: HistoryPopupMetrics.controlSpacing),
+            scrollView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: HistoryPopupMetrics.scrollHorizontalInset),
+            scrollView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -HistoryPopupMetrics.scrollHorizontalInset),
+            scrollView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor, constant: -HistoryPopupMetrics.scrollHorizontalInset),
 
             emptyLabel.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
             emptyLabel.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor),
-            emptyLabel.leadingAnchor.constraint(greaterThanOrEqualTo: scrollView.leadingAnchor, constant: 16),
-            emptyLabel.trailingAnchor.constraint(lessThanOrEqualTo: scrollView.trailingAnchor, constant: -16)
+            emptyLabel.leadingAnchor.constraint(
+                greaterThanOrEqualTo: scrollView.leadingAnchor,
+                constant: HistoryPopupMetrics.emptyLabelHorizontalPadding
+            ),
+            emptyLabel.trailingAnchor.constraint(
+                lessThanOrEqualTo: scrollView.trailingAnchor,
+                constant: -HistoryPopupMetrics.emptyLabelHorizontalPadding
+            )
         ])
     }
 }
@@ -206,9 +227,9 @@ extension HistoryPopupController {
     }
 
     private func configureFilters() {
-        filterSegment.segmentCount = 2
-        filterSegment.setLabel(L10n.tr("historyPopup.filter.all"), forSegment: 0)
-        filterSegment.setLabel(L10n.tr("historyPopup.filter.favorites"), forSegment: 1)
+        filterSegment.segmentCount = PopupMode.allCases.count
+        filterSegment.setLabel(L10n.tr("historyPopup.filter.all"), forSegment: PopupMode.all.rawValue)
+        filterSegment.setLabel(L10n.tr("historyPopup.filter.favorites"), forSegment: PopupMode.favorites.rawValue)
         filterSegment.selectedSegment = mode.rawValue
         filterSegment.target = self
         filterSegment.action = #selector(changeFilterMode)
@@ -226,8 +247,8 @@ extension HistoryPopupController {
         tableView.headerView = nil
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = 34
-        tableView.intercellSpacing = NSSize(width: 0, height: 1)
+        tableView.rowHeight = HistoryPopupMetrics.rowHeight
+        tableView.intercellSpacing = NSSize(width: 0, height: HistoryPopupMetrics.rowSpacing)
         tableView.doubleAction = #selector(chooseSelectedItem)
         tableView.target = self
         tableView.onRowClick = { [weak self] row in
@@ -322,7 +343,7 @@ extension HistoryPopupController {
             return screenPoint
         }
 
-        let padding: CGFloat = 8
+        let padding = HistoryPopupMetrics.screenEdgePadding
         let proposedX = min(screenPoint.x, visibleFrame.maxX - windowSize.width - padding)
         let proposedY = min(screenPoint.y - windowSize.height, visibleFrame.maxY - windowSize.height - padding)
         let clampedX = max(visibleFrame.minX + padding, proposedX)

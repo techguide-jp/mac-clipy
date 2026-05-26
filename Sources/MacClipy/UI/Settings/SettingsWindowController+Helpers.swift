@@ -1,5 +1,14 @@
 import AppKit
 
+private enum SettingsHelperMetrics {
+    static let sectionTitleFontSize: CGFloat = 13
+    static let helpFontSize: CGFloat = 12
+    static let iconButtonWidth: CGFloat = 32
+    static let fallbackButtonMinWidth: CGFloat = 88
+    static let toolbarButtonHeight: CGFloat = 28
+    static let toolbarSpacing: CGFloat = 6
+}
+
 extension SettingsWindowController: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         onDismiss()
@@ -12,7 +21,7 @@ extension SettingsWindowController: NSTableViewDataSource, NSTableViewDelegate {
             return excludedBundleIdentifiers.count
         }
         if tableView == favoriteFoldersTableView {
-            return favoriteStore.folders.count + 2
+            return favoriteStore.folders.count + Self.FavoriteFolderTableRows.concreteFolderOffset
         }
         if tableView == favoriteItemsTableView {
             return favoriteRows.count
@@ -37,7 +46,7 @@ extension SettingsWindowController: NSTableViewDataSource, NSTableViewDelegate {
 extension SettingsWindowController {
     func sectionLabel(_ key: String) -> NSTextField {
         let label = NSTextField(labelWithString: L10n.tr(key))
-        label.font = .boldSystemFont(ofSize: 13)
+        label.font = .boldSystemFont(ofSize: SettingsHelperMetrics.sectionTitleFontSize)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }
@@ -45,7 +54,7 @@ extension SettingsWindowController {
     func helpLabel(_ key: String) -> NSTextField {
         let label = NSTextField(labelWithString: L10n.tr(key))
         label.textColor = .secondaryLabelColor
-        label.font = .systemFont(ofSize: 12)
+        label.font = .systemFont(ofSize: SettingsHelperMetrics.helpFontSize)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }
@@ -68,16 +77,16 @@ extension SettingsWindowController {
         if let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: title) {
             button.image = image
             button.imagePosition = .imageOnly
-            button.widthAnchor.constraint(equalToConstant: 32).isActive = true
+            button.widthAnchor.constraint(equalToConstant: SettingsHelperMetrics.iconButtonWidth).isActive = true
         } else {
             button.title = title
-            button.widthAnchor.constraint(greaterThanOrEqualToConstant: 88).isActive = true
+            button.widthAnchor.constraint(greaterThanOrEqualToConstant: SettingsHelperMetrics.fallbackButtonMinWidth).isActive = true
         }
-        button.heightAnchor.constraint(equalToConstant: 28).isActive = true
+        button.heightAnchor.constraint(equalToConstant: SettingsHelperMetrics.toolbarButtonHeight).isActive = true
         return button
     }
 
-    func toolbarStack(_ views: [NSView], spacing: CGFloat = 6) -> NSStackView {
+    func toolbarStack(_ views: [NSView], spacing: CGFloat = SettingsHelperMetrics.toolbarSpacing) -> NSStackView {
         let stackView = NSStackView(views: views)
         stackView.orientation = .horizontal
         stackView.alignment = .centerY
@@ -159,10 +168,10 @@ extension SettingsWindowController {
 
     func selectedFavoriteFolderFilter() -> FavoriteFolderFilter {
         let selectedRow = favoriteFoldersTableView.selectedRow
-        if selectedRow == 1 {
+        if selectedRow == Self.FavoriteFolderTableRows.unclassified {
             return .unclassified
         }
-        let folderIndex = selectedRow - 2
+        let folderIndex = selectedRow - Self.FavoriteFolderTableRows.concreteFolderOffset
         guard favoriteStore.folders.indices.contains(folderIndex) else {
             return .all
         }
@@ -188,6 +197,6 @@ extension SettingsWindowController {
         guard let folderIndex = favoriteStore.folders.firstIndex(where: { $0.id == folderID }) else {
             return nil
         }
-        return folderIndex + 2
+        return folderIndex + Self.FavoriteFolderTableRows.concreteFolderOffset
     }
 }

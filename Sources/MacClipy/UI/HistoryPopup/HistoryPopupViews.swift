@@ -1,4 +1,19 @@
 import AppKit
+import Carbon
+
+private enum HistoryPopupCellMetrics {
+    static let titleFontSize: CGFloat = 13
+    static let horizontalPadding: CGFloat = 10
+    static let titleToStarSpacing: CGFloat = 8
+    static let starButtonSize: CGFloat = 24
+}
+
+private enum PopupNavigationKeyCode {
+    static let returnKey = UInt16(kVK_Return)
+    static let escape = UInt16(kVK_Escape)
+    static let downArrow = UInt16(kVK_DownArrow)
+    static let upArrow = UInt16(kVK_UpArrow)
+}
 
 final class PopupPanel: NSPanel {
     var onKeyEquivalent: ((NSEvent) -> Bool)?
@@ -49,7 +64,7 @@ final class HistoryPopupCellView: NSTableCellView {
     }
 
     private func setupFields() {
-        titleField.font = .systemFont(ofSize: 13, weight: .medium)
+        titleField.font = .systemFont(ofSize: HistoryPopupCellMetrics.titleFontSize, weight: .medium)
         titleField.lineBreakMode = .byTruncatingTail
         titleField.translatesAutoresizingMaskIntoConstraints = false
 
@@ -64,14 +79,17 @@ final class HistoryPopupCellView: NSTableCellView {
         addSubview(starButton)
 
         NSLayoutConstraint.activate([
-            titleField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
-            titleField.trailingAnchor.constraint(equalTo: starButton.leadingAnchor, constant: -8),
+            titleField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: HistoryPopupCellMetrics.horizontalPadding),
+            titleField.trailingAnchor.constraint(
+                equalTo: starButton.leadingAnchor,
+                constant: -HistoryPopupCellMetrics.titleToStarSpacing
+            ),
             titleField.centerYAnchor.constraint(equalTo: centerYAnchor),
 
-            starButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+            starButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -HistoryPopupCellMetrics.horizontalPadding),
             starButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-            starButton.widthAnchor.constraint(equalToConstant: 24),
-            starButton.heightAnchor.constraint(equalToConstant: 24)
+            starButton.widthAnchor.constraint(equalToConstant: HistoryPopupCellMetrics.starButtonSize),
+            starButton.heightAnchor.constraint(equalToConstant: HistoryPopupCellMetrics.starButtonSize)
         ])
     }
 
@@ -117,13 +135,13 @@ final class PopupKeyHandlingTableView: NSTableView {
         }
 
         switch event.keyCode {
-        case 36:
+        case PopupNavigationKeyCode.returnKey:
             onReturn?()
-        case 53:
+        case PopupNavigationKeyCode.escape:
             onEscape?()
-        case 125:
+        case PopupNavigationKeyCode.downArrow:
             moveSelection(by: 1)
-        case 126:
+        case PopupNavigationKeyCode.upArrow:
             moveSelection(by: -1)
         default:
             if shouldAppendToSearch(event), let text = event.charactersIgnoringModifiers {
@@ -150,7 +168,10 @@ final class PopupKeyHandlingTableView: NSTableView {
         if key == "f", modifiers.contains(.shift) {
             return .toggleMode
         }
-        if !modifiers.contains(.shift), let index = Int(key), (1...9).contains(index) {
+        if !modifiers.contains(.shift),
+           let index = Int(key),
+           (AppConstants.Keyboard.firstFolderShortcutIndex...AppConstants.Keyboard.lastFolderShortcutIndex)
+            .contains(index) {
             return .folder(index)
         }
         return nil

@@ -55,7 +55,10 @@ extension SettingsWindowController {
 
         do {
             try favoriteStore.deleteFolder(id: folder.id)
-            favoriteFoldersTableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+            favoriteFoldersTableView.selectRowIndexes(
+                IndexSet(integer: Self.FavoriteFolderTableRows.all),
+                byExtendingSelection: false
+            )
             reloadFavoriteManagement()
             statusLabel.stringValue = L10n.tr("settings.favorites.status.folderDeleted")
         } catch {
@@ -64,11 +67,11 @@ extension SettingsWindowController {
     }
 
     @objc func moveFavoriteFolderUp() {
-        moveSelectedFavoriteFolder(by: -1)
+        moveSelectedFavoriteFolder(by: Self.FavoriteFolderMoveOffset.up)
     }
 
     @objc func moveFavoriteFolderDown() {
-        moveSelectedFavoriteFolder(by: 1)
+        moveSelectedFavoriteFolder(by: Self.FavoriteFolderMoveOffset.down)
     }
 
     @objc func renameFavoriteItem() {
