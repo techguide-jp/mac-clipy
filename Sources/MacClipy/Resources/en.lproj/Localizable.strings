@@ -68,6 +68,7 @@
 "settings.favorites.folder.deleteMessage" = "Only the folder will be deleted. Favorites inside it stay unclassified.";
 "settings.favorites.folder.down" = "Down";
 "settings.favorites.folder.namePrompt" = "Enter a folder name.";
+"settings.favorites.folder.none" = "No Folders";
 "settings.favorites.folder.rename" = "Rename";
 "settings.favorites.folder.unclassified" = "Unclassified";
 "settings.favorites.folder.up" = "Up";

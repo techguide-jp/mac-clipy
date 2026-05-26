@@ -38,13 +38,14 @@ final class SettingsWindowController: NSWindowController {
         self.onDismiss = onDismiss
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 720, height: 520),
-            styleMask: [.titled, .closable],
+            contentRect: NSRect(x: 0, y: 0, width: 780, height: 540),
+            styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false
         )
         window.title = L10n.tr("settings.title")
         window.isReleasedWhenClosed = false
+        window.minSize = NSSize(width: 760, height: 520)
 
         super.init(window: window)
         window.delegate = self

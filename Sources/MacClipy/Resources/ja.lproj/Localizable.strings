@@ -68,6 +68,7 @@
 "settings.favorites.folder.deleteMessage" = "フォルダだけを削除し、中のお気に入りは未分類として残します。";
 "settings.favorites.folder.down" = "下へ";
 "settings.favorites.folder.namePrompt" = "フォルダ名を入力してください。";
+"settings.favorites.folder.none" = "フォルダなし";
 "settings.favorites.folder.rename" = "名前変更";
 "settings.favorites.folder.unclassified" = "未分類";
 "settings.favorites.folder.up" = "上へ";

@@ -59,7 +59,6 @@ extension SettingsWindowController {
 
     func buildGeneralTab() -> NSView {
         let view = NSView()
-        view.translatesAutoresizingMaskIntoConstraints = false
 
         let historyLabel = sectionLabel("settings.shortcut.title")
         let historyHelpLabel = helpLabel("settings.shortcut.help")
@@ -134,7 +133,6 @@ extension SettingsWindowController {
 
     func buildExcludedAppsTab() -> NSView {
         let view = NSView()
-        view.translatesAutoresizingMaskIntoConstraints = false
 
         let titleLabel = sectionLabel("settings.excludedApps.title")
         let excludedAppsHelpLabel = helpLabel("settings.excludedApps.help")
@@ -177,7 +175,6 @@ extension SettingsWindowController {
 
     func buildFavoritesTab() -> NSView {
         let view = NSView()
-        view.translatesAutoresizingMaskIntoConstraints = false
 
         configureFavoriteTables()
         configureFavoriteControls()
@@ -187,23 +184,50 @@ extension SettingsWindowController {
         let foldersLabel = sectionLabel("settings.favorites.folders")
         let itemsLabel = sectionLabel("settings.favorites.items")
 
-        let addFolderButton = actionButton("settings.favorites.folder.add", #selector(addFavoriteFolder))
-        let renameFolderButton = actionButton("settings.favorites.folder.rename", #selector(renameFavoriteFolder))
-        let deleteFolderButton = actionButton("settings.favorites.folder.delete", #selector(deleteFavoriteFolder))
-        let moveUpButton = actionButton("settings.favorites.folder.up", #selector(moveFavoriteFolderUp))
-        let moveDownButton = actionButton("settings.favorites.folder.down", #selector(moveFavoriteFolderDown))
-        let renameItemButton = actionButton("settings.favorites.item.rename", #selector(renameFavoriteItem))
-        let removeItemButton = actionButton("settings.favorites.item.remove", #selector(removeFavoriteItem))
-        let addToFolderButton = actionButton("settings.favorites.item.addToFolder", #selector(addFavoriteItemToFolder))
-        let removeFromFolderButton = actionButton(
-            "settings.favorites.item.removeFromFolder",
-            #selector(removeFavoriteItemFromFolder)
+        let folderToolbar = toolbarStack([
+            iconButton("settings.favorites.folder.add", symbolName: "plus", action: #selector(addFavoriteFolder)),
+            iconButton("settings.favorites.folder.rename", symbolName: "pencil", action: #selector(renameFavoriteFolder)),
+            iconButton("settings.favorites.folder.delete", symbolName: "trash", action: #selector(deleteFavoriteFolder)),
+            iconButton("settings.favorites.folder.up", symbolName: "chevron.up", action: #selector(moveFavoriteFolderUp)),
+            iconButton("settings.favorites.folder.down", symbolName: "chevron.down", action: #selector(moveFavoriteFolderDown))
+        ])
+
+        let itemToolbarSpacer = NSView()
+        itemToolbarSpacer.translatesAutoresizingMaskIntoConstraints = false
+        itemToolbarSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        itemToolbarSpacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        let itemToolbar = toolbarStack(
+            [
+                iconButton(
+                    "settings.favorites.item.rename",
+                    symbolName: "pencil",
+                    action: #selector(renameFavoriteItem)
+                ),
+                iconButton(
+                    "settings.favorites.item.remove",
+                    symbolName: "star.slash",
+                    action: #selector(removeFavoriteItem)
+                ),
+                itemToolbarSpacer,
+                folderAssignmentPopup,
+                iconButton(
+                    "settings.favorites.item.addToFolder",
+                    symbolName: "folder.badge.plus",
+                    action: #selector(addFavoriteItemToFolder)
+                ),
+                iconButton(
+                    "settings.favorites.item.removeFromFolder",
+                    symbolName: "folder.badge.minus",
+                    action: #selector(removeFavoriteItemFromFolder)
+                )
+            ],
+            spacing: 8
         )
+        itemToolbar.setCustomSpacing(14, after: itemToolbarSpacer)
 
         let views: [NSView] = [
-            foldersLabel, folderScrollView, addFolderButton, renameFolderButton, deleteFolderButton,
-            moveUpButton, moveDownButton, itemsLabel, favoriteSortPopup, itemScrollView,
-            renameItemButton, removeItemButton, folderAssignmentPopup, addToFolderButton, removeFromFolderButton
+            foldersLabel, folderScrollView, folderToolbar, itemsLabel, favoriteSortPopup, itemScrollView, itemToolbar
         ]
         views.forEach(view.addSubview)
 
@@ -213,45 +237,33 @@ extension SettingsWindowController {
 
             folderScrollView.topAnchor.constraint(equalTo: foldersLabel.bottomAnchor, constant: 8),
             folderScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            folderScrollView.widthAnchor.constraint(equalToConstant: 210),
-            folderScrollView.bottomAnchor.constraint(equalTo: addFolderButton.topAnchor, constant: -10),
+            folderScrollView.widthAnchor.constraint(equalToConstant: 220),
+            folderScrollView.bottomAnchor.constraint(equalTo: folderToolbar.topAnchor, constant: -8),
 
-            addFolderButton.leadingAnchor.constraint(equalTo: folderScrollView.leadingAnchor),
-            addFolderButton.bottomAnchor.constraint(equalTo: moveUpButton.topAnchor, constant: -8),
-            renameFolderButton.leadingAnchor.constraint(equalTo: addFolderButton.trailingAnchor, constant: 6),
-            renameFolderButton.centerYAnchor.constraint(equalTo: addFolderButton.centerYAnchor),
-            deleteFolderButton.leadingAnchor.constraint(equalTo: renameFolderButton.trailingAnchor, constant: 6),
-            deleteFolderButton.centerYAnchor.constraint(equalTo: addFolderButton.centerYAnchor),
-
-            moveUpButton.leadingAnchor.constraint(equalTo: folderScrollView.leadingAnchor),
-            moveUpButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -16),
-            moveDownButton.leadingAnchor.constraint(equalTo: moveUpButton.trailingAnchor, constant: 6),
-            moveDownButton.centerYAnchor.constraint(equalTo: moveUpButton.centerYAnchor),
+            folderToolbar.leadingAnchor.constraint(equalTo: folderScrollView.leadingAnchor),
+            folderToolbar.trailingAnchor.constraint(lessThanOrEqualTo: folderScrollView.trailingAnchor),
+            folderToolbar.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -16),
+            folderToolbar.heightAnchor.constraint(equalToConstant: 32),
 
             itemsLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 18),
-            itemsLabel.leadingAnchor.constraint(equalTo: folderScrollView.trailingAnchor, constant: 18),
+            itemsLabel.leadingAnchor.constraint(equalTo: folderScrollView.trailingAnchor, constant: 20),
 
             favoriteSortPopup.centerYAnchor.constraint(equalTo: itemsLabel.centerYAnchor),
             favoriteSortPopup.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
-            favoriteSortPopup.widthAnchor.constraint(equalToConstant: 170),
+            favoriteSortPopup.widthAnchor.constraint(equalToConstant: 180),
+            itemsLabel.trailingAnchor.constraint(lessThanOrEqualTo: favoriteSortPopup.leadingAnchor, constant: -12),
 
             itemScrollView.topAnchor.constraint(equalTo: itemsLabel.bottomAnchor, constant: 8),
-            itemScrollView.leadingAnchor.constraint(equalTo: folderScrollView.trailingAnchor, constant: 18),
+            itemScrollView.leadingAnchor.constraint(equalTo: itemsLabel.leadingAnchor),
             itemScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
-            itemScrollView.bottomAnchor.constraint(equalTo: renameItemButton.topAnchor, constant: -10),
+            itemScrollView.bottomAnchor.constraint(equalTo: itemToolbar.topAnchor, constant: -8),
 
-            renameItemButton.leadingAnchor.constraint(equalTo: itemScrollView.leadingAnchor),
-            renameItemButton.bottomAnchor.constraint(equalTo: folderAssignmentPopup.topAnchor, constant: -8),
-            removeItemButton.leadingAnchor.constraint(equalTo: renameItemButton.trailingAnchor, constant: 8),
-            removeItemButton.centerYAnchor.constraint(equalTo: renameItemButton.centerYAnchor),
+            itemToolbar.leadingAnchor.constraint(equalTo: itemScrollView.leadingAnchor),
+            itemToolbar.trailingAnchor.constraint(equalTo: itemScrollView.trailingAnchor),
+            itemToolbar.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -16),
+            itemToolbar.heightAnchor.constraint(equalToConstant: 32),
 
-            folderAssignmentPopup.leadingAnchor.constraint(equalTo: itemScrollView.leadingAnchor),
-            folderAssignmentPopup.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -16),
-            folderAssignmentPopup.widthAnchor.constraint(equalToConstant: 170),
-            addToFolderButton.leadingAnchor.constraint(equalTo: folderAssignmentPopup.trailingAnchor, constant: 8),
-            addToFolderButton.centerYAnchor.constraint(equalTo: folderAssignmentPopup.centerYAnchor),
-            removeFromFolderButton.leadingAnchor.constraint(equalTo: addToFolderButton.trailingAnchor, constant: 8),
-            removeFromFolderButton.centerYAnchor.constraint(equalTo: folderAssignmentPopup.centerYAnchor)
+            folderAssignmentPopup.widthAnchor.constraint(equalToConstant: 190)
         ])
 
         return view
@@ -349,10 +361,17 @@ extension SettingsWindowController {
 
     func reloadFolderAssignmentPopup() {
         folderAssignmentPopup.removeAllItems()
-        for folder in favoriteStore.folders {
+        let folders = favoriteStore.folders
+        guard !folders.isEmpty else {
+            folderAssignmentPopup.addItem(withTitle: L10n.tr("settings.favorites.folder.none"))
+            folderAssignmentPopup.isEnabled = false
+            return
+        }
+
+        for folder in folders {
             folderAssignmentPopup.addItem(withTitle: folder.name)
             folderAssignmentPopup.lastItem?.representedObject = folder.id
         }
-        folderAssignmentPopup.isEnabled = !favoriteStore.folders.isEmpty
+        folderAssignmentPopup.isEnabled = true
     }
 }

@@ -57,6 +57,36 @@ extension SettingsWindowController {
         return button
     }
 
+    func iconButton(_ key: String, symbolName: String, action: Selector) -> NSButton {
+        let title = L10n.tr(key)
+        let button = NSButton(title: "", target: self, action: action)
+        button.bezelStyle = .rounded
+        button.toolTip = title
+        button.setAccessibilityLabel(title)
+        button.translatesAutoresizingMaskIntoConstraints = false
+
+        if let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: title) {
+            button.image = image
+            button.imagePosition = .imageOnly
+            button.widthAnchor.constraint(equalToConstant: 32).isActive = true
+        } else {
+            button.title = title
+            button.widthAnchor.constraint(greaterThanOrEqualToConstant: 88).isActive = true
+        }
+        button.heightAnchor.constraint(equalToConstant: 28).isActive = true
+        return button
+    }
+
+    func toolbarStack(_ views: [NSView], spacing: CGFloat = 6) -> NSStackView {
+        let stackView = NSStackView(views: views)
+        stackView.orientation = .horizontal
+        stackView.alignment = .centerY
+        stackView.distribution = .fill
+        stackView.spacing = spacing
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }
+
     func tableScrollView(for tableView: NSTableView) -> NSScrollView {
         let scrollView = NSScrollView()
         scrollView.documentView = tableView
