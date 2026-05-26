@@ -33,6 +33,16 @@ final class SwiftUIModelTests: XCTestCase {
         XCTAssertEqual(model.visibleItems().map(\.id), [favorite.id])
     }
 
+    func testFavoritesModelRefreshPreservesSelectedFolderFilter() {
+        let model = FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
+        let folderID = UUID()
+
+        model.selectFolderFilter(.folder(folderID))
+        model.refreshFromStore()
+
+        XCTAssertEqual(model.selectedFolderFilter, .folder(folderID))
+    }
+
     private func makeItem(content: String, at timestamp: TimeInterval) -> ClipboardItem {
         ClipboardItem(
             content: content,

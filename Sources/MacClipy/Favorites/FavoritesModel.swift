@@ -37,9 +37,8 @@ final class FavoritesModel {
         folders = store.folders
         memberships = store.memberships
 
-        if case let .folder(folderID) = selectedFolderFilter,
-           !folders.contains(where: { $0.id == folderID }) {
-            selectedFolderFilter = .all
+        if case let .folder(folderID) = selectedFolderFilter {
+            selectedFolderName = folders.first(where: { $0.id == folderID })?.name ?? selectedFolderName
         }
 
         if let selectedFavoriteID,
