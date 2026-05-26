@@ -11,7 +11,7 @@ final class HistoryPopupController: NSWindowController,
                                     NSTableViewDataSource,
                                     NSTableViewDelegate,
                                     NSWindowDelegate {
-    private enum PopupMode: Int, CaseIterable {
+    enum PopupMode: Int, CaseIterable {
         case all
         case favorites
     }
@@ -34,12 +34,12 @@ final class HistoryPopupController: NSWindowController,
 
     private let searchField = NSSearchField()
     private let settingsButton = NSButton()
-    private let filterSegment = NSSegmentedControl(labels: [], trackingMode: .selectOne, target: nil, action: nil)
-    private let folderPopup = NSPopUpButton()
+    let filterSegment = NSSegmentedControl(labels: [], trackingMode: .selectOne, target: nil, action: nil)
+    let folderPopup = NSPopUpButton()
     private let tableView = PopupKeyHandlingTableView()
     private let emptyLabel = NSTextField(labelWithString: "")
 
-    private var mode: PopupMode = .all
+    var mode: PopupMode = .all
     private var folderFilter: FavoriteFolderFilter = .all
     private var results: [PopupResult] = []
     var isShowingFavoriteNamePrompt = false
@@ -247,6 +247,8 @@ extension HistoryPopupController {
         tableView.onEscape = { [weak self] in self?.closePopup() }
         tableView.onToggleFavorite = { [weak self] in self?.toggleSelectedFavorite() }
         tableView.onToggleMode = { [weak self] in self?.toggleFavoriteMode() }
+        tableView.onShowAll = { [weak self] in self?.setMode(.all) }
+        tableView.onShowFavorites = { [weak self] in self?.setMode(.favorites) }
         tableView.onFolderShortcut = { [weak self] index in self?.selectFolderByShortcut(index) }
         tableView.onSearchFocus = { [weak self] in
             guard let self else {
@@ -287,7 +289,7 @@ extension HistoryPopupController {
         folderPopup.isEnabled = mode == .favorites
     }
 
-    private func reloadResults(selecting row: Int = 0) {
+    func reloadResults(selecting row: Int = 0) {
         switch mode {
         case .all:
             results = store.search(searchField.stringValue).map { item in
@@ -354,12 +356,6 @@ extension HistoryPopupController {
         onSettingsRequested()
     }
 
-    @objc private func changeFilterMode() {
-        mode = filterSegment.selectedSegment == PopupMode.favorites.rawValue ? .favorites : .all
-        folderPopup.isEnabled = mode == .favorites
-        reloadResults()
-    }
-
     @objc private func changeFolderFilter() {
         folderFilter = folderPopup.selectedItem?.representedObject as? FavoriteFolderFilter ?? .all
         mode = .favorites
@@ -385,6 +381,19 @@ extension HistoryPopupController {
             return true
         case #selector(NSResponder.moveUp(_:)):
             moveSelection(by: -1)
+            return true
+        // 検索文字がある場合は、左右キーをタブ切り替えではなくカーソル移動として残す。
+        case #selector(NSResponder.moveLeft(_:)):
+            guard searchField.stringValue.isEmpty else {
+                return false
+            }
+            setMode(.all)
+            return true
+        case #selector(NSResponder.moveRight(_:)):
+            guard searchField.stringValue.isEmpty else {
+                return false
+            }
+            setMode(.favorites)
             return true
         default:
             return false
@@ -439,13 +448,6 @@ extension HistoryPopupController {
         } catch {
             NSLog("MacClipy failed to toggle favorite: \(error.localizedDescription)")
         }
-    }
-
-    private func toggleFavoriteMode() {
-        mode = mode == .favorites ? .all : .favorites
-        filterSegment.selectedSegment = mode.rawValue
-        folderPopup.isEnabled = mode == .favorites
-        reloadResults()
     }
 
     private func selectFolderByShortcut(_ shortcutIndex: Int) {

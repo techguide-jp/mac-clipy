@@ -13,6 +13,8 @@ private enum PopupNavigationKeyCode {
     static let escape = UInt16(kVK_Escape)
     static let downArrow = UInt16(kVK_DownArrow)
     static let upArrow = UInt16(kVK_UpArrow)
+    static let leftArrow = UInt16(kVK_LeftArrow)
+    static let rightArrow = UInt16(kVK_RightArrow)
 }
 
 final class PopupPanel: NSPanel {
@@ -110,6 +112,8 @@ final class PopupKeyHandlingTableView: NSTableView {
     var onEscape: (() -> Void)?
     var onToggleFavorite: (() -> Void)?
     var onToggleMode: (() -> Void)?
+    var onShowAll: (() -> Void)?
+    var onShowFavorites: (() -> Void)?
     var onFolderShortcut: ((Int) -> Void)?
     var onSearchFocus: (() -> Void)?
     var onPrintableKey: ((String) -> Void)?
@@ -145,6 +149,10 @@ final class PopupKeyHandlingTableView: NSTableView {
             moveSelection(by: 1)
         case PopupNavigationKeyCode.upArrow:
             moveSelection(by: -1)
+        case PopupNavigationKeyCode.leftArrow:
+            onShowAll?()
+        case PopupNavigationKeyCode.rightArrow:
+            onShowFavorites?()
         default:
             if shouldAppendToSearch(event), let text = event.charactersIgnoringModifiers {
                 onSearchFocus?()
