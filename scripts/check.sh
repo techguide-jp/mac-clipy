@@ -19,7 +19,7 @@ fi
 
 if command -v swiftformat >/dev/null 2>&1; then
   echo "==> SwiftFormat"
-  swiftformat --lint Sources Tests Package.swift
+  swiftformat Sources Tests Package.swift --lint
 elif [[ "${REQUIRE_SWIFTFORMAT:-0}" == "1" ]]; then
   echo "SwiftFormat is required but was not found." >&2
   exit 1

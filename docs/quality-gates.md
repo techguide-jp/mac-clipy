@@ -12,7 +12,7 @@ scripts/check.sh
 このスクリプトは次をまとめて実行します。
 
 - SwiftLint がある場合は `swiftlint lint --strict`
-- SwiftFormat がある場合は `swiftformat --lint Sources Tests Package.swift`
+- SwiftFormat がある場合は `swiftformat Sources Tests Package.swift --lint`
 - `swift test -Xswiftc -warnings-as-errors`
 - `swift build -c release -Xswiftc -warnings-as-errors`
 - `scripts/build-app.sh`
