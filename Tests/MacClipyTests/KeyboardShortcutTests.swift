@@ -22,16 +22,18 @@ final class KeyboardShortcutTests: XCTestCase {
         }
     }
 
-    func testKeyLookupFromCarbonKeyCode() {
-        XCTAssertEqual(KeyboardShortcut.key(forCarbonKeyCode: KeyboardShortcut.defaultShortcut.carbonKeyCode!), "v")
+    func testKeyLookupFromCarbonKeyCode() throws {
+        let keyCode = try XCTUnwrap(KeyboardShortcut.defaultShortcut.carbonKeyCode)
+        XCTAssertEqual(KeyboardShortcut.key(forCarbonKeyCode: keyCode), "v")
     }
 
     func testSettingsDecodeUsesDefaultHotKeyWhenMissing() throws {
-        let data = """
+        let json = """
         {
           "excludedBundleIdentifiers": ["com.example.Secret"]
         }
-        """.data(using: .utf8)!
+        """
+        let data = try XCTUnwrap(json.data(using: .utf8))
 
         let settings = try JSONDecoder().decode(AppSettings.self, from: data)
 

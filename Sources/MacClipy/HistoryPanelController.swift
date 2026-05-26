@@ -1,7 +1,10 @@
 import AppKit
 
 @MainActor
-final class HistoryPanelController: NSWindowController, NSTableViewDataSource, NSTableViewDelegate, NSSearchFieldDelegate {
+final class HistoryPanelController: NSWindowController,
+                                    NSTableViewDataSource,
+                                    NSTableViewDelegate,
+                                    NSSearchFieldDelegate {
     private let store: ClipboardStore
     private let onItemChosen: (ClipboardItem) -> Void
 

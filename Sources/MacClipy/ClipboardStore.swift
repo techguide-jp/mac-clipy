@@ -102,8 +102,9 @@ public final class ClipboardStore {
         }
 
         return items.filter { item in
-            item.content.range(of: normalizedQuery, options: [.caseInsensitive, .diacriticInsensitive]) != nil
-                || item.sourceBundleID?.range(of: normalizedQuery, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+            let options: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
+            return item.content.range(of: normalizedQuery, options: options) != nil
+                || item.sourceBundleID?.range(of: normalizedQuery, options: options) != nil
         }
     }
 

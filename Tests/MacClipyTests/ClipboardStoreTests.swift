@@ -4,8 +4,12 @@ import XCTest
 final class ClipboardStoreTests: XCTestCase {
     func testDuplicateTextUpdatesExistingItem() throws {
         let store = makeStore()
-        let first = try XCTUnwrap(try store.add(content: "hello", sourceBundleID: "app.one", at: Date(timeIntervalSince1970: 10)))
-        let second = try XCTUnwrap(try store.add(content: "hello", sourceBundleID: "app.two", at: Date(timeIntervalSince1970: 20)))
+        let first = try XCTUnwrap(
+            try store.add(content: "hello", sourceBundleID: "app.one", at: Date(timeIntervalSince1970: 10))
+        )
+        let second = try XCTUnwrap(
+            try store.add(content: "hello", sourceBundleID: "app.two", at: Date(timeIntervalSince1970: 20))
+        )
 
         XCTAssertEqual(store.items.count, 1)
         XCTAssertEqual(first.id, second.id)
@@ -18,7 +22,9 @@ final class ClipboardStoreTests: XCTestCase {
         let store = makeStore(maxItems: 3)
 
         for index in 0..<5 {
-            try store.add(content: "item-\(index)", sourceBundleID: nil, at: Date(timeIntervalSince1970: TimeInterval(index)))
+            try store.add(content: "item-\(index)",
+                          sourceBundleID: nil,
+                          at: Date(timeIntervalSince1970: TimeInterval(index)))
         }
 
         XCTAssertEqual(store.items.map(\.content), ["item-4", "item-3", "item-2"])

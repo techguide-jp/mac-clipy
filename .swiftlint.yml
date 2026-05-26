@@ -1,0 +1,55 @@
+included:
+  - Sources
+  - Tests
+
+excluded:
+  - .build
+  - dist
+
+opt_in_rules:
+  - empty_count
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+
+force_cast: error
+force_try:
+  severity: error
+force_unwrapping:
+  severity: error
+implicitly_unwrapped_optional:
+  severity: error
+todo:
+  severity: error
+
+line_length:
+  warning: 140
+  error: 160
+  ignores_comments: false
+  ignores_urls: true
+  ignores_function_declarations: false
+  ignores_interpolated_strings: false
+
+function_body_length:
+  warning: 120
+  error: 160
+
+type_body_length:
+  warning: 380
+  error: 450
+
+file_length:
+  warning: 500
+  error: 650
+
+cyclomatic_complexity:
+  warning: 12
+  error: 18
+
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  excluded:
+    - id
+
+reporter: xcode

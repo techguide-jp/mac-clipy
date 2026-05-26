@@ -54,7 +54,8 @@ public enum KeyboardShortcutParseError: LocalizedError, Equatable, Sendable {
         case .multipleKeys:
             "ショートカットのキーは1つだけ指定してください。"
         case .unsupportedKey(let key):
-            "\(key) は対応していないキーです。英数字、space、tab、enter、escape を指定してください。"
+            "\(key) は対応していないキーです。"
+                + "英数字、space、tab、enter、escape を指定してください。"
         }
     }
 }

@@ -5,9 +5,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let store = ClipboardStore()
     private let settingsStore = SettingsStore()
 
-    private var monitor: ClipboardMonitor!
+    private var monitor: ClipboardMonitor?
     private var hotKeyController: HotKeyController?
-    private var statusItem: NSStatusItem!
+    private var statusItem: NSStatusItem?
     private var previousApplication: NSRunningApplication?
 
     private lazy var historyPanelController = HistoryPanelController(store: store) { [weak self] item in
@@ -39,7 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self?.rebuildStatusMenu()
             self?.historyPanelController.refresh()
         }
-        monitor.start()
+        monitor?.start()
 
         setupStatusItem()
         setupHotKey()
@@ -61,17 +61,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func setupStatusItem() {
-        statusItem = NSStatusBar.system.statusItem(withLength: 84)
-        if let button = statusItem.button {
+        let item = NSStatusBar.system.statusItem(withLength: 84)
+        statusItem = item
+
+        if let button = item.button {
             button.image = nil
-            button.imagePosition = .noImage
+            button.imagePosition = NSControl.ImagePosition.noImage
             button.title = "MacClipy"
             button.toolTip = "MacClipy"
         }
 
         let menu = NSMenu()
         menu.delegate = self
-        statusItem.menu = menu
+        item.menu = menu
         rebuildStatusMenu()
     }
 
@@ -103,11 +105,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(emptyItem)
         } else {
             for (index, item) in store.items.prefix(10).enumerated() {
-                let menuItem = NSMenuItem(
-                    title: "\(index + 1). \(item.menuTitle)",
-                    action: #selector(copyMenuItem(_:)),
-                    keyEquivalent: index < 9 ? "\(index + 1)" : ""
-                )
+                let menuItem = NSMenuItem(title: "\(index + 1). \(item.menuTitle)",
+                                          action: #selector(copyMenuItem(_:)),
+                                          keyEquivalent: index < 9 ? "\(index + 1)" : "")
                 menuItem.target = self
                 menuItem.representedObject = item.id.uuidString
                 menu.addItem(menuItem)
@@ -116,7 +116,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
 
-        let hotKeyItem = NSMenuItem(title: "履歴メニュー: \(settingsStore.settings.hotKey.displayName)", action: nil, keyEquivalent: "")
+        let hotKeyItem = NSMenuItem(title: "履歴メニュー: \(settingsStore.settings.hotKey.displayName)",
+                                    action: nil,
+                                    keyEquivalent: "")
         hotKeyItem.isEnabled = false
         menu.addItem(hotKeyItem)
 
@@ -146,7 +148,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func copyMenuItem(_ sender: NSMenuItem) {
-        guard let idString = sender.representedObject as? String,
+        guard let monitor,
+              let idString = sender.representedObject as? String,
               let id = UUID(uuidString: idString),
               let item = store.items.first(where: { $0.id == id }) else {
             return
@@ -181,11 +184,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(emptyItem)
         } else {
             for (index, item) in store.items.prefix(20).enumerated() {
-                let menuItem = NSMenuItem(
-                    title: "\(index + 1). \(item.menuTitle)",
-                    action: #selector(pasteMenuItem(_:)),
-                    keyEquivalent: ""
-                )
+                let menuItem = NSMenuItem(title: "\(index + 1). \(item.menuTitle)",
+                                          action: #selector(pasteMenuItem(_:)),
+                                          keyEquivalent: "")
                 menuItem.target = self
                 menuItem.representedObject = item.id.uuidString
                 menuItem.toolTip = item.content
@@ -195,7 +196,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
 
-        let searchItem = NSMenuItem(title: "検索ウィンドウを開く...", action: #selector(showHistoryPanel), keyEquivalent: "")
+        let searchItem = NSMenuItem(title: "検索ウィンドウを開く...",
+                                    action: #selector(showHistoryPanel),
+                                    keyEquivalent: "")
         searchItem.target = self
         menu.addItem(searchItem)
 
@@ -213,6 +216,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func togglePause() {
+        guard let monitor else {
+            return
+        }
+
         monitor.setPaused(!monitor.isPaused)
         rebuildStatusMenu()
     }
@@ -248,14 +255,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func copyAndPaste(_ item: ClipboardItem) {
+        guard let monitor else {
+            return
+        }
+
         do {
             try monitor.copyToPasteboard(item)
             let pasted = PasteController.pasteIntoPreviousApplication(previousApplication)
             if !pasted {
-                showAlert(
-                    title: "コピーしました",
-                    message: "貼り付けにはアクセシビリティ権限が必要です。システム設定で MacClipy を許可してください。"
-                )
+                let message = "貼り付けにはアクセシビリティ権限が必要です。"
+                    + "システム設定で MacClipy を許可してください。"
+                showAlert(title: "コピーしました", message: message)
             }
         } catch {
             showAlert(title: "貼り付けに失敗しました", message: error.localizedDescription)

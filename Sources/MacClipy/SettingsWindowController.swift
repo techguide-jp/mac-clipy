@@ -61,7 +61,9 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
         shortcutLabel.font = .boldSystemFont(ofSize: 13)
         shortcutLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        let shortcutHelpLabel = NSTextField(labelWithString: "枠をクリックしてから、使いたいキーの組み合わせを押します。")
+        let shortcutHelpLabel = NSTextField(
+            labelWithString: "枠をクリックしてから、使いたいキーの組み合わせを押します。"
+        )
         shortcutHelpLabel.textColor = .secondaryLabelColor
         shortcutHelpLabel.font = .systemFont(ofSize: 12)
         shortcutHelpLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -79,7 +81,9 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
         titleLabel.font = .boldSystemFont(ofSize: 13)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        let excludedAppsHelpLabel = NSTextField(labelWithString: "パスワード管理アプリなど、コピー内容を残したくないアプリを選びます。")
+        let excludedAppsHelpLabel = NSTextField(
+            labelWithString: "パスワード管理アプリなど、コピー内容を残したくないアプリを選びます。"
+        )
         excludedAppsHelpLabel.textColor = .secondaryLabelColor
         excludedAppsHelpLabel.font = .systemFont(ofSize: 12)
         excludedAppsHelpLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -100,15 +104,21 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
         scrollView.borderType = .bezelBorder
         scrollView.translatesAutoresizingMaskIntoConstraints = false
 
-        let addExcludedAppButton = NSButton(title: "アプリを追加...", target: self, action: #selector(addExcludedApp))
+        let addExcludedAppButton = NSButton(title: "アプリを追加...",
+                                            target: self,
+                                            action: #selector(addExcludedApp))
         addExcludedAppButton.bezelStyle = .rounded
         addExcludedAppButton.translatesAutoresizingMaskIntoConstraints = false
 
-        let removeExcludedAppButton = NSButton(title: "選択項目を削除", target: self, action: #selector(removeSelectedExcludedApp))
+        let removeExcludedAppButton = NSButton(title: "選択項目を削除",
+                                               target: self,
+                                               action: #selector(removeSelectedExcludedApp))
         removeExcludedAppButton.bezelStyle = .rounded
         removeExcludedAppButton.translatesAutoresizingMaskIntoConstraints = false
 
-        let resetExcludedAppsButton = NSButton(title: "推奨設定に戻す", target: self, action: #selector(resetExcludedApps))
+        let resetExcludedAppsButton = NSButton(title: "推奨設定に戻す",
+                                               target: self,
+                                               action: #selector(resetExcludedApps))
         resetExcludedAppsButton.bezelStyle = .rounded
         resetExcludedAppsButton.translatesAutoresizingMaskIntoConstraints = false
 
@@ -175,9 +185,15 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
             removeExcludedAppButton.leadingAnchor.constraint(equalTo: addExcludedAppButton.trailingAnchor, constant: 8),
             removeExcludedAppButton.centerYAnchor.constraint(equalTo: addExcludedAppButton.centerYAnchor),
 
-            resetExcludedAppsButton.leadingAnchor.constraint(equalTo: removeExcludedAppButton.trailingAnchor, constant: 8),
+            resetExcludedAppsButton.leadingAnchor.constraint(
+                equalTo: removeExcludedAppButton.trailingAnchor,
+                constant: 8
+            ),
             resetExcludedAppsButton.centerYAnchor.constraint(equalTo: addExcludedAppButton.centerYAnchor),
-            resetExcludedAppsButton.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -16),
+            resetExcludedAppsButton.trailingAnchor.constraint(
+                lessThanOrEqualTo: contentView.trailingAnchor,
+                constant: -16
+            ),
 
             statusLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             statusLabel.trailingAnchor.constraint(lessThanOrEqualTo: cancelButton.leadingAnchor, constant: -12),
@@ -193,7 +209,8 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
 
     @objc private func save() {
         do {
-            try settingsStore.update(excludedBundleIdentifiers: excludedBundleIdentifiers, hotKey: shortcutRecorder.shortcut)
+            try settingsStore.update(excludedBundleIdentifiers: excludedBundleIdentifiers,
+                                     hotKey: shortcutRecorder.shortcut)
             statusLabel.stringValue = "保存しました"
             onSave()
             window?.orderOut(nil)
@@ -209,7 +226,8 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
 
     @objc private func resetShortcut() {
         shortcutRecorder.shortcut = .defaultShortcut
-        statusLabel.stringValue = "保存すると \(KeyboardShortcut.defaultShortcut.displayName) が有効になります。"
+        statusLabel.stringValue = "保存すると "
+            + "\(KeyboardShortcut.defaultShortcut.displayName) が有効になります。"
         window?.makeFirstResponder(shortcutRecorder)
     }
 
@@ -290,7 +308,8 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
 
     private func appendExcludedApp(from appURL: URL?) {
         guard let appURL, let bundle = Bundle(url: appURL), let bundleIdentifier = bundle.bundleIdentifier else {
-            statusLabel.stringValue = "アプリ情報を読み取れませんでした。別のアプリを選んでください。"
+            statusLabel.stringValue = "アプリ情報を読み取れませんでした。"
+                + "別のアプリを選んでください。"
             return
         }
 
@@ -302,7 +321,8 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
         excludedBundleIdentifiers.append(bundleIdentifier)
         excludedBundleIdentifiers = AppSettings.normalizedBundleIdentifiers(excludedBundleIdentifiers)
         excludedAppsTableView.reloadData()
-        statusLabel.stringValue = "保存すると \(displayName(for: bundleIdentifier)) が履歴に保存されなくなります。"
+        statusLabel.stringValue = "保存すると "
+            + "\(displayName(for: bundleIdentifier)) が履歴に保存されなくなります。"
     }
 
     private func displayName(for bundleIdentifier: String) -> String {
@@ -323,7 +343,8 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
     }
 
     private func appDisplayName(from bundle: Bundle, fallbackURL: URL) -> String {
-        if let displayName = bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String, !displayName.isEmpty {
+        if let displayName = bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String,
+           !displayName.isEmpty {
             return displayName
         }
 
