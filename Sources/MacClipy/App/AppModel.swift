@@ -13,6 +13,7 @@ final class AppModel {
     private var monitor: ClipboardMonitor?
     private var statusItemController: StatusItemController?
     private var floatingPanelController: FloatingPanelController?
+    @ObservationIgnored private var settingsWindowController: SettingsWindowController?
     private var previousApplication: NSRunningApplication?
 
     var isPaused: Bool {
@@ -28,6 +29,7 @@ final class AppModel {
         popupModel.onSettingsRequested = { [weak self] in
             self?.showSettings()
         }
+        settingsWindowController = SettingsWindowController(appModel: self)
     }
 
     func applicationDidFinishLaunching() {
@@ -63,8 +65,7 @@ final class AppModel {
     }
 
     func showSettings() {
-        NSApp.activate(ignoringOtherApps: true)
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        settingsWindowController?.show()
     }
 
     func refreshStatusMenu() {
