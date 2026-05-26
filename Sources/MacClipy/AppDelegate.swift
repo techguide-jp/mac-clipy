@@ -14,6 +14,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         self?.copyAndPaste(item)
     }
 
+    private lazy var historyPopupController = HistoryPopupController(store: store) { [weak self] item in
+        self?.copyAndPaste(item)
+    }
+
     private lazy var settingsWindowController = SettingsWindowController(
         settingsStore: settingsStore,
         onSave: { [weak self] in
@@ -95,7 +99,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         let controller = HotKeyController(shortcut: shortcut) { [weak self] in
-            self?.showHistoryContextMenu()
+            self?.showHistoryPopup()
         }
 
         try controller.register()
@@ -181,52 +185,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    @objc private func pasteMenuItem(_ sender: NSMenuItem) {
-        guard let idString = sender.representedObject as? String,
-              let id = UUID(uuidString: idString),
-              let item = store.items.first(where: { $0.id == id }) else {
-            return
-        }
-
-        copyAndPaste(item)
-    }
-
-    @objc private func showHistoryContextMenu() {
+    @objc private func showHistoryPopup() {
         rememberFrontmostApplication()
-
-        let menu = NSMenu()
-        menu.autoenablesItems = false
-
-        if store.items.isEmpty {
-            let emptyItem = NSMenuItem(title: "履歴はありません", action: nil, keyEquivalent: "")
-            emptyItem.isEnabled = false
-            menu.addItem(emptyItem)
-        } else {
-            for (index, item) in store.items.prefix(20).enumerated() {
-                let menuItem = NSMenuItem(title: "\(index + 1). \(item.menuTitle)",
-                                          action: #selector(pasteMenuItem(_:)),
-                                          keyEquivalent: "")
-                menuItem.target = self
-                menuItem.representedObject = item.id.uuidString
-                menuItem.toolTip = item.content
-                menu.addItem(menuItem)
-            }
-        }
-
-        menu.addItem(.separator())
-
-        let searchItem = NSMenuItem(title: "検索ウィンドウを開く...",
-                                    action: #selector(showHistoryPanel),
-                                    keyEquivalent: "")
-        searchItem.target = self
-        menu.addItem(searchItem)
-
-        let settingsItem = NSMenuItem(title: "設定...", action: #selector(showSettings), keyEquivalent: "")
-        settingsItem.target = self
-        menu.addItem(settingsItem)
-
-        let location = NSEvent.mouseLocation
-        menu.popUp(positioning: menu.items.first, at: location, in: nil)
+        historyPopupController.show(at: NSEvent.mouseLocation)
     }
 
     @objc private func showHistoryPanel() {

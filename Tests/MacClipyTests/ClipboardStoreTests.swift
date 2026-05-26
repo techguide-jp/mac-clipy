@@ -39,6 +39,31 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertEqual(store.search("HELLO").map(\.content), ["Hello Clipboard"])
     }
 
+    func testSearchSupportsLargeHistory() throws {
+        let store = makeStore(maxItems: 200)
+
+        for index in 0..<100 {
+            try store.add(content: "project note \(index)",
+                          sourceBundleID: "com.example.Editor",
+                          at: Date(timeIntervalSince1970: TimeInterval(index)))
+        }
+
+        XCTAssertEqual(store.search("").count, 100)
+        XCTAssertEqual(store.search("note 9").map(\.content), [
+            "project note 99",
+            "project note 98",
+            "project note 97",
+            "project note 96",
+            "project note 95",
+            "project note 94",
+            "project note 93",
+            "project note 92",
+            "project note 91",
+            "project note 90",
+            "project note 9"
+        ])
+    }
+
     func testExcludedBundleIdentifierIsNotCaptured() {
         let settings = AppSettings(excludedBundleIdentifiers: ["com.example.SecretApp"])
         let policy = ClipboardCapturePolicy(settings: settings)
