@@ -14,9 +14,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         self?.copyAndPaste(item)
     }
 
-    private lazy var historyPopupController = HistoryPopupController(store: store) { [weak self] item in
-        self?.copyAndPaste(item)
-    }
+    private lazy var historyPopupController = HistoryPopupController(
+        store: store,
+        onItemChosen: { [weak self] item in
+            self?.copyAndPaste(item)
+        },
+        onSettingsRequested: { [weak self] in
+            self?.showSettings()
+        }
+    )
 
     private lazy var settingsWindowController = SettingsWindowController(
         settingsStore: settingsStore,
@@ -171,18 +177,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func copyMenuItem(_ sender: NSMenuItem) {
-        guard let monitor,
-              let idString = sender.representedObject as? String,
+        guard let idString = sender.representedObject as? String,
               let id = UUID(uuidString: idString),
               let item = store.items.first(where: { $0.id == id }) else {
             return
         }
 
-        do {
-            try monitor.copyToPasteboard(item)
-        } catch {
-            showAlert(title: "コピーに失敗しました", message: error.localizedDescription)
-        }
+        copyAndPaste(item)
     }
 
     @objc private func showHistoryPopup() {

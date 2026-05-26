@@ -8,14 +8,21 @@ final class HistoryPopupController: NSWindowController,
                                     NSWindowDelegate {
     private let store: ClipboardStore
     private let onItemChosen: (ClipboardItem) -> Void
+    private let onSettingsRequested: () -> Void
 
     private let searchField = NSSearchField()
+    private let settingsButton = NSButton()
     private let tableView = PopupKeyHandlingTableView()
     private var results: [ClipboardItem] = []
 
-    init(store: ClipboardStore, onItemChosen: @escaping (ClipboardItem) -> Void) {
+    init(
+        store: ClipboardStore,
+        onItemChosen: @escaping (ClipboardItem) -> Void,
+        onSettingsRequested: @escaping () -> Void
+    ) {
         self.store = store
         self.onItemChosen = onItemChosen
+        self.onSettingsRequested = onSettingsRequested
 
         let panel = PopupPanel(
             contentRect: NSRect(x: 0, y: 0, width: 440, height: 360),
@@ -87,6 +94,18 @@ final class HistoryPopupController: NSWindowController,
         searchField.action = #selector(chooseSelectedItem)
         searchField.translatesAutoresizingMaskIntoConstraints = false
 
+        if let image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: "設定") {
+            settingsButton.image = image
+            settingsButton.imagePosition = .imageOnly
+        } else {
+            settingsButton.title = "設定"
+        }
+        settingsButton.bezelStyle = .rounded
+        settingsButton.target = self
+        settingsButton.action = #selector(openSettings)
+        settingsButton.toolTip = "設定"
+        settingsButton.translatesAutoresizingMaskIntoConstraints = false
+
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("historyPopupItem"))
         tableView.addTableColumn(column)
         tableView.headerView = nil
@@ -121,12 +140,17 @@ final class HistoryPopupController: NSWindowController,
         scrollView.translatesAutoresizingMaskIntoConstraints = false
 
         rootView.addSubview(searchField)
+        rootView.addSubview(settingsButton)
         rootView.addSubview(scrollView)
 
         NSLayoutConstraint.activate([
             searchField.topAnchor.constraint(equalTo: rootView.topAnchor, constant: 10),
             searchField.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 10),
-            searchField.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -10),
+            searchField.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -8),
+
+            settingsButton.centerYAnchor.constraint(equalTo: searchField.centerYAnchor),
+            settingsButton.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -10),
+            settingsButton.widthAnchor.constraint(equalToConstant: 34),
 
             scrollView.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 8),
             scrollView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 6),
@@ -171,6 +195,11 @@ final class HistoryPopupController: NSWindowController,
         let item = results[selectedRow]
         closePopup()
         onItemChosen(item)
+    }
+
+    @objc private func openSettings() {
+        closePopup()
+        onSettingsRequested()
     }
 
     func controlTextDidChange(_ notification: Notification) {
