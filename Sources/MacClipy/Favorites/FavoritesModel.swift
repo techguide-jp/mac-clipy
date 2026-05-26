@@ -38,14 +38,12 @@ final class FavoritesModel {
         memberships = store.memberships
 
         if case let .folder(folderID) = selectedFolderFilter,
-           !folders.contains(where: { $0.id == folderID })
-        {
+           !folders.contains(where: { $0.id == folderID }) {
             selectedFolderFilter = .all
         }
 
         if let selectedFavoriteID,
-           !items.contains(where: { $0.id == selectedFavoriteID })
-        {
+           !items.contains(where: { $0.id == selectedFavoriteID }) {
             self.selectedFavoriteID = nil
             draftFavoriteTitle = ""
         }

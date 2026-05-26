@@ -137,8 +137,7 @@ enum HistoryPopupKeyAction {
         if !modifiers.contains(.shift),
            let index = Int(key),
            (AppConstants.Keyboard.firstFolderShortcutIndex ... AppConstants.Keyboard.lastFolderShortcutIndex)
-           .contains(index)
-        {
+           .contains(index) {
             model.selectFolderByShortcut(index)
             return true
         }

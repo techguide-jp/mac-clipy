@@ -9,7 +9,7 @@ swift --version
 
 if command -v swiftlint >/dev/null 2>&1; then
   echo "==> SwiftLint"
-  swiftlint lint --strict
+  swiftlint lint --strict --no-cache
 elif [[ "${REQUIRE_SWIFTLINT:-0}" == "1" ]]; then
   echo "SwiftLint is required but was not found." >&2
   exit 1
@@ -19,7 +19,7 @@ fi
 
 if command -v swiftformat >/dev/null 2>&1; then
   echo "==> SwiftFormat"
-  swiftformat Sources Tests Package.swift --lint
+  swiftformat Sources Tests Package.swift --lint --cache ignore
 elif [[ "${REQUIRE_SWIFTFORMAT:-0}" == "1" ]]; then
   echo "SwiftFormat is required but was not found." >&2
   exit 1

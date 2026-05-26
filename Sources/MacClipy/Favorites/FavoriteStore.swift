@@ -404,8 +404,7 @@ public final class FavoriteStore {
         for index in data.memberships.indices
             where data.memberships[index].favoriteItemID == favoriteID
             && data.memberships[index].folderID == folderID
-            && data.memberships[index].deletedAt == nil
-        {
+            && data.memberships[index].deletedAt == nil {
             data.memberships[index].deletedAt = date
             removed = true
         }

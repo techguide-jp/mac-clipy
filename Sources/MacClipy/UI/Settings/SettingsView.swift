@@ -274,8 +274,7 @@ private struct FavoritesManagementView: View {
 
                 if let selectedFavoriteID = model.selectedFavoriteID,
                    case let .folder(folderID) = model.selectedFolderFilter,
-                   model.folderIDs(for: selectedFavoriteID).contains(folderID)
-                {
+                   model.folderIDs(for: selectedFavoriteID).contains(folderID) {
                     Button {
                         model.removeSelectedFavorite(from: folderID)
                     } label: {

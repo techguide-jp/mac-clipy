@@ -9,4 +9,4 @@ if ! command -v swiftformat >/dev/null 2>&1; then
   exit 1
 fi
 
-swiftformat Sources Tests Package.swift
+swiftformat Sources Tests Package.swift --cache ignore
