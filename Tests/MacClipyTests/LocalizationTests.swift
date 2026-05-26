@@ -116,20 +116,82 @@ final class LocalizationTests: XCTestCase {
             for sourcePath in sourcePaths {
                 let sourceURL = root.appendingPathComponent(sourcePath)
                 let source = try String(contentsOf: sourceURL, encoding: .utf8)
-                let matches = regex.matches(in: source, range: NSRange(source.startIndex..., in: source))
+                let sourceWithoutComments = sourceByRemovingComments(from: source)
+                let matches = regex.matches(
+                    in: sourceWithoutComments,
+                    range: NSRange(sourceWithoutComments.startIndex..., in: sourceWithoutComments)
+                )
 
                 for match in matches {
-                    guard let range = Range(match.range, in: source) else {
+                    guard let range = Range(match.range, in: sourceWithoutComments) else {
                         continue
                     }
 
-                    let line = lineNumber(for: range.lowerBound, in: source)
-                    violations.append("\(sourceURL.path):\(line): \(source[range])")
+                    let line = lineNumber(for: range.lowerBound, in: sourceWithoutComments)
+                    violations.append("\(sourceURL.path):\(line): \(sourceWithoutComments[range])")
                 }
             }
         }
 
         return violations.sorted()
+    }
+
+    private func sourceByRemovingComments(from source: String) -> String {
+        var result = ""
+        var index = source.startIndex
+        var isInsideString = false
+
+        while index < source.endIndex {
+            let character = source[index]
+            let nextIndex = source.index(after: index)
+            let nextCharacter = nextIndex < source.endIndex ? source[nextIndex] : nil
+
+            if isInsideString {
+                result.append(character)
+                if character == "\\" && nextIndex < source.endIndex {
+                    result.append(source[nextIndex])
+                    index = source.index(after: nextIndex)
+                    continue
+                }
+                if character == "\"" {
+                    isInsideString = false
+                }
+                index = nextIndex
+                continue
+            }
+
+            if character == "/" && nextCharacter == "/" {
+                index = source.index(after: nextIndex)
+                while index < source.endIndex, !source[index].isNewline {
+                    index = source.index(after: index)
+                }
+                continue
+            }
+
+            if character == "/" && nextCharacter == "*" {
+                index = source.index(after: nextIndex)
+                while index < source.endIndex {
+                    if source[index].isNewline {
+                        result.append(source[index])
+                    }
+                    let blockNextIndex = source.index(after: index)
+                    if source[index] == "*", blockNextIndex < source.endIndex, source[blockNextIndex] == "/" {
+                        index = source.index(after: blockNextIndex)
+                        break
+                    }
+                    index = blockNextIndex
+                }
+                continue
+            }
+
+            result.append(character)
+            if character == "\"" {
+                isInsideString = true
+            }
+            index = nextIndex
+        }
+
+        return result
     }
 
     private func formatSpecifiers(in value: String) -> [Character] {

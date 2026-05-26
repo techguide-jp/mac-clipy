@@ -27,6 +27,7 @@ final class PopupPanel: NSPanel {
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        // 検索欄フォーカス中でも、Command系は検索文字列へ混入させず処理する。
         if onKeyEquivalent?(event) == true {
             return true
         }
@@ -122,6 +123,7 @@ final class PopupKeyHandlingTableView: NSTableView {
 
         super.mouseUp(with: event)
 
+        // スター以外の行クリックは、選択だけでなく貼り付けまで行う。
         guard clickedRow >= 0, !clickedFavoriteButton else {
             return
         }
@@ -155,6 +157,7 @@ final class PopupKeyHandlingTableView: NSTableView {
 
     static func commandAction(for event: NSEvent) -> CommandAction? {
         let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        // Command系は検索入力へ流さず、操作ショートカットとして先に解釈する。
         guard modifiers.contains(.command),
               !modifiers.contains(.option),
               !modifiers.contains(.control),

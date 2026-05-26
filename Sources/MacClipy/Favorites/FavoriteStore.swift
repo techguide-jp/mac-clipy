@@ -28,6 +28,7 @@ public struct FavoriteItem: Codable, Equatable, Identifiable {
     public var id: UUID
     public var clipboardItemID: UUID?
     public var checksum: String
+    // 履歴上限で消えないよう、貼り付け用の正本をお気に入り側に保持する。
     public var contentSnapshot: String
     public var sourceBundleID: String?
     public var displayTitle: String
@@ -219,6 +220,7 @@ public final class FavoriteStore {
     }
 
     public func favorite(for item: ClipboardItem) -> FavoriteItem? {
+        // 履歴側のIDが変わっても同じ内容は同一のお気に入りとして扱う。
         items.first {
             $0.checksum == item.checksum && $0.contentSnapshot == item.content
         }
@@ -334,6 +336,7 @@ public final class FavoriteStore {
         }
 
         data.folders[index].deletedAt = date
+        // フォルダ削除ではお気に入り本体を消さず、所属だけ外して未分類として残す。
         for membershipIndex in data.memberships.indices where data.memberships[membershipIndex].folderID == id {
             data.memberships[membershipIndex].deletedAt = date
         }
@@ -371,6 +374,7 @@ public final class FavoriteStore {
         guard folders.contains(where: { $0.id == folderID }) else {
             throw FavoriteStoreError.folderNotFound
         }
+        // 複数フォルダ所属は許可するが、同じフォルダへの重複所属は作らない。
         guard !memberships.contains(where: { $0.favoriteItemID == favoriteID && $0.folderID == folderID }) else {
             return
         }

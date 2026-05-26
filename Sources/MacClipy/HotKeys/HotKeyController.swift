@@ -82,6 +82,7 @@ public final class HotKeyController {
             self.hotKeyRef = nil
         }
 
+        // 新しい登録のコールバックを、古いcontrollerの解除で消さない。
         if Self.callbackOwners[identifier] == ObjectIdentifier(self) {
             Self.callbacks[identifier] = nil
             Self.callbackOwners[identifier] = nil

@@ -5,7 +5,7 @@ import Foundation
 public enum AppConstants {
     public enum Clipboard {
         public static let defaultMaxItems = 200
-        // 100 KiB keeps accidental large clipboard payloads out of the lightweight JSON history.
+        // 軽量なJSON履歴を維持するため、巨大なクリップボード内容は保存しない。
         public static let defaultMaxItemSizeBytes = 100 * 1024
         public static let initialUseCount = 1
         public static let useCountIncrement = 1
@@ -19,12 +19,12 @@ public enum AppConstants {
     }
 
     public enum ClipboardMonitor {
-        // Polling below half a second keeps the menu responsive without busy-waiting the pasteboard.
+        // 反応速度を保ちつつ、ペーストボードを過剰に監視しない間隔にする。
         public static let pollingInterval: TimeInterval = 0.45
     }
 
     public enum Paste {
-        // Give the previous application a short activation window before synthesizing Command+V.
+        // 前面アプリへ戻る猶予を置いてからCommand+Vを送る。
         public static let delayBeforeSendingCommandV: TimeInterval = 0.15
         public static let commandVKeyCode = CGKeyCode(kVK_ANSI_V)
     }
@@ -36,7 +36,7 @@ public enum AppConstants {
         public static let handlerEventCount = 1
         public static let registrationOptions: UInt32 = 0
         public static let fourCharCodeLength = 4
-        // Carbon OSType signatures are packed one byte at a time into a 32-bit integer.
+        // CarbonのOSType署名は1バイトずつ32bit整数へ詰める。
         public static let fourCharCodeByteShift = 8
     }
 

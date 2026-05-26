@@ -104,6 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func setupHotKeys() throws {
         let previousHistoryController = historyHotKeyController
         let previousFavoriteController = favoriteHotKeyController
+        // 新規登録だけを戻し、片方の失敗で既存ショートカットを壊さない。
         var registeredControllers: [HotKeyController] = []
 
         do {
@@ -280,6 +281,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func showSettings() {
+        // 録画中に既存ホットキーが発火しないよう、設定画面を開く間だけ解除する。
         historyHotKeyController?.unregister()
         favoriteHotKeyController?.unregister()
         settingsWindowController.show()
@@ -299,6 +301,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         do {
             switch response {
             case .alertFirstButtonReturn:
+                // 履歴のみ削除では、お気に入りの正本を貼り付け可能な状態で残す。
                 try store.clear()
             case .alertSecondButtonReturn:
                 try store.clear()
