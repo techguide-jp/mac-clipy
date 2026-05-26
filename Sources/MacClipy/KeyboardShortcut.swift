@@ -48,14 +48,14 @@ public enum KeyboardShortcutParseError: LocalizedError, Equatable, Sendable {
         case .empty:
             "ショートカットを入力してください。"
         case .missingModifier:
-            "command、shift、option、control のいずれかを含めてください。"
+            "command、option、control のいずれかを含めてください。"
         case .missingKey:
             "ショートカットのキーを入力してください。"
         case .multipleKeys:
             "ショートカットのキーは1つだけ指定してください。"
         case .unsupportedKey(let key):
             "\(key) は対応していないキーです。"
-                + "英数字、space、tab、enter、escape を指定してください。"
+                + "英数字、space、tab、enter を指定してください。"
         }
     }
 }
@@ -81,6 +81,10 @@ public struct KeyboardShortcut: Codable, Equatable, Sendable {
 
     public var carbonModifiers: UInt32 {
         modifiers.reduce(UInt32(0)) { $0 | $1.carbonFlag }
+    }
+
+    public var isRegisterable: Bool {
+        carbonKeyCode != nil && Self.hasActivationModifier(modifiers)
     }
 
     public var displayName: String {
@@ -124,7 +128,7 @@ public struct KeyboardShortcut: Codable, Equatable, Sendable {
             key = normalizedKey
         }
 
-        guard !modifiers.isEmpty else {
+        guard hasActivationModifier(modifiers) else {
             throw KeyboardShortcutParseError.missingModifier
         }
 
@@ -143,8 +147,6 @@ public struct KeyboardShortcut: Codable, Equatable, Sendable {
             "Tab"
         case "return":
             "Return"
-        case "escape":
-            "Esc"
         default:
             key.uppercased()
         }
@@ -202,6 +204,10 @@ public struct KeyboardShortcut: Codable, Equatable, Sendable {
         ShortcutModifier.displayOrder.filter { modifiers.contains($0) }
     }
 
+    public static func hasActivationModifier(_ modifiers: [ShortcutModifier]) -> Bool {
+        modifiers.contains(.command) || modifiers.contains(.option) || modifiers.contains(.control)
+    }
+
     private static let keyCodes: [String: UInt32] = [
         "a": UInt32(kVK_ANSI_A),
         "s": UInt32(kVK_ANSI_S),
@@ -241,8 +247,7 @@ public struct KeyboardShortcut: Codable, Equatable, Sendable {
         "m": UInt32(kVK_ANSI_M),
         "space": UInt32(kVK_Space),
         "tab": UInt32(kVK_Tab),
-        "return": UInt32(kVK_Return),
-        "escape": UInt32(kVK_Escape)
+        "return": UInt32(kVK_Return)
     ]
 
     private static let keysByCode: [UInt32: String] = {

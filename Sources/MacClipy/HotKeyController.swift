@@ -20,9 +20,11 @@ public final class HotKeyController {
     private static let hotKeyID = UInt32(1)
     nonisolated(unsafe) private static var callback: (@MainActor () -> Void)?
 
+    public let shortcut: KeyboardShortcut
+    public private(set) var isRegistered = false
+
     private var hotKeyRef: EventHotKeyRef?
     private var eventHandlerRef: EventHandlerRef?
-    private let shortcut: KeyboardShortcut
     private let onPressed: @MainActor () -> Void
 
     public init(shortcut: KeyboardShortcut, onPressed: @MainActor @escaping () -> Void) {
@@ -36,7 +38,10 @@ public final class HotKeyController {
 
     public func register() throws {
         unregister()
-        Self.callback = onPressed
+
+        guard let keyCode = shortcut.carbonKeyCode else {
+            throw HotKeyError.unsupportedShortcut(shortcut.displayName)
+        }
 
         var eventType = EventTypeSpec(
             eventClass: OSType(kEventClassKeyboard),
@@ -56,10 +61,6 @@ public final class HotKeyController {
             throw HotKeyError.registrationFailed(handlerStatus)
         }
 
-        guard let keyCode = shortcut.carbonKeyCode else {
-            throw HotKeyError.unsupportedShortcut(shortcut.displayName)
-        }
-
         let carbonHotKeyID = EventHotKeyID(signature: Self.signature, id: Self.hotKeyID)
         let hotKeyStatus = RegisterEventHotKey(
             keyCode,
@@ -74,6 +75,9 @@ public final class HotKeyController {
             unregister()
             throw HotKeyError.registrationFailed(hotKeyStatus)
         }
+
+        Self.callback = onPressed
+        isRegistered = true
     }
 
     public func unregister() {
@@ -86,6 +90,8 @@ public final class HotKeyController {
             RemoveEventHandler(eventHandlerRef)
             self.eventHandlerRef = nil
         }
+
+        isRegistered = false
     }
 
     private static let handleHotKeyEvent: EventHandlerUPP = { _, event, _ in

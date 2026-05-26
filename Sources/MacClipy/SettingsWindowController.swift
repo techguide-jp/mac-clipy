@@ -2,16 +2,16 @@ import AppKit
 import UniformTypeIdentifiers
 
 @MainActor
-final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTableViewDataSource, NSTableViewDelegate {
+final class SettingsWindowController: NSWindowController {
     private let settingsStore: SettingsStore
-    private let onSave: () -> Void
+    private let onSave: () throws -> Void
     private let onDismiss: () -> Void
     private let shortcutRecorder = ShortcutRecorderControl(shortcut: .defaultShortcut)
     private let excludedAppsTableView = NSTableView()
     private let statusLabel = NSTextField(labelWithString: "")
     private var excludedBundleIdentifiers: [String] = []
 
-    init(settingsStore: SettingsStore, onSave: @escaping () -> Void, onDismiss: @escaping () -> Void) {
+    init(settingsStore: SettingsStore, onSave: @escaping () throws -> Void, onDismiss: @escaping () -> Void) {
         self.settingsStore = settingsStore
         self.onSave = onSave
         self.onDismiss = onDismiss
@@ -217,11 +217,21 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
     }
 
     @objc private func save() {
+        let previousSettings = settingsStore.settings
+
         do {
             try settingsStore.update(excludedBundleIdentifiers: excludedBundleIdentifiers,
                                      hotKey: shortcutRecorder.shortcut)
+
+            do {
+                try onSave()
+            } catch {
+                try rollbackSettings(to: previousSettings)
+                statusLabel.stringValue = "ショートカットを登録できませんでした: \(error.localizedDescription)"
+                return
+            }
+
             statusLabel.stringValue = "保存しました"
-            onSave()
             window?.orderOut(nil)
         } catch {
             statusLabel.stringValue = "保存に失敗しました: \(error.localizedDescription)"
@@ -284,35 +294,22 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
         statusLabel.stringValue = "保存すると推奨設定に戻ります。"
     }
 
-    func windowWillClose(_ notification: Notification) {
-        onDismiss()
-    }
-
-    func numberOfRows(in tableView: NSTableView) -> Int {
-        excludedBundleIdentifiers.count
-    }
-
-    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        guard excludedBundleIdentifiers.indices.contains(row) else {
-            return nil
-        }
-
-        let identifier = NSUserInterfaceItemIdentifier("excludedAppCell")
-        let cell = tableView.makeView(withIdentifier: identifier, owner: self) as? NSTableCellView
-            ?? ExcludedAppCellView(identifier: identifier)
-
-        let bundleIdentifier = excludedBundleIdentifiers[row]
-        cell.textField?.stringValue = displayName(for: bundleIdentifier)
-        cell.toolTip = bundleIdentifier
-        return cell
-    }
-
     private func presentExcludedAppPanel(_ panel: NSOpenPanel) {
         guard panel.runModal() == .OK else {
             return
         }
 
         appendExcludedApp(from: panel.url)
+    }
+
+    private func rollbackSettings(to previousSettings: AppSettings) throws {
+        try settingsStore.update(
+            excludedBundleIdentifiers: previousSettings.excludedBundleIdentifiers,
+            hotKey: previousSettings.hotKey
+        )
+        excludedBundleIdentifiers = previousSettings.excludedBundleIdentifiers
+        shortcutRecorder.shortcut = previousSettings.hotKey
+        excludedAppsTableView.reloadData()
     }
 
     private func appendExcludedApp(from appURL: URL?) {
@@ -333,8 +330,37 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
         statusLabel.stringValue = "保存すると "
             + "\(displayName(for: bundleIdentifier)) が履歴に保存されなくなります。"
     }
+}
 
-    private func displayName(for bundleIdentifier: String) -> String {
+extension SettingsWindowController: NSWindowDelegate {
+    func windowWillClose(_ notification: Notification) {
+        onDismiss()
+    }
+}
+
+extension SettingsWindowController: NSTableViewDataSource, NSTableViewDelegate {
+    func numberOfRows(in tableView: NSTableView) -> Int {
+        excludedBundleIdentifiers.count
+    }
+
+    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        guard excludedBundleIdentifiers.indices.contains(row) else {
+            return nil
+        }
+
+        let identifier = NSUserInterfaceItemIdentifier("excludedAppCell")
+        let cell = tableView.makeView(withIdentifier: identifier, owner: self) as? NSTableCellView
+            ?? ExcludedAppCellView(identifier: identifier)
+
+        let bundleIdentifier = excludedBundleIdentifiers[row]
+        cell.textField?.stringValue = displayName(for: bundleIdentifier)
+        cell.toolTip = bundleIdentifier
+        return cell
+    }
+}
+
+private extension SettingsWindowController {
+    func displayName(for bundleIdentifier: String) -> String {
         if let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier),
            let bundle = Bundle(url: appURL) {
             return appDisplayName(from: bundle, fallbackURL: appURL)
@@ -351,7 +377,7 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
         return bundleIdentifier
     }
 
-    private func appDisplayName(from bundle: Bundle, fallbackURL: URL) -> String {
+    func appDisplayName(from bundle: Bundle, fallbackURL: URL) -> String {
         if let displayName = bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String,
            !displayName.isEmpty {
             return displayName
@@ -364,7 +390,7 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
         return fallbackURL.deletingPathExtension().lastPathComponent
     }
 
-    private static let knownAppNames = [
+    static let knownAppNames = [
         "com.1password.1password": "1Password",
         "com.agilebits.onepassword7": "1Password 7",
         "com.bitwarden.desktop": "Bitwarden",

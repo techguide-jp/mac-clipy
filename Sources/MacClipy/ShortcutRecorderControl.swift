@@ -76,9 +76,9 @@ final class ShortcutRecorderControl: NSControl {
         }
 
         let modifiers = shortcutModifiers(from: event.modifierFlags)
-        guard !modifiers.isEmpty else {
+        guard KeyboardShortcut.hasActivationModifier(modifiers) else {
             NSSound.beep()
-            onMessage?("⌘、⇧、⌥、⌃ のいずれかとキーを一緒に押してください。")
+            onMessage?("⌘、⌥、⌃ のいずれかとキーを一緒に押してください。")
             return
         }
 

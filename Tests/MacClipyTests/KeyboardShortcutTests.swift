@@ -22,6 +22,18 @@ final class KeyboardShortcutTests: XCTestCase {
         }
     }
 
+    func testRejectsShiftOnlyShortcut() {
+        XCTAssertThrowsError(try KeyboardShortcut.parse("shift+v")) { error in
+            XCTAssertEqual(error as? KeyboardShortcutParseError, .missingModifier)
+        }
+    }
+
+    func testRejectsEscapeShortcut() {
+        XCTAssertThrowsError(try KeyboardShortcut.parse("command+escape")) { error in
+            XCTAssertEqual(error as? KeyboardShortcutParseError, .unsupportedKey("escape"))
+        }
+    }
+
     func testKeyLookupFromCarbonKeyCode() throws {
         let keyCode = try XCTUnwrap(KeyboardShortcut.defaultShortcut.carbonKeyCode)
         XCTAssertEqual(KeyboardShortcut.key(forCarbonKeyCode: keyCode), "v")
@@ -38,6 +50,23 @@ final class KeyboardShortcutTests: XCTestCase {
         let settings = try JSONDecoder().decode(AppSettings.self, from: data)
 
         XCTAssertEqual(settings.excludedBundleIdentifiers, ["com.example.Secret"])
+        XCTAssertEqual(settings.hotKey, .defaultShortcut)
+    }
+
+    func testSettingsDecodeUsesDefaultHotKeyWhenStoredHotKeyIsUnsupported() throws {
+        let json = """
+        {
+          "excludedBundleIdentifiers": ["com.example.Secret"],
+          "hotKey": {
+            "key": "escape",
+            "modifiers": ["command"]
+          }
+        }
+        """
+        let data = try XCTUnwrap(json.data(using: .utf8))
+
+        let settings = try JSONDecoder().decode(AppSettings.self, from: data)
+
         XCTAssertEqual(settings.hotKey, .defaultShortcut)
     }
 }

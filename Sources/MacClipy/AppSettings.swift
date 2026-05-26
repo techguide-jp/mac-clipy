@@ -31,8 +31,10 @@ public struct AppSettings: Codable, Equatable {
         let identifiers = try container.decodeIfPresent([String].self, forKey: .excludedBundleIdentifiers)
             ?? Self.defaultExcludedBundleIdentifiers
 
+        let decodedHotKey = try container.decodeIfPresent(KeyboardShortcut.self, forKey: .hotKey) ?? .defaultShortcut
+
         self.excludedBundleIdentifiers = Self.normalizedBundleIdentifiers(identifiers)
-        self.hotKey = try container.decodeIfPresent(KeyboardShortcut.self, forKey: .hotKey) ?? .defaultShortcut
+        self.hotKey = decodedHotKey.isRegisterable ? decodedHotKey : .defaultShortcut
     }
 
     public func isExcluded(bundleIdentifier: String?) -> Bool {
@@ -115,7 +117,7 @@ public final class SettingsStore {
 
     public func update(excludedBundleIdentifiers identifiers: [String], hotKey: KeyboardShortcut) throws {
         settings.excludedBundleIdentifiers = AppSettings.normalizedBundleIdentifiers(identifiers)
-        settings.hotKey = hotKey
+        settings.hotKey = hotKey.isRegisterable ? hotKey : .defaultShortcut
         try save()
     }
 }

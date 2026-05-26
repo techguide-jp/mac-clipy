@@ -17,11 +17,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private lazy var settingsWindowController = SettingsWindowController(
         settingsStore: settingsStore,
         onSave: { [weak self] in
-            self?.setupHotKey()
-            self?.rebuildStatusMenu()
+            guard let self else {
+                return
+            }
+
+            try self.setupHotKey()
+            self.rebuildStatusMenu()
         },
         onDismiss: { [weak self] in
-            self?.setupHotKey()
+            self?.restoreHotKeyAfterSettings()
         }
     )
 
@@ -42,7 +46,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         monitor?.start()
 
         setupStatusItem()
-        setupHotKey()
+        do {
+            try setupHotKey()
+        } catch {
+            showAlert(title: "ホットキー登録に失敗しました", message: error.localizedDescription)
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -77,16 +85,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         rebuildStatusMenu()
     }
 
-    private func setupHotKey() {
-        hotKeyController?.unregister()
+    private func setupHotKey() throws {
+        let shortcut = settingsStore.settings.hotKey
+        if let hotKeyController, hotKeyController.shortcut == shortcut {
+            if !hotKeyController.isRegistered {
+                try hotKeyController.register()
+            }
+            return
+        }
 
-        let controller = HotKeyController(shortcut: settingsStore.settings.hotKey) { [weak self] in
+        let controller = HotKeyController(shortcut: shortcut) { [weak self] in
             self?.showHistoryContextMenu()
         }
 
+        try controller.register()
+        hotKeyController?.unregister()
+        hotKeyController = controller
+    }
+
+    private func restoreHotKeyAfterSettings() {
         do {
-            try controller.register()
-            hotKeyController = controller
+            try setupHotKey()
         } catch {
             showAlert(title: "ホットキー登録に失敗しました", message: error.localizedDescription)
         }
