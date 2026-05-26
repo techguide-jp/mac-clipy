@@ -25,11 +25,11 @@ final class LocalizationTests: XCTestCase {
             let translations = try loadTranslations(for: localization)
 
             let hotKeyTitle = try XCTUnwrap(translations["menu.hotKey"])
-            let resultCount = try XCTUnwrap(translations["historyPanel.resultCount"])
+            let favoriteDetail = try XCTUnwrap(translations["settings.favorites.item.detail"])
             let saveFailed = try XCTUnwrap(translations["settings.status.saveFailed"])
 
             XCTAssertFalse(String(format: hotKeyTitle, "⇧⌘V").contains("%@"))
-            XCTAssertFalse(String(format: resultCount, 3).contains("%d"))
+            XCTAssertFalse(String(format: favoriteDetail, 3).contains("%d"))
             XCTAssertFalse(String(format: saveFailed, "disk full").contains("%@"))
         }
     }

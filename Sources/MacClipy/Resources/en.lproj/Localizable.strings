@@ -24,11 +24,6 @@
 "favorites.error.favoriteNotFound" = "Favorite not found.";
 "favorites.error.folderNotFound" = "Folder not found.";
 "favorites.toggle" = "Favorite";
-"historyPanel.columnTitle" = "History";
-"historyPanel.deleteFailed" = "Delete failed: %@";
-"historyPanel.noMatches" = "No matching history";
-"historyPanel.resultCount" = "%d results";
-"historyPanel.searchPlaceholder" = "Search";
 "historyPopup.filter.all" = "All";
 "historyPopup.filter.favorites" = "Favorites";
 "historyPopup.favoriteName.add" = "Add";

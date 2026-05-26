@@ -24,11 +24,6 @@
 "favorites.error.favoriteNotFound" = "お気に入りが見つかりません。";
 "favorites.error.folderNotFound" = "フォルダが見つかりません。";
 "favorites.toggle" = "お気に入り";
-"historyPanel.columnTitle" = "履歴";
-"historyPanel.deleteFailed" = "削除に失敗しました: %@";
-"historyPanel.noMatches" = "一致する履歴はありません";
-"historyPanel.resultCount" = "%d 件";
-"historyPanel.searchPlaceholder" = "検索";
 "historyPopup.filter.all" = "すべて";
 "historyPopup.filter.favorites" = "お気に入り";
 "historyPopup.favoriteName.add" = "登録";

@@ -12,10 +12,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem?
     private var previousApplication: NSRunningApplication?
 
-    private lazy var historyPanelController = HistoryPanelController(store: store) { [weak self] item in
-        self?.copyAndPaste(item)
-    }
-
     private lazy var historyPopupController = HistoryPopupController(
         store: store,
         favoriteStore: favoriteStore,
@@ -56,7 +52,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         monitor = ClipboardMonitor(store: store, settingsStore: settingsStore) { [weak self] in
             self?.rebuildStatusMenu()
-            self?.historyPanelController.refresh()
+            self?.historyPopupController.refresh()
         }
         monitor?.start()
 
@@ -80,7 +76,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        showHistoryPanel()
+        showHistoryPopup()
         return true
     }
 
@@ -210,7 +206,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(favoriteHotKeyItem)
 
         let searchItem = NSMenuItem(title: L10n.tr("menu.search"),
-                                    action: #selector(showHistoryPanel),
+                                    action: #selector(showHistoryPopup),
                                     keyEquivalent: "")
         searchItem.target = self
         menu.addItem(searchItem)
@@ -266,11 +262,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         historyPopupController.show(at: NSEvent.mouseLocation, initialMode: .favorites)
     }
 
-    @objc private func showHistoryPanel() {
-        rememberFrontmostApplication()
-        historyPanelController.show()
-    }
-
     @objc private func togglePause() {
         guard let monitor else {
             return
@@ -311,7 +302,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 return
             }
             rebuildStatusMenu()
-            historyPanelController.refresh()
+            historyPopupController.refresh()
         } catch {
             showAlert(title: L10n.tr("alert.clearHistoryFailed.title"), message: error.localizedDescription)
         }
