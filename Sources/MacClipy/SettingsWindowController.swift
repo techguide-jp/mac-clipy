@@ -134,76 +134,85 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
         statusLabel.font = .systemFont(ofSize: 12)
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        contentView.addSubview(shortcutLabel)
-        contentView.addSubview(shortcutHelpLabel)
-        contentView.addSubview(shortcutRecorder)
-        contentView.addSubview(resetShortcutButton)
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(excludedAppsHelpLabel)
-        contentView.addSubview(scrollView)
-        contentView.addSubview(addExcludedAppButton)
-        contentView.addSubview(removeExcludedAppButton)
-        contentView.addSubview(resetExcludedAppsButton)
-        contentView.addSubview(statusLabel)
-        contentView.addSubview(saveButton)
-        contentView.addSubview(cancelButton)
+        let layoutViews = SettingsLayoutViews(
+            shortcutLabel: shortcutLabel,
+            shortcutHelpLabel: shortcutHelpLabel,
+            shortcutRecorder: shortcutRecorder,
+            resetShortcutButton: resetShortcutButton,
+            titleLabel: titleLabel,
+            excludedAppsHelpLabel: excludedAppsHelpLabel,
+            scrollView: scrollView,
+            addExcludedAppButton: addExcludedAppButton,
+            removeExcludedAppButton: removeExcludedAppButton,
+            resetExcludedAppsButton: resetExcludedAppsButton,
+            statusLabel: statusLabel,
+            saveButton: saveButton,
+            cancelButton: cancelButton
+        )
+        layoutViews.subviews.forEach(contentView.addSubview)
+        activateLayout(layoutViews, in: contentView)
+    }
 
+    private func activateLayout(_ views: SettingsLayoutViews, in contentView: NSView) {
         NSLayoutConstraint.activate([
-            shortcutLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
-            shortcutLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            shortcutLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            views.shortcutLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            views.shortcutLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            views.shortcutLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
 
-            shortcutHelpLabel.topAnchor.constraint(equalTo: shortcutLabel.bottomAnchor, constant: 4),
-            shortcutHelpLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            shortcutHelpLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            views.shortcutHelpLabel.topAnchor.constraint(equalTo: views.shortcutLabel.bottomAnchor, constant: 4),
+            views.shortcutHelpLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            views.shortcutHelpLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
 
-            shortcutRecorder.topAnchor.constraint(equalTo: shortcutHelpLabel.bottomAnchor, constant: 8),
-            shortcutRecorder.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            shortcutRecorder.trailingAnchor.constraint(equalTo: resetShortcutButton.leadingAnchor, constant: -10),
-            shortcutRecorder.heightAnchor.constraint(equalToConstant: 54),
+            views.shortcutRecorder.topAnchor.constraint(equalTo: views.shortcutHelpLabel.bottomAnchor, constant: 8),
+            views.shortcutRecorder.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            views.shortcutRecorder.trailingAnchor.constraint(equalTo: views.resetShortcutButton.leadingAnchor, constant: -10),
+            views.shortcutRecorder.heightAnchor.constraint(equalToConstant: 54),
 
-            resetShortcutButton.centerYAnchor.constraint(equalTo: shortcutRecorder.centerYAnchor),
-            resetShortcutButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            resetShortcutButton.widthAnchor.constraint(equalToConstant: 96),
+            views.resetShortcutButton.centerYAnchor.constraint(equalTo: views.shortcutRecorder.centerYAnchor),
+            views.resetShortcutButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            views.resetShortcutButton.widthAnchor.constraint(equalToConstant: 96),
 
-            titleLabel.topAnchor.constraint(equalTo: shortcutRecorder.bottomAnchor, constant: 16),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            views.titleLabel.topAnchor.constraint(equalTo: views.shortcutRecorder.bottomAnchor, constant: 16),
+            views.titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            views.titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
 
-            excludedAppsHelpLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-            excludedAppsHelpLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            excludedAppsHelpLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            views.excludedAppsHelpLabel.topAnchor.constraint(equalTo: views.titleLabel.bottomAnchor, constant: 4),
+            views.excludedAppsHelpLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            views.excludedAppsHelpLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
 
-            scrollView.topAnchor.constraint(equalTo: excludedAppsHelpLabel.bottomAnchor, constant: 8),
-            scrollView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            scrollView.bottomAnchor.constraint(equalTo: addExcludedAppButton.topAnchor, constant: -10),
+            views.scrollView.topAnchor.constraint(equalTo: views.excludedAppsHelpLabel.bottomAnchor, constant: 8),
+            views.scrollView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            views.scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            views.scrollView.bottomAnchor.constraint(equalTo: views.addExcludedAppButton.topAnchor, constant: -10),
 
-            addExcludedAppButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            addExcludedAppButton.bottomAnchor.constraint(equalTo: statusLabel.topAnchor, constant: -10),
+            views.addExcludedAppButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            views.addExcludedAppButton.bottomAnchor.constraint(equalTo: views.statusLabel.topAnchor, constant: -10),
 
-            removeExcludedAppButton.leadingAnchor.constraint(equalTo: addExcludedAppButton.trailingAnchor, constant: 8),
-            removeExcludedAppButton.centerYAnchor.constraint(equalTo: addExcludedAppButton.centerYAnchor),
-
-            resetExcludedAppsButton.leadingAnchor.constraint(
-                equalTo: removeExcludedAppButton.trailingAnchor,
+            views.removeExcludedAppButton.leadingAnchor.constraint(
+                equalTo: views.addExcludedAppButton.trailingAnchor,
                 constant: 8
             ),
-            resetExcludedAppsButton.centerYAnchor.constraint(equalTo: addExcludedAppButton.centerYAnchor),
-            resetExcludedAppsButton.trailingAnchor.constraint(
+            views.removeExcludedAppButton.centerYAnchor.constraint(equalTo: views.addExcludedAppButton.centerYAnchor),
+
+            views.resetExcludedAppsButton.leadingAnchor.constraint(
+                equalTo: views.removeExcludedAppButton.trailingAnchor,
+                constant: 8
+            ),
+            views.resetExcludedAppsButton.centerYAnchor.constraint(equalTo: views.addExcludedAppButton.centerYAnchor),
+            views.resetExcludedAppsButton.trailingAnchor.constraint(
                 lessThanOrEqualTo: contentView.trailingAnchor,
                 constant: -16
             ),
 
-            statusLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            statusLabel.trailingAnchor.constraint(lessThanOrEqualTo: cancelButton.leadingAnchor, constant: -12),
-            statusLabel.centerYAnchor.constraint(equalTo: saveButton.centerYAnchor),
+            views.statusLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            views.statusLabel.trailingAnchor.constraint(lessThanOrEqualTo: views.cancelButton.leadingAnchor, constant: -12),
+            views.statusLabel.centerYAnchor.constraint(equalTo: views.saveButton.centerYAnchor),
 
-            cancelButton.trailingAnchor.constraint(equalTo: saveButton.leadingAnchor, constant: -8),
-            cancelButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -14),
+            views.cancelButton.trailingAnchor.constraint(equalTo: views.saveButton.leadingAnchor, constant: -8),
+            views.cancelButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -14),
 
-            saveButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            saveButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -14)
+            views.saveButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            views.saveButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -14)
         ])
     }
 
@@ -363,6 +372,40 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTa
         "com.apple.keychainaccess": "キーチェーンアクセス",
         "com.local.macclipy": "MacClipy"
     ]
+}
+
+private struct SettingsLayoutViews {
+    let shortcutLabel: NSTextField
+    let shortcutHelpLabel: NSTextField
+    let shortcutRecorder: ShortcutRecorderControl
+    let resetShortcutButton: NSButton
+    let titleLabel: NSTextField
+    let excludedAppsHelpLabel: NSTextField
+    let scrollView: NSScrollView
+    let addExcludedAppButton: NSButton
+    let removeExcludedAppButton: NSButton
+    let resetExcludedAppsButton: NSButton
+    let statusLabel: NSTextField
+    let saveButton: NSButton
+    let cancelButton: NSButton
+
+    var subviews: [NSView] {
+        [
+            shortcutLabel,
+            shortcutHelpLabel,
+            shortcutRecorder,
+            resetShortcutButton,
+            titleLabel,
+            excludedAppsHelpLabel,
+            scrollView,
+            addExcludedAppButton,
+            removeExcludedAppButton,
+            resetExcludedAppsButton,
+            statusLabel,
+            saveButton,
+            cancelButton
+        ]
+    }
 }
 
 private final class ExcludedAppCellView: NSTableCellView {
