@@ -56,47 +56,50 @@ enum LegacyShortcutConverter {
     }
 
     private static func key(named rawKey: String) -> KeyboardShortcuts.Key? {
-        switch rawKey.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
-        case "a": .a
-        case "b": .b
-        case "c": .c
-        case "d": .d
-        case "e": .e
-        case "f": .f
-        case "g": .g
-        case "h": .h
-        case "i": .i
-        case "j": .j
-        case "k": .k
-        case "l": .l
-        case "m": .m
-        case "n": .n
-        case "o": .o
-        case "p": .p
-        case "q": .q
-        case "r": .r
-        case "s": .s
-        case "t": .t
-        case "u": .u
-        case "v": .v
-        case "w": .w
-        case "x": .x
-        case "y": .y
-        case "z": .z
-        case "0": .zero
-        case "1": .one
-        case "2": .two
-        case "3": .three
-        case "4": .four
-        case "5": .five
-        case "6": .six
-        case "7": .seven
-        case "8": .eight
-        case "9": .nine
-        case "space": .space
-        case "tab": .tab
-        case "return", "enter": .return
-        default: nil
-        }
+        let normalizedKey = rawKey.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return keysByName[normalizedKey]
     }
+
+    private static let keysByName: [String: KeyboardShortcuts.Key] = [
+        "a": .a,
+        "b": .b,
+        "c": .c,
+        "d": .d,
+        "e": .e,
+        "f": .f,
+        "g": .g,
+        "h": .h,
+        "i": .i,
+        "j": .j,
+        "k": .k,
+        "l": .l,
+        "m": .m,
+        "n": .n,
+        "o": .o,
+        "p": .p,
+        "q": .q,
+        "r": .r,
+        "s": .s,
+        "t": .t,
+        "u": .u,
+        "v": .v,
+        "w": .w,
+        "x": .x,
+        "y": .y,
+        "z": .z,
+        "0": .zero,
+        "1": .one,
+        "2": .two,
+        "3": .three,
+        "4": .four,
+        "5": .five,
+        "6": .six,
+        "7": .seven,
+        "8": .eight,
+        "9": .nine,
+        "space": .space,
+        "tab": .tab,
+        "return": .return,
+        "enter": .return
+    ]
 }

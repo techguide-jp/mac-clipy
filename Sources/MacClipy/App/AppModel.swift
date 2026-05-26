@@ -8,8 +8,8 @@ final class AppModel {
     let settingsModel = SettingsModel()
     let historyModel = ClipboardHistoryModel()
     let favoritesModel = FavoritesModel()
+    let historyPopupModel: HistoryPopupModel
 
-    private(set) var historyPopupModel: HistoryPopupModel!
     private var monitor: ClipboardMonitor?
     private var statusItemController: StatusItemController?
     private var floatingPanelController: FloatingPanelController?
@@ -21,13 +21,13 @@ final class AppModel {
 
     init() {
         let popupModel = HistoryPopupModel(historyModel: historyModel, favoritesModel: favoritesModel)
+        self.historyPopupModel = popupModel
         popupModel.onChoose = { [weak self] item in
             self?.copyAndPaste(item)
         }
         popupModel.onSettingsRequested = { [weak self] in
             self?.showSettings()
         }
-        self.historyPopupModel = popupModel
     }
 
     func applicationDidFinishLaunching() {
