@@ -17,9 +17,21 @@ scripts/check.sh
 - `scripts/build-app.sh`
 - `dist/MacClipy.app/Contents/Info.plist` の検証
 - 実行ファイルの存在確認
+- `ja.lproj` / `en.lproj` の localization resource 存在確認
 
 ローカルに SwiftLint がない場合は lint をスキップします。
 CI では `REQUIRE_SWIFTLINT=1` を付けて実行するため、SwiftLint がない状態や lint 違反は失敗として扱います。
+
+## 多言語対応ルール
+
+UI 文言は Swift ソースに直接書かず、`Localizable.strings` に移して `L10n.tr(...)` 経由で参照します。
+`swift test` の `LocalizationTests` で次を検出します。
+
+- `ja` と `en` の key 集合が一致しない
+- 空の翻訳がある
+- `String(format:)` の placeholder が日英でずれている
+- `L10n.tr("...")` で参照している key が resource にない
+- Swift ソースに日本語の文字列リテラルが直接残っている
 
 ## CI
 
