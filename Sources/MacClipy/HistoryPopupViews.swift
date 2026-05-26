@@ -44,6 +44,10 @@ final class HistoryPopupCellView: NSTableCellView {
         starButton.contentTintColor = isFavorite ? .systemYellow : .secondaryLabelColor
     }
 
+    func containsFavoriteButton(pointInCell: NSPoint) -> Bool {
+        starButton.frame.contains(pointInCell)
+    }
+
     private func setupFields() {
         titleField.font = .systemFont(ofSize: 13, weight: .medium)
         titleField.lineBreakMode = .byTruncatingTail
@@ -90,6 +94,21 @@ final class PopupKeyHandlingTableView: NSTableView {
     var onFolderShortcut: ((Int) -> Void)?
     var onSearchFocus: (() -> Void)?
     var onPrintableKey: ((String) -> Void)?
+
+    var onRowClick: ((Int) -> Void)?
+
+    override func mouseUp(with event: NSEvent) {
+        let location = convert(event.locationInWindow, from: nil)
+        let clickedRow = row(at: location)
+        let clickedFavoriteButton = isFavoriteButtonClick(row: clickedRow, location: location)
+
+        super.mouseUp(with: event)
+
+        guard clickedRow >= 0, !clickedFavoriteButton else {
+            return
+        }
+        onRowClick?(clickedRow)
+    }
 
     override func keyDown(with event: NSEvent) {
         if let action = Self.commandAction(for: event) {
@@ -168,5 +187,15 @@ final class PopupKeyHandlingTableView: NSTableView {
         }
 
         return event.charactersIgnoringModifiers?.count == 1
+    }
+
+    private func isFavoriteButtonClick(row: Int, location: NSPoint) -> Bool {
+        guard row >= 0,
+              let cell = view(atColumn: 0, row: row, makeIfNecessary: false) as? HistoryPopupCellView else {
+            return false
+        }
+
+        let pointInCell = cell.convert(location, from: self)
+        return cell.containsFavoriteButton(pointInCell: pointInCell)
     }
 }

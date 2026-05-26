@@ -230,6 +230,9 @@ extension HistoryPopupController {
         tableView.intercellSpacing = NSSize(width: 0, height: 1)
         tableView.doubleAction = #selector(chooseSelectedItem)
         tableView.target = self
+        tableView.onRowClick = { [weak self] row in
+            self?.chooseItem(at: row)
+        }
         tableView.onReturn = { [weak self] in self?.chooseSelectedItem() }
         tableView.onEscape = { [weak self] in self?.closePopup() }
         tableView.onToggleFavorite = { [weak self] in self?.toggleSelectedFavorite() }
@@ -333,11 +336,15 @@ extension HistoryPopupController {
         }
 
         let selectedRow = tableView.selectedRow >= 0 ? tableView.selectedRow : 0
-        guard results.indices.contains(selectedRow) else {
+        chooseItem(at: selectedRow)
+    }
+
+    private func chooseItem(at row: Int) {
+        guard results.indices.contains(row) else {
             return
         }
 
-        let result = results[selectedRow]
+        let result = results[row]
         if let favorite = result.favorite {
             try? favoriteStore.markUsed(id: favorite.id)
         }
