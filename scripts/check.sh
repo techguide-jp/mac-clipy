@@ -27,5 +27,7 @@ echo "==> App bundle"
 scripts/build-app.sh
 plutil -lint dist/MacClipy.app/Contents/Info.plist
 test -x dist/MacClipy.app/Contents/MacOS/MacClipy
+test -f dist/MacClipy.app/Contents/Resources/ja.lproj/Localizable.strings
+test -f dist/MacClipy.app/Contents/Resources/en.lproj/Localizable.strings
 
 echo "All checks passed."

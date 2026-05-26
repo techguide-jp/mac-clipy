@@ -7,14 +7,16 @@ APP_NAME="MacClipy"
 APP_DIR="$ROOT_DIR/dist/$APP_NAME.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
+RESOURCES_DIR="$CONTENTS_DIR/Resources"
 
 swift build -c "$BUILD_CONFIG" --package-path "$ROOT_DIR"
 
 rm -rf "$APP_DIR"
-mkdir -p "$MACOS_DIR"
+mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 
 cp "$ROOT_DIR/.build/$BUILD_CONFIG/$APP_NAME" "$MACOS_DIR/$APP_NAME"
 chmod +x "$MACOS_DIR/$APP_NAME"
+cp -R "$ROOT_DIR/Sources/MacClipy/Resources/"*.lproj "$RESOURCES_DIR/"
 
 cat > "$CONTENTS_DIR/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -23,6 +25,11 @@ cat > "$CONTENTS_DIR/Info.plist" <<'PLIST'
 <dict>
   <key>CFBundleDevelopmentRegion</key>
   <string>ja</string>
+  <key>CFBundleLocalizations</key>
+  <array>
+    <string>ja</string>
+    <string>en</string>
+  </array>
   <key>CFBundleExecutable</key>
   <string>MacClipy</string>
   <key>CFBundleIdentifier</key>

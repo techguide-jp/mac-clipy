@@ -22,7 +22,7 @@ final class SettingsWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "MacClipy 設定"
+        window.title = L10n.tr("settings.title")
         window.isReleasedWhenClosed = false
 
         super.init(window: window)
@@ -57,12 +57,12 @@ final class SettingsWindowController: NSWindowController {
         contentView.translatesAutoresizingMaskIntoConstraints = false
         window.contentView = contentView
 
-        let shortcutLabel = NSTextField(labelWithString: "履歴メニューのショートカット")
+        let shortcutLabel = NSTextField(labelWithString: L10n.tr("settings.shortcut.title"))
         shortcutLabel.font = .boldSystemFont(ofSize: 13)
         shortcutLabel.translatesAutoresizingMaskIntoConstraints = false
 
         let shortcutHelpLabel = NSTextField(
-            labelWithString: "枠をクリックしてから、使いたいキーの組み合わせを押します。"
+            labelWithString: L10n.tr("settings.shortcut.help")
         )
         shortcutHelpLabel.textColor = .secondaryLabelColor
         shortcutHelpLabel.font = .systemFont(ofSize: 12)
@@ -73,23 +73,25 @@ final class SettingsWindowController: NSWindowController {
         }
         shortcutRecorder.translatesAutoresizingMaskIntoConstraints = false
 
-        let resetShortcutButton = NSButton(title: "既定に戻す", target: self, action: #selector(resetShortcut))
+        let resetShortcutButton = NSButton(title: L10n.tr("settings.shortcut.reset"),
+                                           target: self,
+                                           action: #selector(resetShortcut))
         resetShortcutButton.bezelStyle = .rounded
         resetShortcutButton.translatesAutoresizingMaskIntoConstraints = false
 
-        let titleLabel = NSTextField(labelWithString: "履歴に保存しないアプリ")
+        let titleLabel = NSTextField(labelWithString: L10n.tr("settings.excludedApps.title"))
         titleLabel.font = .boldSystemFont(ofSize: 13)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         let excludedAppsHelpLabel = NSTextField(
-            labelWithString: "パスワード管理アプリなど、コピー内容を残したくないアプリを選びます。"
+            labelWithString: L10n.tr("settings.excludedApps.help")
         )
         excludedAppsHelpLabel.textColor = .secondaryLabelColor
         excludedAppsHelpLabel.font = .systemFont(ofSize: 12)
         excludedAppsHelpLabel.translatesAutoresizingMaskIntoConstraints = false
 
         let excludedAppsColumn = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("excludedApp"))
-        excludedAppsColumn.title = "アプリ"
+        excludedAppsColumn.title = L10n.tr("settings.excludedApps.column")
         excludedAppsColumn.resizingMask = .autoresizingMask
         excludedAppsTableView.addTableColumn(excludedAppsColumn)
         excludedAppsTableView.headerView = nil
@@ -104,29 +106,29 @@ final class SettingsWindowController: NSWindowController {
         scrollView.borderType = .bezelBorder
         scrollView.translatesAutoresizingMaskIntoConstraints = false
 
-        let addExcludedAppButton = NSButton(title: "アプリを追加...",
+        let addExcludedAppButton = NSButton(title: L10n.tr("settings.excludedApps.add"),
                                             target: self,
                                             action: #selector(addExcludedApp))
         addExcludedAppButton.bezelStyle = .rounded
         addExcludedAppButton.translatesAutoresizingMaskIntoConstraints = false
 
-        let removeExcludedAppButton = NSButton(title: "選択項目を削除",
+        let removeExcludedAppButton = NSButton(title: L10n.tr("settings.excludedApps.remove"),
                                                target: self,
                                                action: #selector(removeSelectedExcludedApp))
         removeExcludedAppButton.bezelStyle = .rounded
         removeExcludedAppButton.translatesAutoresizingMaskIntoConstraints = false
 
-        let resetExcludedAppsButton = NSButton(title: "推奨設定に戻す",
+        let resetExcludedAppsButton = NSButton(title: L10n.tr("settings.excludedApps.reset"),
                                                target: self,
                                                action: #selector(resetExcludedApps))
         resetExcludedAppsButton.bezelStyle = .rounded
         resetExcludedAppsButton.translatesAutoresizingMaskIntoConstraints = false
 
-        let saveButton = NSButton(title: "保存", target: self, action: #selector(save))
+        let saveButton = NSButton(title: L10n.tr("button.save"), target: self, action: #selector(save))
         saveButton.bezelStyle = .rounded
         saveButton.translatesAutoresizingMaskIntoConstraints = false
 
-        let cancelButton = NSButton(title: "キャンセル", target: self, action: #selector(cancel))
+        let cancelButton = NSButton(title: L10n.tr("button.cancel"), target: self, action: #selector(cancel))
         cancelButton.bezelStyle = .rounded
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
 
@@ -227,14 +229,17 @@ final class SettingsWindowController: NSWindowController {
                 try onSave()
             } catch {
                 try rollbackSettings(to: previousSettings)
-                statusLabel.stringValue = "ショートカットを登録できませんでした: \(error.localizedDescription)"
+                statusLabel.stringValue = L10n.tr(
+                    "settings.status.shortcutRegistrationFailed",
+                    error.localizedDescription
+                )
                 return
             }
 
-            statusLabel.stringValue = "保存しました"
+            statusLabel.stringValue = L10n.tr("settings.status.saved")
             window?.orderOut(nil)
         } catch {
-            statusLabel.stringValue = "保存に失敗しました: \(error.localizedDescription)"
+            statusLabel.stringValue = L10n.tr("settings.status.saveFailed", error.localizedDescription)
         }
     }
 
@@ -245,16 +250,18 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func resetShortcut() {
         shortcutRecorder.shortcut = .defaultShortcut
-        statusLabel.stringValue = "保存すると "
-            + "\(KeyboardShortcut.defaultShortcut.displayName) が有効になります。"
+        statusLabel.stringValue = L10n.tr(
+            "settings.status.shortcutWillActivate",
+            KeyboardShortcut.defaultShortcut.displayName
+        )
         window?.makeFirstResponder(shortcutRecorder)
     }
 
     @objc private func addExcludedApp() {
         let panel = NSOpenPanel()
-        panel.title = "履歴に保存しないアプリを選択"
-        panel.prompt = "追加"
-        panel.message = "選んだアプリでコピーした内容は、MacClipy の履歴に保存されません。"
+        panel.title = L10n.tr("settings.openPanel.title")
+        panel.prompt = L10n.tr("settings.openPanel.prompt")
+        panel.message = L10n.tr("settings.openPanel.message")
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
@@ -278,20 +285,20 @@ final class SettingsWindowController: NSWindowController {
     @objc private func removeSelectedExcludedApp() {
         let selectedRow = excludedAppsTableView.selectedRow
         guard excludedBundleIdentifiers.indices.contains(selectedRow) else {
-            statusLabel.stringValue = "削除するアプリを一覧から選んでください。"
+            statusLabel.stringValue = L10n.tr("settings.status.selectAppToRemove")
             return
         }
 
         let removedName = displayName(for: excludedBundleIdentifiers[selectedRow])
         excludedBundleIdentifiers.remove(at: selectedRow)
         excludedAppsTableView.reloadData()
-        statusLabel.stringValue = "保存すると \(removedName) が履歴保存の対象に戻ります。"
+        statusLabel.stringValue = L10n.tr("settings.status.appWillBeCapturedAgain", removedName)
     }
 
     @objc private func resetExcludedApps() {
         excludedBundleIdentifiers = AppSettings.defaultExcludedBundleIdentifiers
         excludedAppsTableView.reloadData()
-        statusLabel.stringValue = "保存すると推奨設定に戻ります。"
+        statusLabel.stringValue = L10n.tr("settings.status.excludedAppsWillReset")
     }
 
     private func presentExcludedAppPanel(_ panel: NSOpenPanel) {
@@ -314,21 +321,25 @@ final class SettingsWindowController: NSWindowController {
 
     private func appendExcludedApp(from appURL: URL?) {
         guard let appURL, let bundle = Bundle(url: appURL), let bundleIdentifier = bundle.bundleIdentifier else {
-            statusLabel.stringValue = "アプリ情報を読み取れませんでした。"
-                + "別のアプリを選んでください。"
+            statusLabel.stringValue = L10n.tr("settings.status.appReadFailed")
             return
         }
 
         if excludedBundleIdentifiers.contains(where: { $0.caseInsensitiveCompare(bundleIdentifier) == .orderedSame }) {
-            statusLabel.stringValue = "\(displayName(for: bundleIdentifier)) はすでに追加されています。"
+            statusLabel.stringValue = L10n.tr(
+                "settings.status.appAlreadyAdded",
+                displayName(for: bundleIdentifier)
+            )
             return
         }
 
         excludedBundleIdentifiers.append(bundleIdentifier)
         excludedBundleIdentifiers = AppSettings.normalizedBundleIdentifiers(excludedBundleIdentifiers)
         excludedAppsTableView.reloadData()
-        statusLabel.stringValue = "保存すると "
-            + "\(displayName(for: bundleIdentifier)) が履歴に保存されなくなります。"
+        statusLabel.stringValue = L10n.tr(
+            "settings.status.appWillBeExcluded",
+            displayName(for: bundleIdentifier)
+        )
     }
 }
 
@@ -370,8 +381,8 @@ private extension SettingsWindowController {
             return "MacClipy"
         }
 
-        if let knownName = Self.knownAppNames[bundleIdentifier.lowercased()] {
-            return knownName
+        if let localizationKey = Self.knownAppNameKeys[bundleIdentifier.lowercased()] {
+            return L10n.tr(localizationKey)
         }
 
         return bundleIdentifier
@@ -390,13 +401,13 @@ private extension SettingsWindowController {
         return fallbackURL.deletingPathExtension().lastPathComponent
     }
 
-    static let knownAppNames = [
-        "com.1password.1password": "1Password",
-        "com.agilebits.onepassword7": "1Password 7",
-        "com.bitwarden.desktop": "Bitwarden",
-        "org.keepassxc.keepassxc": "KeePassXC",
-        "com.apple.keychainaccess": "キーチェーンアクセス",
-        "com.local.macclipy": "MacClipy"
+    static let knownAppNameKeys = [
+        "com.1password.1password": "appName.1password",
+        "com.agilebits.onepassword7": "appName.1password7",
+        "com.bitwarden.desktop": "appName.bitwarden",
+        "org.keepassxc.keepassxc": "appName.keepassxc",
+        "com.apple.keychainaccess": "appName.keychainAccess",
+        "com.local.macclipy": "appName.macclipy"
     ]
 }
 

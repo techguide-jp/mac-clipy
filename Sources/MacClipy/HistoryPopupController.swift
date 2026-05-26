@@ -88,22 +88,23 @@ final class HistoryPopupController: NSWindowController,
         rootView.layer?.masksToBounds = true
         window.contentView = rootView
 
-        searchField.placeholderString = "履歴を検索"
+        searchField.placeholderString = L10n.tr("historyPopup.searchPlaceholder")
         searchField.delegate = self
         searchField.target = self
         searchField.action = #selector(chooseSelectedItem)
         searchField.translatesAutoresizingMaskIntoConstraints = false
 
-        if let image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: "設定") {
+        let settingsTitle = L10n.tr("button.settings")
+        if let image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: settingsTitle) {
             settingsButton.image = image
             settingsButton.imagePosition = .imageOnly
         } else {
-            settingsButton.title = "設定"
+            settingsButton.title = settingsTitle
         }
         settingsButton.bezelStyle = .rounded
         settingsButton.target = self
         settingsButton.action = #selector(openSettings)
-        settingsButton.toolTip = "設定"
+        settingsButton.toolTip = settingsTitle
         settingsButton.translatesAutoresizingMaskIntoConstraints = false
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("historyPopupItem"))

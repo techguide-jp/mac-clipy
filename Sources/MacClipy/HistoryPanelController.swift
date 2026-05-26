@@ -65,14 +65,14 @@ final class HistoryPanelController: NSWindowController,
         contentView.translatesAutoresizingMaskIntoConstraints = false
         window.contentView = contentView
 
-        searchField.placeholderString = "検索"
+        searchField.placeholderString = L10n.tr("historyPanel.searchPlaceholder")
         searchField.delegate = self
         searchField.target = self
         searchField.action = #selector(chooseSelectedItem)
         searchField.translatesAutoresizingMaskIntoConstraints = false
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("clip"))
-        column.title = "履歴"
+        column.title = L10n.tr("historyPanel.columnTitle")
         tableView.addTableColumn(column)
         tableView.headerView = nil
         tableView.delegate = self
@@ -126,7 +126,9 @@ final class HistoryPanelController: NSWindowController,
             tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
         }
 
-        statusLabel.stringValue = results.isEmpty ? "一致する履歴はありません" : "\(results.count) 件"
+        statusLabel.stringValue = results.isEmpty
+            ? L10n.tr("historyPanel.noMatches")
+            : L10n.tr("historyPanel.resultCount", results.count)
     }
 
     @objc private func chooseSelectedItem() {
@@ -154,7 +156,7 @@ final class HistoryPanelController: NSWindowController,
             try store.delete(id: results[selectedRow].id)
             reloadResults()
         } catch {
-            statusLabel.stringValue = "削除に失敗しました: \(error.localizedDescription)"
+            statusLabel.stringValue = L10n.tr("historyPanel.deleteFailed", error.localizedDescription)
         }
     }
 

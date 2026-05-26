@@ -40,7 +40,7 @@ public struct ClipboardItem: Codable, Equatable, Identifiable {
             .joined(separator: " ")
 
         if collapsed.count <= 64 {
-            return collapsed.isEmpty ? "(空白のみ)" : collapsed
+            return collapsed.isEmpty ? L10n.tr("clipboard.emptyWhitespace") : collapsed
         }
 
         let index = collapsed.index(collapsed.startIndex, offsetBy: 64)

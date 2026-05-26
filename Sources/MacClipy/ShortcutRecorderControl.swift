@@ -22,7 +22,7 @@ final class ShortcutRecorderControl: NSControl {
         self.shortcut = shortcut
         super.init(frame: .zero)
         focusRingType = .default
-        toolTip = "クリックして、使いたいキーの組み合わせを押してください。"
+        toolTip = L10n.tr("shortcutRecorder.toolTip")
         setContentCompressionResistancePriority(.required, for: .vertical)
     }
 
@@ -65,20 +65,20 @@ final class ShortcutRecorderControl: NSControl {
 
         if UInt32(event.keyCode) == UInt32(kVK_Escape) {
             isRecording = false
-            onMessage?("変更をキャンセルしました。")
+            onMessage?(L10n.tr("shortcutRecorder.cancelled"))
             return
         }
 
         guard let key = KeyboardShortcut.key(forCarbonKeyCode: UInt32(event.keyCode)) else {
             NSSound.beep()
-            onMessage?("このキーは使えません。英数字、Space、Tab、Return を使ってください。")
+            onMessage?(L10n.tr("shortcutRecorder.unsupportedKey"))
             return
         }
 
         let modifiers = shortcutModifiers(from: event.modifierFlags)
         guard KeyboardShortcut.hasActivationModifier(modifiers) else {
             NSSound.beep()
-            onMessage?("⌘、⌥、⌃ のいずれかとキーを一緒に押してください。")
+            onMessage?(L10n.tr("shortcutRecorder.missingModifier"))
             return
         }
 
@@ -86,7 +86,7 @@ final class ShortcutRecorderControl: NSControl {
         shortcut = nextShortcut
         isRecording = false
         onShortcutChange?(nextShortcut)
-        onMessage?("保存すると \(nextShortcut.displayName) が有効になります。")
+        onMessage?(L10n.tr("shortcutRecorder.willActivate", nextShortcut.displayName))
     }
 
     override func draw(_ dirtyRect: NSRect) {
@@ -111,8 +111,10 @@ final class ShortcutRecorderControl: NSControl {
         path.lineWidth = isRecording ? 2 : 1
         path.stroke()
 
-        let title = isRecording ? "キーを押してください" : shortcut.displayName
-        let subtitle = isRecording ? "Esc でキャンセル" : "クリックして変更"
+        let title = isRecording ? L10n.tr("shortcutRecorder.recordingTitle") : shortcut.displayName
+        let subtitle = isRecording
+            ? L10n.tr("shortcutRecorder.recordingSubtitle")
+            : L10n.tr("shortcutRecorder.idleSubtitle")
 
         let titleAttributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.systemFont(ofSize: isRecording ? 16 : 18, weight: .semibold),
@@ -141,7 +143,7 @@ final class ShortcutRecorderControl: NSControl {
 
     private func beginRecording() {
         isRecording = true
-        onMessage?("使いたいキーの組み合わせを押してください。")
+        onMessage?(L10n.tr("shortcutRecorder.prompt"))
     }
 
     private func shortcutModifiers(from flags: NSEvent.ModifierFlags) -> [ShortcutModifier] {

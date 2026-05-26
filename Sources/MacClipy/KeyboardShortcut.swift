@@ -46,16 +46,15 @@ public enum KeyboardShortcutParseError: LocalizedError, Equatable, Sendable {
     public var errorDescription: String? {
         switch self {
         case .empty:
-            "ショートカットを入力してください。"
+            L10n.tr("keyboardShortcut.error.empty")
         case .missingModifier:
-            "command、option、control のいずれかを含めてください。"
+            L10n.tr("keyboardShortcut.error.missingModifier")
         case .missingKey:
-            "ショートカットのキーを入力してください。"
+            L10n.tr("keyboardShortcut.error.missingKey")
         case .multipleKeys:
-            "ショートカットのキーは1つだけ指定してください。"
+            L10n.tr("keyboardShortcut.error.multipleKeys")
         case .unsupportedKey(let key):
-            "\(key) は対応していないキーです。"
-                + "英数字、space、tab、enter を指定してください。"
+            L10n.tr("keyboardShortcut.error.unsupportedKey", key)
         }
     }
 }

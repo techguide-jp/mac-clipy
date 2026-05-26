@@ -46,7 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             try settingsStore.load()
             try store.load()
         } catch {
-            showAlert(title: "初期化に失敗しました", message: error.localizedDescription)
+            showAlert(title: L10n.tr("alert.initializationFailed.title"), message: error.localizedDescription)
         }
 
         monitor = ClipboardMonitor(store: store, settingsStore: settingsStore) { [weak self] in
@@ -59,7 +59,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         do {
             try setupHotKey()
         } catch {
-            showAlert(title: "ホットキー登録に失敗しました", message: error.localizedDescription)
+            showAlert(title: L10n.tr("alert.hotKeyRegistrationFailed.title"), message: error.localizedDescription)
         }
     }
 
@@ -117,7 +117,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         do {
             try setupHotKey()
         } catch {
-            showAlert(title: "ホットキー登録に失敗しました", message: error.localizedDescription)
+            showAlert(title: L10n.tr("alert.hotKeyRegistrationFailed.title"), message: error.localizedDescription)
         }
     }
 
@@ -129,7 +129,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.removeAllItems()
 
         if store.items.isEmpty {
-            let emptyItem = NSMenuItem(title: "履歴はありません", action: nil, keyEquivalent: "")
+            let emptyItem = NSMenuItem(title: L10n.tr("menu.emptyHistory"), action: nil, keyEquivalent: "")
             emptyItem.isEnabled = false
             menu.addItem(emptyItem)
         } else {
@@ -145,39 +145,45 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
 
-        let hotKeyItem = NSMenuItem(title: "履歴メニュー: \(settingsStore.settings.hotKey.displayName)",
+        let hotKeyItem = NSMenuItem(title: L10n.tr("menu.hotKey", settingsStore.settings.hotKey.displayName),
                                     action: nil,
                                     keyEquivalent: "")
         hotKeyItem.isEnabled = false
         menu.addItem(hotKeyItem)
 
-        let searchItem = NSMenuItem(title: "検索...", action: #selector(showHistoryPanel), keyEquivalent: "")
+        let searchItem = NSMenuItem(title: L10n.tr("menu.search"),
+                                    action: #selector(showHistoryPanel),
+                                    keyEquivalent: "")
         searchItem.target = self
         menu.addItem(searchItem)
 
         if monitor?.isPaused == true {
-            let pausedItem = NSMenuItem(title: "状態: コピー履歴を保存していません", action: nil, keyEquivalent: "")
+            let pausedItem = NSMenuItem(title: L10n.tr("menu.pauseStatus"), action: nil, keyEquivalent: "")
             pausedItem.isEnabled = false
             menu.addItem(pausedItem)
         }
 
-        let pauseTitle = monitor?.isPaused == true ? "コピー履歴の保存を再開" : "コピー履歴の保存を一時停止"
+        let pauseTitle = monitor?.isPaused == true ? L10n.tr("menu.pauseResume") : L10n.tr("menu.pauseStart")
         let pauseItem = NSMenuItem(title: pauseTitle, action: #selector(togglePause), keyEquivalent: "")
         pauseItem.target = self
         menu.addItem(pauseItem)
 
-        let settingsItem = NSMenuItem(title: "設定...", action: #selector(showSettings), keyEquivalent: ",")
+        let settingsItem = NSMenuItem(title: L10n.tr("menu.settings"),
+                                      action: #selector(showSettings),
+                                      keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
 
-        let clearItem = NSMenuItem(title: "履歴を削除...", action: #selector(clearHistory), keyEquivalent: "")
+        let clearItem = NSMenuItem(title: L10n.tr("menu.clearHistory"),
+                                   action: #selector(clearHistory),
+                                   keyEquivalent: "")
         clearItem.target = self
         clearItem.isEnabled = !store.items.isEmpty
         menu.addItem(clearItem)
 
         menu.addItem(.separator())
 
-        let quitItem = NSMenuItem(title: "終了", action: #selector(quit), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: L10n.tr("menu.quit"), action: #selector(quit), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
     }
@@ -218,11 +224,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func clearHistory() {
         let alert = NSAlert()
-        alert.messageText = "履歴を削除しますか？"
-        alert.informativeText = "保存済みのクリップボード履歴をすべて削除します。"
+        alert.messageText = L10n.tr("alert.clearHistory.title")
+        alert.informativeText = L10n.tr("alert.clearHistory.message")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "削除")
-        alert.addButton(withTitle: "キャンセル")
+        alert.addButton(withTitle: L10n.tr("button.delete"))
+        alert.addButton(withTitle: L10n.tr("button.cancel"))
 
         guard alert.runModal() == .alertFirstButtonReturn else {
             return
@@ -233,7 +239,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             rebuildStatusMenu()
             historyPanelController.refresh()
         } catch {
-            showAlert(title: "履歴削除に失敗しました", message: error.localizedDescription)
+            showAlert(title: L10n.tr("alert.clearHistoryFailed.title"), message: error.localizedDescription)
         }
     }
 
@@ -250,12 +256,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             try monitor.copyToPasteboard(item)
             let pasted = PasteController.pasteIntoPreviousApplication(previousApplication)
             if !pasted {
-                let message = "貼り付けにはアクセシビリティ権限が必要です。"
-                    + "システム設定で MacClipy を許可してください。"
-                showAlert(title: "コピーしました", message: message)
+                showAlert(
+                    title: L10n.tr("alert.copy.title"),
+                    message: L10n.tr("alert.accessibilityPermission.message")
+                )
             }
         } catch {
-            showAlert(title: "貼り付けに失敗しました", message: error.localizedDescription)
+            showAlert(title: L10n.tr("alert.pasteFailed.title"), message: error.localizedDescription)
         }
     }
 
@@ -274,7 +281,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         alert.messageText = title
         alert.informativeText = message
         alert.alertStyle = .informational
-        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: L10n.tr("button.ok"))
         alert.runModal()
     }
 }

@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "MacClipy",
+    defaultLocalization: "ja",
     platforms: [
         .macOS(.v13)
     ],
@@ -13,6 +14,9 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "MacClipy",
+            resources: [
+                .process("Resources")
+            ],
             swiftSettings: [
                 .unsafeFlags(["-parse-as-library"])
             ]

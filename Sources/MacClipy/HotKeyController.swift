@@ -8,9 +8,9 @@ public enum HotKeyError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .registrationFailed(let status):
-            return "ホットキー登録に失敗しました: \(status)"
+            return L10n.tr("hotKey.error.registrationFailed", status)
         case .unsupportedShortcut(let shortcut):
-            return "\(shortcut) はホットキーとして登録できません。"
+            return L10n.tr("hotKey.error.unsupportedShortcut", shortcut)
         }
     }
 }
