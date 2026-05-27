@@ -8,11 +8,16 @@ enum HistoryPopupInitialMode {
 }
 
 struct HistoryPopupResult: Identifiable, Equatable {
+    let id: UUID
     let item: ClipboardItem
     let favorite: FavoriteItem?
 
-    var id: UUID {
-        favorite?.id ?? item.id
+    static func historyItem(_ item: ClipboardItem, favorite: FavoriteItem?) -> HistoryPopupResult {
+        HistoryPopupResult(id: item.id, item: item, favorite: favorite)
+    }
+
+    static func favoriteItem(_ favorite: FavoriteItem) -> HistoryPopupResult {
+        HistoryPopupResult(id: favorite.id, item: favorite.clipboardItem, favorite: favorite)
     }
 
     var title: String {
@@ -44,6 +49,8 @@ final class HistoryPopupModel {
     var folderFilter: FavoriteFolderFilter = .all
     var selectedRow = 0
     var revision = 0
+    var presentationRevision = 0
+    private(set) var results: [HistoryPopupResult] = []
     var isShowingFavoriteNamePrompt = false
 
     var onChoose: ((ClipboardItem) -> Void)?
@@ -59,32 +66,19 @@ final class HistoryPopupModel {
         favoritesModel.folders
     }
 
-    var results: [HistoryPopupResult] {
-        _ = revision
-
-        switch mode {
-        case .all:
-            return historyModel.search(query).map { item in
-                HistoryPopupResult(item: item, favorite: favoritesModel.favorite(for: item))
-            }
-        case .favorites:
-            return favoritesModel.search(query, folderFilter: folderFilter).map { favorite in
-                HistoryPopupResult(item: favorite.clipboardItem, favorite: favorite)
-            }
-        }
-    }
-
     func prepare(initialMode: HistoryPopupInitialMode) {
         query = ""
         mode = initialMode == .favorites ? .favorites : .all
         folderFilter = .all
         selectedRow = 0
+        presentationRevision += 1
         refresh()
     }
 
     func refresh() {
         historyModel.refreshFromStore()
         favoritesModel.refreshFromStore()
+        results = makeResults()
         selectedRow = clampedRow(selectedRow)
         revision += 1
     }
@@ -140,19 +134,19 @@ final class HistoryPopupModel {
     }
 
     func chooseItem(at row: Int) {
-        let currentResults = results
-        guard currentResults.indices.contains(row) else {
+        guard results.indices.contains(row) else {
             return
         }
 
-        let result = currentResults[row]
-        if let favorite = result.favorite {
-            try? favoritesModel.store.markUsed(id: favorite.id)
-            favoritesModel.refreshFromStore()
+        choose(results[row], selectedRow: row)
+    }
+
+    func chooseItem(id: UUID) {
+        guard let row = results.firstIndex(where: { $0.id == id }) else {
+            return
         }
 
-        onChoose?(result.item)
-        close()
+        choose(results[row], selectedRow: row)
     }
 
     func toggleFavoriteForSelectedItem() {
@@ -160,33 +154,70 @@ final class HistoryPopupModel {
     }
 
     func toggleFavorite(at row: Int) {
-        let currentResults = results
-        guard currentResults.indices.contains(row) else {
+        guard results.indices.contains(row) else {
             return
         }
 
-        do {
-            if let favorite = currentResults[row].favorite {
-                try favoritesModel.store.removeFavorite(id: favorite.id)
-            } else {
-                let item = currentResults[row].item
-                let title = promptForFavoriteTitle(defaultTitle: FavoriteItem.defaultDisplayTitle(for: item.content))
-                guard let title else {
-                    return
-                }
-                try favoritesModel.store.addFavorite(for: item, displayTitle: title)
-            }
+        toggleFavorite(results[row])
+    }
 
-            refresh()
-        } catch {
-            NSLog("MacClipy failed to toggle favorite: \(error.localizedDescription)")
+    func toggleFavorite(id: UUID) {
+        guard let result = results.first(where: { $0.id == id }) else {
+            return
         }
+
+        toggleFavorite(result)
     }
 
     func appendSearchText(_ text: String) {
         query += text
         selectedRow = 0
         refresh()
+    }
+
+    private func makeResults() -> [HistoryPopupResult] {
+        switch mode {
+        case .all:
+            historyModel.search(query).map { item in
+                HistoryPopupResult.historyItem(item, favorite: favoritesModel.favorite(for: item))
+            }
+        case .favorites:
+            favoritesModel.search(query, folderFilter: folderFilter).map { favorite in
+                HistoryPopupResult.favoriteItem(favorite)
+            }
+        }
+    }
+
+    private func choose(_ result: HistoryPopupResult, selectedRow row: Int) {
+        selectedRow = row
+        if let favorite = result.favorite {
+            try? favoritesModel.store.markUsed(id: favorite.id)
+            favoritesModel.refreshFromStore()
+            results = makeResults()
+            selectedRow = clampedRow(selectedRow)
+            revision += 1
+        }
+
+        onChoose?(result.item)
+        close()
+    }
+
+    private func toggleFavorite(_ result: HistoryPopupResult) {
+        do {
+            if let favorite = result.favorite {
+                try favoritesModel.store.removeFavorite(id: favorite.id)
+            } else {
+                let title = promptForFavoriteTitle(defaultTitle: FavoriteItem.defaultDisplayTitle(for: result.item.content))
+                guard let title else {
+                    return
+                }
+                try favoritesModel.store.addFavorite(for: result.item, displayTitle: title)
+            }
+
+            refresh()
+        } catch {
+            NSLog("MacClipy failed to toggle favorite: \(error.localizedDescription)")
+        }
     }
 
     private func clampedRow(_ row: Int) -> Int {

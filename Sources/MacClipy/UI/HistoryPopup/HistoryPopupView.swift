@@ -33,6 +33,10 @@ struct HistoryPopupView: View {
             TextField(L10n.tr("historyPopup.searchPlaceholder"), text: $model.query)
                 .textFieldStyle(.roundedBorder)
                 .focused($searchFocused)
+                .id(model.presentationRevision)
+                .onChange(of: model.presentationRevision) {
+                    searchFocused = true
+                }
 
             Button {
                 model.requestSettings()
@@ -90,18 +94,18 @@ struct HistoryPopupView: View {
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, minHeight: 300)
                     } else {
-                        ForEach(Array(model.results.enumerated()), id: \.element.id) { index, result in
+                        ForEach(Array(model.results.enumerated()), id: \.element.id) { row, result in
                             HistoryPopupRow(
                                 result: result,
-                                isSelected: index == model.selectedRow,
+                                isSelected: row == model.selectedRow,
                                 onChoose: {
-                                    model.chooseItem(at: index)
+                                    model.chooseItem(id: result.id)
                                 },
                                 onToggleFavorite: {
-                                    model.toggleFavorite(at: index)
+                                    model.toggleFavorite(id: result.id)
                                 }
                             )
-                            .id(index)
+                            .id(row)
                         }
                     }
                 }
@@ -153,8 +157,17 @@ private struct HistoryPopupRow: View {
             .help(L10n.tr("favorites.toggle"))
         }
         .padding(.horizontal, 10)
-        .frame(height: 44)
-        .background(isSelected ? Color.accentColor.opacity(0.18) : Color.clear)
+        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        .background {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isSelected ? Color.accentColor.opacity(0.26) : Color.clear)
+        }
+        .overlay {
+            if isSelected {
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.accentColor.opacity(0.38), lineWidth: 1)
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .contentShape(Rectangle())
         .onTapGesture(perform: onChoose)

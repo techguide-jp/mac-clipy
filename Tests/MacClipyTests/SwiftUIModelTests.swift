@@ -69,6 +69,64 @@ final class SwiftUIModelTests: XCTestCase {
         XCTAssertEqual(popupModel.selectedRow, 0)
     }
 
+    func testHistoryPopupChoosesDisplayedSnapshotWhenStoreChangesBeforeRefresh() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        try historyModel.store.add(content: "first", sourceBundleID: nil, at: Date(timeIntervalSince1970: 10))
+        try historyModel.store.add(content: "second", sourceBundleID: nil, at: Date(timeIntervalSince1970: 20))
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
+        )
+        popupModel.prepare(initialMode: .all)
+        let displayedResult = popupModel.results[1]
+        var chosenItem: ClipboardItem?
+        popupModel.onChoose = { item in
+            chosenItem = item
+        }
+
+        try historyModel.store.add(content: "third", sourceBundleID: nil, at: Date(timeIntervalSince1970: 30))
+        popupModel.chooseItem(at: 1)
+
+        XCTAssertEqual(chosenItem?.id, displayedResult.item.id)
+        XCTAssertEqual(chosenItem?.content, "first")
+    }
+
+    func testHistoryPopupPrepareResetsSearchPresentationState() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        try historyModel.store.add(content: "first", sourceBundleID: nil)
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
+        )
+
+        popupModel.prepare(initialMode: .all)
+        let firstPresentationRevision = popupModel.presentationRevision
+        popupModel.query = "stale search"
+
+        popupModel.prepare(initialMode: .all)
+
+        XCTAssertEqual(popupModel.query, "")
+        XCTAssertGreaterThan(popupModel.presentationRevision, firstPresentationRevision)
+    }
+
+    func testHistoryPopupHistoryResultKeepsClipboardIdentityWhenFavorited() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        let favoriteStore = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let item = try XCTUnwrap(
+            try historyModel.store.add(content: "favorite source", sourceBundleID: nil, at: Date(timeIntervalSince1970: 10))
+        )
+        let favorite = try favoriteStore.addFavorite(for: item)
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: favoriteStore)
+        )
+
+        popupModel.prepare(initialMode: .all)
+
+        XCTAssertEqual(popupModel.results.first?.id, item.id)
+        XCTAssertNotEqual(popupModel.results.first?.id, favorite.id)
+    }
+
     func testFavoritesModelFiltersAssignsAndRemovesFolders() throws {
         let model = FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
         let favorite = try model.store.addFavorite(for: makeItem(content: "deploy command", at: 10))
