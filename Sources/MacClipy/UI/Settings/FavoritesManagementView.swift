@@ -7,6 +7,20 @@ struct FavoritesManagementView: View {
         case favorite(UUID)
     }
 
+    enum DeletionConfirmation: Identifiable {
+        case folder(UUID)
+        case favorite(UUID)
+
+        var id: String {
+            switch self {
+            case let .folder(folderID):
+                "folder-\(folderID)"
+            case let .favorite(favoriteID):
+                "favorite-\(favoriteID)"
+            }
+        }
+    }
+
     @Bindable var model: FavoritesModel
     @State var query = ""
     @State var assignmentFolderID: UUID?
@@ -16,6 +30,7 @@ struct FavoritesManagementView: View {
     @State var editingFolderName = ""
     @State var editingFavoriteID: UUID?
     @State var editingFavoriteTitle = ""
+    @State var deletionConfirmation: DeletionConfirmation?
     @FocusState var focusedFolderField: FolderFieldFocus?
 
     var body: some View {
@@ -26,6 +41,16 @@ struct FavoritesManagementView: View {
             Divider()
 
             itemColumn
+        }
+        .alert(deletionConfirmationTitle, isPresented: deletionConfirmationBinding) {
+            Button(L10n.tr("button.cancel"), role: .cancel) {
+                deletionConfirmation = nil
+            }
+            Button(deletionConfirmationActionTitle, role: .destructive) {
+                confirmDeletion()
+            }
+        } message: {
+            Text(deletionConfirmationMessage)
         }
     }
 
@@ -98,7 +123,7 @@ struct FavoritesManagementView: View {
                     .help(L10n.tr("settings.favorites.folder.down"))
 
                     Button(role: .destructive) {
-                        model.deleteSelectedFolder()
+                        requestDeleteSelectedFolder()
                     } label: {
                         Image(systemName: "trash")
                             .accessibilityLabel(L10n.tr("settings.favorites.folder.delete"))
@@ -215,7 +240,7 @@ struct FavoritesManagementView: View {
                 Spacer()
 
                 Button(role: .destructive) {
-                    model.removeSelectedFavorite()
+                    requestRemoveSelectedFavorite()
                 } label: {
                     Image(systemName: "star.slash")
                         .accessibilityLabel(L10n.tr("settings.favorites.item.remove"))
@@ -232,5 +257,56 @@ struct FavoritesManagementView: View {
         }
 
         return model.items.first { $0.id == selectedFavoriteID }
+    }
+
+    private var deletionConfirmationBinding: Binding<Bool> {
+        Binding {
+            deletionConfirmation != nil
+        } set: { isPresented in
+            if !isPresented {
+                deletionConfirmation = nil
+            }
+        }
+    }
+
+    private var deletionConfirmationTitle: String {
+        switch deletionConfirmation {
+        case .folder:
+            L10n.tr("settings.favorites.folder.delete")
+        case .favorite:
+            L10n.tr("settings.favorites.item.remove")
+        case nil:
+            ""
+        }
+    }
+
+    private var deletionConfirmationActionTitle: String {
+        switch deletionConfirmation {
+        case .folder:
+            L10n.tr("settings.favorites.folder.delete")
+        case .favorite:
+            L10n.tr("settings.favorites.item.remove")
+        case nil:
+            L10n.tr("button.delete")
+        }
+    }
+
+    private var deletionConfirmationMessage: String {
+        switch deletionConfirmation {
+        case let .folder(folderID):
+            L10n.tr("settings.favorites.folder.deleteConfirmMessage", folderName(for: folderID))
+        case let .favorite(favoriteID):
+            L10n.tr("settings.favorites.item.removeConfirmMessage", favoriteTitle(for: favoriteID))
+        case nil:
+            ""
+        }
+    }
+
+    private func folderName(for folderID: UUID) -> String {
+        model.folders.first { $0.id == folderID }?.name ?? L10n.tr("settings.favorites.folder.none")
+    }
+
+    private func favoriteTitle(for favoriteID: UUID) -> String {
+        model.items.first { $0.id == favoriteID }?.menuTitle ?? L10n.tr("settings.favorites.items")
     }
 }

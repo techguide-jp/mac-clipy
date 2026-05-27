@@ -132,7 +132,7 @@ extension FavoritesManagementView {
                 Divider()
 
                 Button(role: .destructive) {
-                    deleteFolder(editableFolder)
+                    requestDeleteFolder(editableFolder)
                 } label: {
                     Label(L10n.tr("settings.favorites.folder.delete"), systemImage: "trash")
                 }
@@ -252,7 +252,7 @@ extension FavoritesManagementView {
         Divider()
 
         Button(role: .destructive) {
-            removeFavorite(favorite)
+            requestRemoveFavorite(favorite)
         } label: {
             Label(L10n.tr("settings.favorites.item.remove"), systemImage: "star.slash")
         }

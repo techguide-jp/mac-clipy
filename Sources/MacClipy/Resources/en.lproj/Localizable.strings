@@ -71,6 +71,7 @@
 "settings.favorites.folder.add" = "New Folder";
 "settings.favorites.folder.all" = "All";
 "settings.favorites.folder.delete" = "Delete Folder";
+"settings.favorites.folder.deleteConfirmMessage" = "Delete the folder \"%@\"? Favorites inside it will not be deleted and will stay unclassified.";
 "settings.favorites.folder.deleteMessage" = "Only the folder will be deleted. Favorites inside it stay unclassified.";
 "settings.favorites.folder.down" = "Down";
 "settings.favorites.folder.namePrompt" = "Enter a folder name.";
@@ -86,6 +87,7 @@
 "settings.favorites.item.favoriteName" = "Favorite Name";
 "settings.favorites.item.namedDetail" = "Content: %@ / %d uses";
 "settings.favorites.item.remove" = "Remove Favorite";
+"settings.favorites.item.removeConfirmMessage" = "Remove \"%@\" from favorites? The copied value will stay in history.";
 "settings.favorites.item.removeFromFolder" = "Remove from Folder";
 "settings.favorites.item.rename" = "Rename Title";
 "settings.favorites.item.titlePrompt" = "Enter a display title.";

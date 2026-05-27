@@ -70,6 +70,19 @@ extension FavoritesManagementView {
         model.moveSelectedFolder(by: offset)
     }
 
+    func requestDeleteSelectedFolder() {
+        guard case let .folder(folderID) = model.selectedFolderFilter else {
+            return
+        }
+
+        deletionConfirmation = .folder(folderID)
+    }
+
+    func requestDeleteFolder(_ folder: FavoriteFolder) {
+        model.selectFolderFilter(.folder(folder.id))
+        deletionConfirmation = .folder(folder.id)
+    }
+
     func deleteFolder(_ folder: FavoriteFolder) {
         model.selectFolderFilter(.folder(folder.id))
         model.deleteSelectedFolder()
@@ -107,10 +120,42 @@ extension FavoritesManagementView {
         model.removeSelectedFavorite(from: folderID)
     }
 
+    func requestRemoveSelectedFavorite() {
+        guard let selectedFavoriteID = model.selectedFavoriteID else {
+            return
+        }
+
+        deletionConfirmation = .favorite(selectedFavoriteID)
+    }
+
+    func requestRemoveFavorite(_ favorite: FavoriteItem) {
+        model.selectFavorite(favorite)
+        deletionConfirmation = .favorite(favorite.id)
+    }
+
     func removeFavorite(_ favorite: FavoriteItem) {
         model.selectFavorite(favorite)
         model.removeSelectedFavorite()
         cancelFavoriteEditing()
+    }
+
+    func confirmDeletion() {
+        guard let deletionConfirmation else {
+            return
+        }
+
+        switch deletionConfirmation {
+        case let .folder(folderID):
+            if let folder = model.folders.first(where: { $0.id == folderID }) {
+                deleteFolder(folder)
+            }
+        case let .favorite(favoriteID):
+            if let favorite = model.items.first(where: { $0.id == favoriteID }) {
+                removeFavorite(favorite)
+            }
+        }
+
+        self.deletionConfirmation = nil
     }
 
     func cancelFavoriteEditing() {

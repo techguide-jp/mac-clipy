@@ -71,6 +71,7 @@
 "settings.favorites.folder.add" = "フォルダ作成";
 "settings.favorites.folder.all" = "すべて";
 "settings.favorites.folder.delete" = "フォルダ削除";
+"settings.favorites.folder.deleteConfirmMessage" = "フォルダ「%@」を削除します。中のお気に入りは削除されず、未分類として残ります。";
 "settings.favorites.folder.deleteMessage" = "フォルダだけを削除し、中のお気に入りは未分類として残します。";
 "settings.favorites.folder.down" = "下へ";
 "settings.favorites.folder.namePrompt" = "フォルダ名を入力してください。";
@@ -86,6 +87,7 @@
 "settings.favorites.item.favoriteName" = "お気に入り名";
 "settings.favorites.item.namedDetail" = "コピー内容: %@ / 利用 %d 回";
 "settings.favorites.item.remove" = "お気に入り解除";
+"settings.favorites.item.removeConfirmMessage" = "お気に入り「%@」を解除します。履歴のコピー値は削除されません。";
 "settings.favorites.item.removeFromFolder" = "このフォルダから外す";
 "settings.favorites.item.rename" = "表示名変更";
 "settings.favorites.item.titlePrompt" = "表示名を入力してください。";
