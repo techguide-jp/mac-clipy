@@ -301,6 +301,27 @@ final class SwiftUIModelTests: XCTestCase {
         XCTAssertEqual(model.selectedFolderFilter, .folder(folderID))
     }
 
+    func testSettingsWindowFrameIsMovedInsideVisibleFrame() {
+        let visibleFrame = NSRect(x: 0, y: 0, width: 1000, height: 800)
+        let offscreenFrame = NSRect(x: 760, y: 120, width: 360, height: 300)
+
+        let fittedFrame = SettingsWindowController.frame(offscreenFrame, fittingIn: visibleFrame)
+
+        XCTAssertEqual(fittedFrame.origin.x, 640)
+        XCTAssertEqual(fittedFrame.origin.y, 120)
+        XCTAssertEqual(fittedFrame.size.width, 360)
+        XCTAssertEqual(fittedFrame.size.height, 300)
+    }
+
+    func testSettingsWindowFrameShrinksWhenLargerThanVisibleFrame() {
+        let visibleFrame = NSRect(x: 100, y: 100, width: 500, height: 400)
+        let oversizedFrame = NSRect(x: 40, y: 40, width: 700, height: 500)
+
+        let fittedFrame = SettingsWindowController.frame(oversizedFrame, fittingIn: visibleFrame)
+
+        XCTAssertEqual(fittedFrame, visibleFrame)
+    }
+
     private func makeItem(content: String, at timestamp: TimeInterval) -> ClipboardItem {
         ClipboardItem(
             content: content,
