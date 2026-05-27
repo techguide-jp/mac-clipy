@@ -19,7 +19,7 @@ public enum AppConstants {
     }
 
     public enum ClipboardMonitor {
-        // 反応速度を保ちつつ、ペーストボードを過剰に監視しない間隔にする。
+        /// 反応速度を保ちつつ、ペーストボードを過剰に監視しない間隔にする。
         public static let pollingInterval: TimeInterval = 0.45
     }
 
@@ -36,7 +36,7 @@ public enum AppConstants {
         public static let handlerEventCount = 1
         public static let registrationOptions: UInt32 = 0
         public static let fourCharCodeLength = 4
-        // CarbonのOSType署名は1バイトずつ32bit整数へ詰める。
+        /// CarbonのOSType署名は1バイトずつ32bit整数へ詰める。
         public static let fourCharCodeByteShift = 8
     }
 

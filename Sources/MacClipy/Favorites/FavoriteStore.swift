@@ -1,6 +1,6 @@
 import Foundation
 
-public enum FavoriteItemSort: String, CaseIterable, Equatable {
+public enum FavoriteItemSort: String, CaseIterable, Equatable, Hashable {
     case manual
     case title
     case lastUsed
@@ -176,14 +176,14 @@ public final class FavoriteStore {
 
     public init(favoritesURL: URL = AppPaths.favoritesURL) {
         self.favoritesURL = favoritesURL
-        self.data = FavoriteData()
+        data = FavoriteData()
 
-        self.encoder = JSONEncoder()
-        self.encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        self.encoder.dateEncodingStrategy = .iso8601
+        encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
 
-        self.decoder = JSONDecoder()
-        self.decoder.dateDecodingStrategy = .iso8601
+        decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
     }
 
     public var items: [FavoriteItem] {
@@ -370,7 +370,8 @@ public final class FavoriteStore {
         let currentFolder = sorted[currentIndex]
         let nextFolder = sorted[nextIndex]
         guard let currentDataIndex = data.folders.firstIndex(where: { $0.id == currentFolder.id }),
-              let nextDataIndex = data.folders.firstIndex(where: { $0.id == nextFolder.id }) else {
+              let nextDataIndex = data.folders.firstIndex(where: { $0.id == nextFolder.id })
+        else {
             throw FavoriteStoreError.folderNotFound
         }
 
@@ -402,8 +403,8 @@ public final class FavoriteStore {
         var removed = false
         for index in data.memberships.indices
             where data.memberships[index].favoriteItemID == favoriteID
-                && data.memberships[index].folderID == folderID
-                && data.memberships[index].deletedAt == nil {
+            && data.memberships[index].folderID == folderID
+            && data.memberships[index].deletedAt == nil {
             data.memberships[index].deletedAt = date
             removed = true
         }
@@ -494,5 +495,4 @@ public final class FavoriteStore {
             }
         }
     }
-
 }

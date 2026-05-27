@@ -34,10 +34,10 @@ Dock に出て、Command+Tab の対象になり、通常ウィンドウを前面
 現在の MacClipy は以下の方針にしている。
 
 - `Info.plist` に `LSUIElement=true` を入れる。
-- `AppDelegate.applicationDidFinishLaunching` で `NSApp.setActivationPolicy(.accessory)` を呼ぶ。
+- `AppDelegateBridge.applicationDidFinishLaunching` で `NSApp.setActivationPolicy(.accessory)` を呼ぶ。
 - Dock には表示しない。
 - 起動時に検索ウィンドウは自動表示しない。
-- `NSStatusBar.system.statusItem` のメニューバー項目と `Control + Option + V` のホットキーを入口にする。
+- `NSStatusBar.system.statusItem` のメニューバー項目、`Shift + Command + V` の履歴ショートカット、`Option + Command + V` のお気に入りショートカットを入口にする。
 
 この構成なら、Clipy 系アプリらしく常駐でき、Dock を占有しない。メニューバー項目が多い環境では隠れることがあるため、必要に応じて macOS 側でメニューバー項目を整理する。
 

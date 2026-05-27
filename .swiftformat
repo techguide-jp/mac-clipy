@@ -1,0 +1,9 @@
+--swiftversion 6.0
+--indent 4
+--semicolons never
+--commas inline
+--linebreaks lf
+--maxwidth 140
+--disable wrapMultilineStatementBraces
+--wraparguments before-first
+--wrapcollections before-first

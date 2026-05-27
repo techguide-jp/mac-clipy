@@ -1,5 +1,5 @@
-import XCTest
 @testable import MacClipy
+import XCTest
 
 final class ClipboardStoreTests: XCTestCase {
     func testDuplicateTextUpdatesExistingItem() throws {
@@ -21,10 +21,12 @@ final class ClipboardStoreTests: XCTestCase {
     func testMaxItemsTrimsOldEntries() throws {
         let store = makeStore(maxItems: 3)
 
-        for index in 0..<5 {
-            try store.add(content: "item-\(index)",
-                          sourceBundleID: nil,
-                          at: Date(timeIntervalSince1970: TimeInterval(index)))
+        for index in 0 ..< 5 {
+            try store.add(
+                content: "item-\(index)",
+                sourceBundleID: nil,
+                at: Date(timeIntervalSince1970: TimeInterval(index))
+            )
         }
 
         XCTAssertEqual(store.items.map(\.content), ["item-4", "item-3", "item-2"])
@@ -42,10 +44,12 @@ final class ClipboardStoreTests: XCTestCase {
     func testSearchSupportsLargeHistory() throws {
         let store = makeStore(maxItems: 200)
 
-        for index in 0..<100 {
-            try store.add(content: "project note \(index)",
-                          sourceBundleID: "com.example.Editor",
-                          at: Date(timeIntervalSince1970: TimeInterval(index)))
+        for index in 0 ..< 100 {
+            try store.add(
+                content: "project note \(index)",
+                sourceBundleID: "com.example.Editor",
+                at: Date(timeIntervalSince1970: TimeInterval(index))
+            )
         }
 
         XCTAssertEqual(store.search("").count, 100)
@@ -65,8 +69,7 @@ final class ClipboardStoreTests: XCTestCase {
     }
 
     func testExcludedBundleIdentifierIsNotCaptured() {
-        let settings = AppSettings(excludedBundleIdentifiers: ["com.example.SecretApp"])
-        let policy = ClipboardCapturePolicy(settings: settings)
+        let policy = ClipboardCapturePolicy(excludedBundleIdentifiers: ["com.example.SecretApp"])
 
         XCTAssertFalse(policy.shouldCapture(content: "secret", sourceBundleID: "com.example.SecretApp"))
         XCTAssertTrue(policy.shouldCapture(content: "normal", sourceBundleID: "com.example.Notes"))

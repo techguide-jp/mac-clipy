@@ -7,7 +7,7 @@ public final class ClipboardMonitor {
 
     private let pasteboard: NSPasteboard
     private let store: ClipboardStore
-    private let settingsStore: SettingsStore
+    private let excludedBundleIdentifiers: () -> [String]
     private let onChange: () -> Void
 
     private var timer: Timer?
@@ -15,15 +15,15 @@ public final class ClipboardMonitor {
 
     public init(
         store: ClipboardStore,
-        settingsStore: SettingsStore,
+        excludedBundleIdentifiers: @escaping () -> [String],
         pasteboard: NSPasteboard = .general,
         onChange: @escaping () -> Void
     ) {
         self.store = store
-        self.settingsStore = settingsStore
+        self.excludedBundleIdentifiers = excludedBundleIdentifiers
         self.pasteboard = pasteboard
         self.onChange = onChange
-        self.lastChangeCount = pasteboard.changeCount
+        lastChangeCount = pasteboard.changeCount
     }
 
     public func start() {
@@ -57,35 +57,51 @@ public final class ClipboardMonitor {
         writeToPasteboard(content)
     }
 
-    private func poll() {
+    @discardableResult
+    public func captureCurrentPasteboardIfNeeded(sourceBundleID: String?) -> Bool {
+        poll(sourceBundleID: sourceBundleID)
+    }
+
+    @discardableResult
+    private func poll() -> Bool {
+        poll(sourceBundleID: NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
+    }
+
+    @discardableResult
+    private func poll(sourceBundleID: String?) -> Bool {
         guard !isPaused else {
-            return
+            return false
         }
 
         let changeCount = pasteboard.changeCount
         guard changeCount != lastChangeCount else {
-            return
+            return false
         }
 
         lastChangeCount = changeCount
 
         guard let content = pasteboard.string(forType: .string) else {
-            return
+            return false
         }
 
-        let sourceBundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-        let policy = ClipboardCapturePolicy(settings: settingsStore.settings, maxItemSize: store.maxItemSize)
+        let policy = ClipboardCapturePolicy(
+            excludedBundleIdentifiers: excludedBundleIdentifiers(),
+            maxItemSize: store.maxItemSize
+        )
         guard policy.shouldCapture(content: content, sourceBundleID: sourceBundleID) else {
-            return
+            return false
         }
 
         do {
             if try store.add(content: content, sourceBundleID: sourceBundleID) != nil {
                 onChange()
+                return true
             }
         } catch {
             NSLog("MacClipy failed to store clipboard item: \(error.localizedDescription)")
         }
+
+        return false
     }
 
     private func writeToPasteboard(_ content: String) {

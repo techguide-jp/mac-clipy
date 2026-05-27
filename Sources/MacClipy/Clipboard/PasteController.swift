@@ -3,6 +3,10 @@ import ApplicationServices
 
 @MainActor
 enum PasteController {
+    static let previousApplicationActivationOptions: NSApplication.ActivationOptions = [
+        .activateAllWindows
+    ]
+
     static func pasteIntoPreviousApplication(_ application: NSRunningApplication?) -> Bool {
         let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
 
@@ -14,7 +18,11 @@ enum PasteController {
             return false
         }
 
-        application.activate(options: [.activateIgnoringOtherApps])
+        // MacClipy owns focus while the popup is open; yield it back before posting Command+V.
+        NSApp.yieldActivation(to: application)
+        guard application.activate(from: .current, options: previousApplicationActivationOptions) else {
+            return false
+        }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + AppConstants.Paste.delayBeforeSendingCommandV) {
             sendCommandV()

@@ -1,5 +1,5 @@
-import XCTest
 @testable import MacClipy
+import XCTest
 
 final class FavoriteStoreTests: XCTestCase {
     func testToggleFavoritePersistsSnapshot() throws {
@@ -107,6 +107,33 @@ final class FavoriteStoreTests: XCTestCase {
         XCTAssertEqual(favorite.menuTitle, "default title")
         XCTAssertEqual(favorite.contentMenuTitle, "default title")
         XCTAssertFalse(favorite.hasCustomDisplayTitle)
+    }
+
+    func testEmptyDisplayTitleFallsBackToContentTitle() throws {
+        let store = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let favorite = try store.addFavorite(
+            for: makeItem(content: "copied value", at: 10),
+            displayTitle: "   "
+        )
+
+        XCTAssertEqual(favorite.displayTitle, "copied value")
+        XCTAssertEqual(favorite.menuTitle, "copied value")
+        XCTAssertFalse(favorite.hasCustomDisplayTitle)
+    }
+
+    func testUpdatingDisplayTitleToEmptyFallsBackToContentTitle() throws {
+        let store = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let favorite = try store.addFavorite(
+            for: makeItem(content: "copied value", at: 10),
+            displayTitle: "Custom Name"
+        )
+
+        try store.updateDisplayTitle(id: favorite.id, title: "")
+
+        let updated = try XCTUnwrap(store.items.first)
+        XCTAssertEqual(updated.displayTitle, "copied value")
+        XCTAssertEqual(updated.menuTitle, "copied value")
+        XCTAssertFalse(updated.hasCustomDisplayTitle)
     }
 
     func testFavoriteSnapshotSurvivesHistoryTrim() throws {
