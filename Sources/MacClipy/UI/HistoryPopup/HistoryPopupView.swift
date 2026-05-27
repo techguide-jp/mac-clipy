@@ -69,7 +69,9 @@ struct HistoryPopupView: View {
 
             Picker(selection: $model.folderFilter) {
                 Text(L10n.tr("historyPopup.folders.all")).tag(FavoriteFolderFilter.all)
-                Text(L10n.tr("historyPopup.folders.unclassified")).tag(FavoriteFolderFilter.unclassified)
+                if model.showsUnclassifiedFolder {
+                    Text(L10n.tr("historyPopup.folders.unclassified")).tag(FavoriteFolderFilter.unclassified)
+                }
                 ForEach(model.folders) { folder in
                     Text(verbatim: folder.name).tag(FavoriteFolderFilter.folder(folder.id))
                 }
@@ -111,11 +113,19 @@ struct HistoryPopupView: View {
                 }
             }
             .onChange(of: model.selectedRow) {
+                guard !model.results.isEmpty else {
+                    return
+                }
+
                 withAnimation(.snappy(duration: 0.12)) {
                     proxy.scrollTo(model.selectedRow, anchor: .center)
                 }
             }
             .onChange(of: model.revision) {
+                guard !model.results.isEmpty else {
+                    return
+                }
+
                 proxy.scrollTo(model.selectedRow, anchor: .center)
             }
         }

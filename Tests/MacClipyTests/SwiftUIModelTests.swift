@@ -219,6 +219,59 @@ final class SwiftUIModelTests: XCTestCase {
         XCTAssertEqual(chosenItem?.content, "favorite copied body")
     }
 
+    func testHistoryPopupFoldersExcludeEmptyFolders() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        let favoriteStore = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let favorite = try favoriteStore.addFavorite(for: makeItem(content: "folder item", at: 10))
+        let filledFolder = try favoriteStore.createFolder(named: "Filled")
+        _ = try favoriteStore.createFolder(named: "Empty")
+        try favoriteStore.addFavorite(id: favorite.id, to: filledFolder.id)
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: favoriteStore)
+        )
+
+        popupModel.prepare(initialMode: .favorites)
+
+        XCTAssertEqual(popupModel.folders.map(\.name), ["Filled"])
+        popupModel.selectFolderByShortcut(1)
+        XCTAssertEqual(popupModel.folderFilter, .folder(filledFolder.id))
+        XCTAssertEqual(popupModel.results.map(\.item.content), ["folder item"])
+    }
+
+    func testHistoryPopupRejectsEmptyFolderFilter() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        let favoriteStore = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        try favoriteStore.addFavorite(for: makeItem(content: "available item", at: 10))
+        let emptyFolder = try favoriteStore.createFolder(named: "Empty")
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: favoriteStore)
+        )
+
+        popupModel.prepare(initialMode: .favorites)
+        popupModel.selectFolderFilter(.folder(emptyFolder.id))
+
+        XCTAssertEqual(popupModel.folderFilter, .all)
+        XCTAssertEqual(popupModel.results.map(\.item.content), ["available item"])
+    }
+
+    func testHistoryPopupHidesUnclassifiedFolderWhenEmpty() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        let favoriteStore = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let favorite = try favoriteStore.addFavorite(for: makeItem(content: "folder item", at: 10))
+        let filledFolder = try favoriteStore.createFolder(named: "Filled")
+        try favoriteStore.addFavorite(id: favorite.id, to: filledFolder.id)
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: favoriteStore)
+        )
+
+        popupModel.prepare(initialMode: .favorites)
+
+        XCTAssertFalse(popupModel.showsUnclassifiedFolder)
+    }
+
     func testFavoritesModelFiltersAssignsAndRemovesFolders() throws {
         let model = FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
         let favorite = try model.store.addFavorite(for: makeItem(content: "deploy command", at: 10))

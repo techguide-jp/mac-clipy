@@ -63,7 +63,13 @@ final class HistoryPopupModel {
     }
 
     var folders: [FavoriteFolder] {
-        favoritesModel.folders
+        favoritesModel.folders.filter { folder in
+            !favoritesModel.search("", folderFilter: .folder(folder.id)).isEmpty
+        }
+    }
+
+    var showsUnclassifiedFolder: Bool {
+        !favoritesModel.search("", folderFilter: .unclassified).isEmpty
     }
 
     func prepare(initialMode: HistoryPopupInitialMode) {
@@ -78,6 +84,7 @@ final class HistoryPopupModel {
     func refresh() {
         historyModel.refreshFromStore()
         favoritesModel.refreshFromStore()
+        normalizeFolderFilter()
         results = makeResults()
         selectedRow = clampedRow(selectedRow)
         revision += 1
@@ -102,6 +109,14 @@ final class HistoryPopupModel {
     }
 
     func selectFolderFilter(_ nextFilter: FavoriteFolderFilter) {
+        guard isAvailableFolderFilter(nextFilter) else {
+            folderFilter = .all
+            mode = .favorites
+            selectedRow = 0
+            refresh()
+            return
+        }
+
         folderFilter = nextFilter
         mode = .favorites
         selectedRow = 0
@@ -173,6 +188,24 @@ final class HistoryPopupModel {
         query += text
         selectedRow = 0
         refresh()
+    }
+
+    private func normalizeFolderFilter() {
+        guard isAvailableFolderFilter(folderFilter) else {
+            folderFilter = .all
+            return
+        }
+    }
+
+    private func isAvailableFolderFilter(_ filter: FavoriteFolderFilter) -> Bool {
+        switch filter {
+        case .all:
+            true
+        case .unclassified:
+            showsUnclassifiedFolder
+        case let .folder(folderID):
+            folders.contains { $0.id == folderID }
+        }
     }
 
     private func makeResults() -> [HistoryPopupResult] {
