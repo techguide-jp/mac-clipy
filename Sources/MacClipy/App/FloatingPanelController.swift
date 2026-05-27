@@ -48,6 +48,10 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         model.refresh()
     }
 
+    func close() {
+        panel.orderOut(nil)
+    }
+
     func windowDidResignKey(_: Notification) {
         guard !model.isShowingFavoriteNamePrompt else {
             return

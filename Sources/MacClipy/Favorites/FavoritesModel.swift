@@ -97,6 +97,54 @@ final class FavoritesModel {
         }
     }
 
+    func moveSelectedFolderFilter(by offset: Int) -> Bool {
+        let filters = selectableFolderFilters
+        guard !filters.isEmpty else {
+            return false
+        }
+
+        let currentIndex = filters.firstIndex(of: selectedFolderFilter) ?? 0
+        let targetIndex = min(max(currentIndex + offset, 0), filters.count - 1)
+        selectFolderFilter(filters[targetIndex])
+        return true
+    }
+
+    func moveSelectedFavorite(by offset: Int, query: String = "") -> Bool {
+        let visibleItems = visibleItems(query: query)
+        guard !visibleItems.isEmpty else {
+            selectFavorite(nil)
+            return false
+        }
+
+        let currentIndex = selectedFavoriteID.flatMap { selectedFavoriteID in
+            visibleItems.firstIndex { $0.id == selectedFavoriteID }
+        }
+        let targetIndex: Int = if let currentIndex {
+            min(max(currentIndex + offset, 0), visibleItems.count - 1)
+        } else {
+            offset < 0 ? visibleItems.count - 1 : 0
+        }
+
+        selectFavorite(visibleItems[targetIndex])
+        return true
+    }
+
+    func ensureSelectedFavoriteVisible(query: String = "") -> Bool {
+        let visibleItems = visibleItems(query: query)
+        guard !visibleItems.isEmpty else {
+            selectFavorite(nil)
+            return false
+        }
+
+        if let selectedFavoriteID,
+           visibleItems.contains(where: { $0.id == selectedFavoriteID }) {
+            return true
+        }
+
+        selectFavorite(visibleItems[0])
+        return true
+    }
+
     func createFolder() {
         do {
             let folder = try store.createFolder(named: newFolderName)
@@ -228,5 +276,9 @@ final class FavoritesModel {
         return favorite.displayTitle.range(of: normalizedQuery, options: options) != nil
             || favorite.contentSnapshot.range(of: normalizedQuery, options: options) != nil
             || favorite.sourceBundleID?.range(of: normalizedQuery, options: options) != nil
+    }
+
+    private var selectableFolderFilters: [FavoriteFolderFilter] {
+        [.all, .unclassified] + folders.map { .folder($0.id) }
     }
 }

@@ -56,6 +56,7 @@ final class HistoryPopupModel {
     var onChoose: ((ClipboardItem) -> Void)?
     var onClose: (() -> Void)?
     var onSettingsRequested: (() -> Void)?
+    var onHelpRequested: (() -> Void)?
 
     init(historyModel: ClipboardHistoryModel, favoritesModel: FavoritesModel) {
         self.historyModel = historyModel
@@ -97,6 +98,11 @@ final class HistoryPopupModel {
     func requestSettings() {
         close()
         onSettingsRequested?()
+    }
+
+    func requestHelp() {
+        close()
+        onHelpRequested?()
     }
 
     func selectMode(_ nextMode: Mode) {

@@ -38,6 +38,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         bringForward(window)
     }
 
+    func showKeyboardHelp() {
+        show()
+        appModel?.isKeyboardHelpPresented = true
+    }
+
     func windowWillClose(_: Notification) {
         window = nil
     }

@@ -1,10 +1,12 @@
 APP_BUNDLE := dist/MacClipy.app
 BUNDLE_ID := com.local.MacClipy
+BUILD_CONFIG ?= release
+DEVELOPMENT_CRASH_MODAL_ENABLED ?= 0
 
 .PHONY: build-app check format reapply-local run
 
 build-app:
-	@scripts/build-app.sh
+	@BUILD_CONFIG="$(BUILD_CONFIG)" DEVELOPMENT_CRASH_MODAL_ENABLED="$(DEVELOPMENT_CRASH_MODAL_ENABLED)" scripts/build-app.sh
 
 check:
 	@scripts/check.sh
@@ -19,4 +21,6 @@ reapply-local: build-app
 	@sleep 1
 	@osascript -e 'application id "$(BUNDLE_ID)" is running'
 
+run: BUILD_CONFIG = debug
+run: DEVELOPMENT_CRASH_MODAL_ENABLED = 1
 run: reapply-local

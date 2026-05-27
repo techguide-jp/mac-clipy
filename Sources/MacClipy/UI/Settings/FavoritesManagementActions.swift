@@ -1,9 +1,22 @@
 import Foundation
 
 extension FavoritesManagementView {
+    func selectFolderFilterFromKeyboard(_ filter: FavoriteFolderFilter) {
+        keyboardFocus = .folders
+        searchFocused = false
+        model.selectFolderFilter(filter)
+    }
+
+    func selectFavoriteFromKeyboard(_ favorite: FavoriteItem) {
+        keyboardFocus = .items
+        searchFocused = false
+        model.selectFavorite(favorite)
+    }
+
     func beginCreatingFolder() {
         cancelFolderEditing()
         cancelFavoriteEditing()
+        keyboardFocus = .folders
         isCreatingFolder = true
         newFolderDraft = ""
         focusedFolderField = .newFolder
@@ -13,6 +26,7 @@ extension FavoritesManagementView {
     func beginRenamingFolder(_ folder: FavoriteFolder) {
         isCreatingFolder = false
         cancelFavoriteEditing()
+        keyboardFocus = .folders
         newFolderDraft = ""
         model.selectFolderFilter(.folder(folder.id))
         editingFolderID = folder.id
@@ -42,6 +56,7 @@ extension FavoritesManagementView {
         isCreatingFolder = false
         newFolderDraft = ""
         focusedFolderField = nil
+        keyboardFocus = .folders
     }
 
     func commitFolderRename(_ folderID: UUID) {
@@ -55,6 +70,7 @@ extension FavoritesManagementView {
         editingFolderID = nil
         editingFolderName = ""
         focusedFolderField = nil
+        keyboardFocus = .folders
     }
 
     func cancelFolderEditing() {
@@ -91,6 +107,7 @@ extension FavoritesManagementView {
 
     func beginRenamingFavorite(_ favorite: FavoriteItem) {
         cancelFolderEditing()
+        keyboardFocus = .items
         model.selectFavorite(favorite)
         editingFavoriteID = favorite.id
         editingFavoriteTitle = favorite.menuTitle
@@ -157,5 +174,37 @@ extension FavoritesManagementView {
         editingFavoriteID = nil
         editingFavoriteTitle = ""
         focusedFolderField = nil
+    }
+
+    func moveKeyboardFocus(backward: Bool) {
+        let order: [FavoritesKeyboardFocus] = [.folders, .search, .items]
+        guard let currentIndex = order.firstIndex(of: keyboardFocus) else {
+            focusFoldersForKeyboard()
+            return
+        }
+
+        let nextIndex = backward
+            ? (currentIndex + order.count - 1) % order.count
+            : (currentIndex + 1) % order.count
+        focusKeyboardArea(order[nextIndex])
+    }
+
+    func focusKeyboardArea(_ focus: FavoritesKeyboardFocus) {
+        switch focus {
+        case .folders:
+            focusFoldersForKeyboard()
+        case .search:
+            keyboardFocus = .search
+            searchFocused = true
+        case .items:
+            keyboardFocus = .items
+            searchFocused = false
+            _ = model.ensureSelectedFavoriteVisible(query: query)
+        }
+    }
+
+    func focusFoldersForKeyboard() {
+        keyboardFocus = .folders
+        searchFocused = false
     }
 }

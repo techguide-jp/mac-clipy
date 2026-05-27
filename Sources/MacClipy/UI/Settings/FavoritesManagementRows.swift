@@ -105,9 +105,10 @@ extension FavoritesManagementView {
         .frame(maxWidth: .infinity, minHeight: 30, alignment: .leading)
         .background(model.selectedFolderFilter == filter ? Color.accentColor.opacity(0.16) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 6))
+        .overlay(focusRing(isFocused: keyboardFocus == .folders && model.selectedFolderFilter == filter))
         .contentShape(Rectangle())
         .onTapGesture {
-            model.selectFolderFilter(filter)
+            selectFolderFilterFromKeyboard(filter)
         }
         .contextMenu {
             if let editableFolder {
@@ -172,9 +173,10 @@ extension FavoritesManagementView {
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
         .background(model.selectedFavoriteID == favorite.id ? Color.accentColor.opacity(0.16) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 6))
+        .overlay(focusRing(isFocused: keyboardFocus == .items && model.selectedFavoriteID == favorite.id))
         .contentShape(Rectangle())
         .onTapGesture {
-            model.selectFavorite(favorite)
+            selectFavoriteFromKeyboard(favorite)
         }
         .contextMenu {
             favoriteContextMenu(for: favorite)
@@ -255,5 +257,10 @@ extension FavoritesManagementView {
         } label: {
             Label(L10n.tr("settings.favorites.item.remove"), systemImage: "star.slash")
         }
+    }
+
+    func focusRing(isFocused: Bool) -> some View {
+        RoundedRectangle(cornerRadius: 6)
+            .stroke(isFocused ? Color.accentColor : Color.clear, lineWidth: 1)
     }
 }
