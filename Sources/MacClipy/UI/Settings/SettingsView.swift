@@ -49,6 +49,11 @@ struct SettingsView: View {
                 appModel.isKeyboardHelpPresented = false
             }
         }
+        .sheet(item: $appModel.developmentCrashReport) { report in
+            DevelopmentCrashReportView(report: report) {
+                appModel.developmentCrashReport = nil
+            }
+        }
         .background(
             KeyboardEventBridge { event, isTextEditing in
                 SettingsKeyAction.handle(

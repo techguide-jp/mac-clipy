@@ -19,8 +19,10 @@ final class AppModel {
     private var statusItemController: StatusItemController?
     private var floatingPanelController: FloatingPanelController?
     @ObservationIgnored private var settingsWindowController: SettingsWindowController?
+    @ObservationIgnored private let developmentCrashReporter = DevelopmentCrashReporter()
     private var previousApplication: NSRunningApplication?
     var isKeyboardHelpPresented = false
+    var developmentCrashReport: DevelopmentCrashReport?
 
     var isPaused: Bool {
         monitor?.isPaused == true
@@ -43,6 +45,7 @@ final class AppModel {
 
     func applicationDidFinishLaunching() {
         NSApp.setActivationPolicy(.accessory)
+        let previousCrashReport = developmentCrashReporter.startLaunch()
 
         do {
             try SettingsMigration.migrateIfNeeded()
@@ -57,10 +60,15 @@ final class AppModel {
         setupFloatingPanel()
         setupStatusItem()
         setupKeyboardShortcuts()
+
+        if let previousCrashReport {
+            showDevelopmentCrashReport(previousCrashReport)
+        }
     }
 
     func applicationWillTerminate() {
         monitor?.stop()
+        developmentCrashReporter.markCleanTermination()
     }
 
     func showHistoryPopup() {
@@ -81,7 +89,15 @@ final class AppModel {
 
     func showKeyboardHelp() {
         floatingPanelController?.close()
+        developmentCrashReport = nil
         settingsWindowController?.showKeyboardHelp()
+    }
+
+    func showDevelopmentCrashReport(_ report: DevelopmentCrashReport) {
+        floatingPanelController?.close()
+        isKeyboardHelpPresented = false
+        settingsWindowController?.show()
+        developmentCrashReport = report
     }
 
     func refreshStatusMenu() {

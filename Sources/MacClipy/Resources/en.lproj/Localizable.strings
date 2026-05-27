@@ -22,6 +22,14 @@
 "button.keyboardHelp" = "Keyboard Help";
 "button.settings" = "Settings";
 "clipboard.emptyWhitespace" = "(whitespace only)";
+"developmentCrashReport.copied" = "Copied log";
+"developmentCrashReport.copyLog" = "Copy Log";
+"developmentCrashReport.logMissing" = "macOS crash log was not found. The app may have been force-quit, or it may have exited before a crash report was generated.";
+"developmentCrashReport.logPath" = "Crash Log";
+"developmentCrashReport.logTruncated" = "The log is long, so only the first portion is shown.";
+"developmentCrashReport.message" = "The previous development launch did not terminate cleanly. Previous launch: %@";
+"developmentCrashReport.revealInFinder" = "Show in Finder";
+"developmentCrashReport.title" = "Previous Crash Log";
 "favorites.error.emptyName" = "Enter a name.";
 "favorites.error.favoriteNotFound" = "Favorite not found.";
 "favorites.error.folderNotFound" = "Folder not found.";
