@@ -28,7 +28,8 @@
 "historyPopup.filter.favorites" = "Favorites";
 "historyPopup.filter.title" = "Scope";
 "historyPopup.favoriteName.add" = "Add";
-"historyPopup.favoriteName.message" = "Enter a display title for this favorite.";
+"historyPopup.favoriteName.message" = "Leave blank to use the copied value as the favorite name.";
+"historyPopup.favoriteName.placeholder" = "Leave blank to use copied value";
 "historyPopup.favoriteName.title" = "Favorite Name";
 "historyPopup.folders.all" = "All Folders";
 "historyPopup.folders.title" = "Folder";
@@ -90,7 +91,7 @@
 "settings.favorites.item.removeConfirmMessage" = "Remove \"%@\" from favorites? The copied value will stay in history.";
 "settings.favorites.item.removeFromFolder" = "Remove from Folder";
 "settings.favorites.item.rename" = "Rename Title";
-"settings.favorites.item.titlePrompt" = "Enter a display title.";
+"settings.favorites.item.titlePrompt" = "Leave blank to use the copied value.";
 "settings.favorites.items" = "Favorites";
 "settings.favorites.sort.lastUsed" = "Last Used";
 "settings.favorites.sort.manual" = "Manual";

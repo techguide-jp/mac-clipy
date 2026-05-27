@@ -28,7 +28,8 @@
 "historyPopup.filter.favorites" = "お気に入り";
 "historyPopup.filter.title" = "表示対象";
 "historyPopup.favoriteName.add" = "登録";
-"historyPopup.favoriteName.message" = "このお気に入りの表示名を入力してください。";
+"historyPopup.favoriteName.message" = "空欄の場合はコピー値をお気に入り名にします。";
+"historyPopup.favoriteName.placeholder" = "空欄ならコピー値を使用";
 "historyPopup.favoriteName.title" = "お気に入り名";
 "historyPopup.folders.all" = "全フォルダ";
 "historyPopup.folders.title" = "フォルダ";
@@ -90,7 +91,7 @@
 "settings.favorites.item.removeConfirmMessage" = "お気に入り「%@」を解除します。履歴のコピー値は削除されません。";
 "settings.favorites.item.removeFromFolder" = "このフォルダから外す";
 "settings.favorites.item.rename" = "表示名変更";
-"settings.favorites.item.titlePrompt" = "表示名を入力してください。";
+"settings.favorites.item.titlePrompt" = "空欄ならコピー値を使用します。";
 "settings.favorites.items" = "お気に入り";
 "settings.favorites.sort.lastUsed" = "最終利用順";
 "settings.favorites.sort.manual" = "手動順";

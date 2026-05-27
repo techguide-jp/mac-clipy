@@ -275,6 +275,7 @@ final class HistoryPopupModel {
 
         let textField = NSTextField(string: defaultTitle)
         textField.frame = NSRect(x: 0, y: 0, width: 320, height: 24)
+        textField.placeholderString = L10n.tr("historyPopup.favoriteName.placeholder")
         alert.accessoryView = textField
 
         guard alert.runModal() == .alertFirstButtonReturn else {
