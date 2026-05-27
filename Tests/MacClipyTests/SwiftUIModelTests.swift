@@ -322,6 +322,21 @@ final class SwiftUIModelTests: XCTestCase {
         XCTAssertEqual(fittedFrame, visibleFrame)
     }
 
+    func testStatusMenuShowsSettingsBeforeSearch() {
+        XCTAssertEqual(
+            StatusItemController.commandItemOrder,
+            [
+                .settings,
+                .search,
+                .favorites,
+                .pause,
+                .clearHistory,
+                .separator,
+                .quit
+            ]
+        )
+    }
+
     private func makeItem(content: String, at timestamp: TimeInterval) -> ClipboardItem {
         ClipboardItem(
             content: content,

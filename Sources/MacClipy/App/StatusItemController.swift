@@ -3,6 +3,26 @@ import KeyboardShortcuts
 
 @MainActor
 final class StatusItemController: NSObject, NSMenuDelegate {
+    enum CommandItem: Equatable {
+        case settings
+        case search
+        case favorites
+        case pause
+        case clearHistory
+        case separator
+        case quit
+    }
+
+    static let commandItemOrder: [CommandItem] = [
+        .settings,
+        .search,
+        .favorites,
+        .pause,
+        .clearHistory,
+        .separator,
+        .quit
+    ]
+
     private let historyModel: ClipboardHistoryModel
     private let monitorState: () -> Bool
     private let onCopyHistoryItem: (ClipboardItem) -> Void
@@ -117,33 +137,38 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
 
     private func addCommandItems(to menu: NSMenu) {
-        let searchItem = NSMenuItem(title: L10n.tr("menu.search"), action: #selector(showHistory), keyEquivalent: "")
-        searchItem.target = self
-        menu.addItem(searchItem)
-
-        let favoritesItem = NSMenuItem(title: L10n.tr("menu.favorites"), action: #selector(showFavorites), keyEquivalent: "")
-        favoritesItem.target = self
-        menu.addItem(favoritesItem)
-
-        let pauseTitle = monitorState() ? L10n.tr("menu.pauseResume") : L10n.tr("menu.pauseStart")
-        let pauseItem = NSMenuItem(title: pauseTitle, action: #selector(togglePause), keyEquivalent: "")
-        pauseItem.target = self
-        menu.addItem(pauseItem)
-
-        let settingsItem = NSMenuItem(title: L10n.tr("menu.settings"), action: #selector(showSettings), keyEquivalent: ",")
-        settingsItem.target = self
-        menu.addItem(settingsItem)
-
-        let clearItem = NSMenuItem(title: L10n.tr("menu.clearHistory"), action: #selector(clearHistory), keyEquivalent: "")
-        clearItem.target = self
-        clearItem.isEnabled = !historyModel.items.isEmpty
-        menu.addItem(clearItem)
-
-        menu.addItem(.separator())
-
-        let quitItem = NSMenuItem(title: L10n.tr("menu.quit"), action: #selector(quit), keyEquivalent: "q")
-        quitItem.target = self
-        menu.addItem(quitItem)
+        for item in Self.commandItemOrder {
+            switch item {
+            case .settings:
+                let menuItem = NSMenuItem(title: L10n.tr("menu.settings"), action: #selector(showSettings), keyEquivalent: ",")
+                menuItem.target = self
+                menu.addItem(menuItem)
+            case .search:
+                let menuItem = NSMenuItem(title: L10n.tr("menu.search"), action: #selector(showHistory), keyEquivalent: "")
+                menuItem.target = self
+                menu.addItem(menuItem)
+            case .favorites:
+                let menuItem = NSMenuItem(title: L10n.tr("menu.favorites"), action: #selector(showFavorites), keyEquivalent: "")
+                menuItem.target = self
+                menu.addItem(menuItem)
+            case .pause:
+                let title = monitorState() ? L10n.tr("menu.pauseResume") : L10n.tr("menu.pauseStart")
+                let menuItem = NSMenuItem(title: title, action: #selector(togglePause), keyEquivalent: "")
+                menuItem.target = self
+                menu.addItem(menuItem)
+            case .clearHistory:
+                let menuItem = NSMenuItem(title: L10n.tr("menu.clearHistory"), action: #selector(clearHistory), keyEquivalent: "")
+                menuItem.target = self
+                menuItem.isEnabled = !historyModel.items.isEmpty
+                menu.addItem(menuItem)
+            case .separator:
+                menu.addItem(.separator())
+            case .quit:
+                let menuItem = NSMenuItem(title: L10n.tr("menu.quit"), action: #selector(quit), keyEquivalent: "q")
+                menuItem.target = self
+                menu.addItem(menuItem)
+            }
+        }
     }
 
     private func shortcutDisplayName(for name: KeyboardShortcuts.Name) -> String {
