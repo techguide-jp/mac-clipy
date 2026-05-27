@@ -82,6 +82,8 @@
 "settings.favorites.item.addToFolder" = "追加";
 "settings.favorites.item.detail" = "利用 %d 回";
 "settings.favorites.item.detailWithFolders" = "利用 %d 回 / %@";
+"settings.favorites.item.copyValue" = "コピー値";
+"settings.favorites.item.favoriteName" = "お気に入り名";
 "settings.favorites.item.namedDetail" = "コピー内容: %@ / 利用 %d 回";
 "settings.favorites.item.remove" = "お気に入り解除";
 "settings.favorites.item.removeFromFolder" = "このフォルダから外す";

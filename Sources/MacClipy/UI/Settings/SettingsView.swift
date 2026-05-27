@@ -267,8 +267,31 @@ private struct FavoritesManagementView: View {
 
     private var selectedFavoriteEditor: some View {
         VStack(alignment: .leading, spacing: 8) {
-            TextField(L10n.tr("settings.favorites.item.titlePrompt"), text: $model.draftFavoriteTitle)
-                .disabled(model.selectedFavoriteID == nil)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(L10n.tr("settings.favorites.item.favoriteName"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField(L10n.tr("settings.favorites.item.titlePrompt"), text: $model.draftFavoriteTitle)
+                    .disabled(model.selectedFavoriteID == nil)
+            }
+
+            if let selectedFavorite {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(L10n.tr("settings.favorites.item.copyValue"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(verbatim: selectedFavorite.contentMenuTitle)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(Color.secondary.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+            }
 
             HStack {
                 Button {
@@ -319,6 +342,14 @@ private struct FavoritesManagementView: View {
         }
     }
 
+    private var selectedFavorite: FavoriteItem? {
+        guard let selectedFavoriteID = model.selectedFavoriteID else {
+            return nil
+        }
+
+        return model.items.first { $0.id == selectedFavoriteID }
+    }
+
     private func folderFilterButton(title: String, filter: FavoriteFolderFilter, systemImage: String) -> some View {
         Button {
             model.selectFolderFilter(filter)
@@ -347,10 +378,12 @@ private struct FavoritesManagementView: View {
                     Text(verbatim: favorite.menuTitle)
                         .font(.system(size: 13, weight: .medium))
                         .lineLimit(1)
-                    Text(verbatim: favoriteDetail(for: favorite))
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    if favorite.hasCustomDisplayTitle {
+                        Text(verbatim: favorite.contentMenuTitle)
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
                 }
                 Spacer()
             }
@@ -360,13 +393,5 @@ private struct FavoritesManagementView: View {
             .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
-    }
-
-    private func favoriteDetail(for favorite: FavoriteItem) -> String {
-        let folderNames = model.folderNames(for: favorite.id)
-        let folderSummary = folderNames.isEmpty
-            ? L10n.tr("settings.favorites.folder.unclassified")
-            : folderNames.joined(separator: ", ")
-        return L10n.tr("settings.favorites.item.detailWithFolders", favorite.useCount, folderSummary)
     }
 }

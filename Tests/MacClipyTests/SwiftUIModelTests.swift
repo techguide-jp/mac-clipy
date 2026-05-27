@@ -145,6 +145,42 @@ final class SwiftUIModelTests: XCTestCase {
         XCTAssertEqual(popupModel.results.first?.detail, "custom favorite name")
     }
 
+    func testHistoryPopupDoesNotDisplaySourceBundleID() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        try historyModel.store.add(
+            content: "copied body",
+            sourceBundleID: "com.example.Editor",
+            at: Date(timeIntervalSince1970: 10)
+        )
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
+        )
+
+        popupModel.prepare(initialMode: .all)
+
+        XCTAssertEqual(popupModel.results.first?.title, "copied body")
+        XCTAssertNil(popupModel.results.first?.detail)
+    }
+
+    func testHistoryPopupDoesNotDuplicateFavoriteNameWhenItMatchesCopiedContent() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        let favoriteStore = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let item = try XCTUnwrap(
+            try historyModel.store.add(content: "copied body", sourceBundleID: nil, at: Date(timeIntervalSince1970: 10))
+        )
+        try favoriteStore.addFavorite(for: item, displayTitle: "copied body")
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: favoriteStore)
+        )
+
+        popupModel.prepare(initialMode: .all)
+
+        XCTAssertEqual(popupModel.results.first?.title, "copied body")
+        XCTAssertNil(popupModel.results.first?.detail)
+    }
+
     func testHistoryPopupDisplaysCopiedContentBeforeCustomFavoriteTitleInFavoritesMode() throws {
         let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
         let favoriteStore = FavoriteStore(favoritesURL: temporaryFavoritesURL())

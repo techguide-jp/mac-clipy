@@ -28,7 +28,7 @@ struct HistoryPopupResult: Identifiable, Equatable {
         if let favorite, favorite.hasCustomDisplayTitle {
             favorite.menuTitle
         } else {
-            item.sourceBundleID
+            nil
         }
     }
 }

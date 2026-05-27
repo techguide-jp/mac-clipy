@@ -82,6 +82,8 @@
 "settings.favorites.item.addToFolder" = "Add";
 "settings.favorites.item.detail" = "%d uses";
 "settings.favorites.item.detailWithFolders" = "%d uses / %@";
+"settings.favorites.item.copyValue" = "Copy Value";
+"settings.favorites.item.favoriteName" = "Favorite Name";
 "settings.favorites.item.namedDetail" = "Content: %@ / %d uses";
 "settings.favorites.item.remove" = "Remove Favorite";
 "settings.favorites.item.removeFromFolder" = "Remove from Folder";
