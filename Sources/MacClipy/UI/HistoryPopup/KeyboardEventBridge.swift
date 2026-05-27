@@ -71,6 +71,11 @@ struct KeyboardEventBridge: NSViewRepresentable {
 enum HistoryPopupKeyAction {
     @MainActor
     static func handle(event: NSEvent, isTextEditing: Bool, model: HistoryPopupModel) -> Bool {
+        if KeyboardHelpKeyAction.isHelpEvent(event) {
+            model.requestHelp()
+            return true
+        }
+
         if handleCommand(event: event, model: model) {
             return true
         }

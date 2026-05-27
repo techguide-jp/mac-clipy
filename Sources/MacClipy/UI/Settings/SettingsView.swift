@@ -3,25 +3,65 @@ import LaunchAtLogin
 import SwiftUI
 
 struct SettingsView: View {
-    let appModel: AppModel
+    @Bindable var appModel: AppModel
+    @State private var selectedTab: SettingsTab = .general
+    @State private var favoriteSearchFocusRevision = 0
 
     var body: some View {
-        TabView {
-            GeneralSettingsView(
-                model: appModel.settingsModel,
-                onShortcutChange: appModel.refreshStatusMenu
-            )
-            .tabItem {
-                Text(L10n.tr("settings.tab.general"))
+        VStack(spacing: 12) {
+            HStack {
+                Spacer()
+
+                Button {
+                    appModel.showKeyboardHelp()
+                } label: {
+                    Image(systemName: "questionmark.circle")
+                        .accessibilityLabel(L10n.tr("button.keyboardHelp"))
+                }
+                .buttonStyle(.bordered)
+                .help(L10n.tr("button.keyboardHelp"))
             }
 
-            FavoritesManagementView(model: appModel.favoritesModel)
+            TabView(selection: $selectedTab) {
+                GeneralSettingsView(
+                    model: appModel.settingsModel,
+                    onShortcutChange: appModel.refreshStatusMenu
+                )
+                .tabItem {
+                    Text(L10n.tr("settings.tab.general"))
+                }
+                .tag(SettingsTab.general)
+
+                FavoritesManagementView(
+                    model: appModel.favoritesModel,
+                    searchFocusRevision: favoriteSearchFocusRevision
+                )
                 .tabItem {
                     Text(L10n.tr("settings.tab.favorites"))
                 }
+                .tag(SettingsTab.favorites)
+            }
         }
         .padding(16)
         .frame(width: 820, height: 580)
+        .sheet(isPresented: $appModel.isKeyboardHelpPresented) {
+            KeyboardHelpView {
+                appModel.isKeyboardHelpPresented = false
+            }
+        }
+        .background(
+            KeyboardEventBridge { event, isTextEditing in
+                SettingsKeyAction.handle(
+                    event: event,
+                    isTextEditing: isTextEditing,
+                    selectTab: { selectedTab = $0 },
+                    focusFavoritesSearch: {
+                        favoriteSearchFocusRevision += 1
+                    },
+                    showHelp: appModel.showKeyboardHelp
+                )
+            }
+        )
     }
 }
 
@@ -115,6 +155,13 @@ private struct GeneralSettingsView: View {
             settingRow(title: L10n.tr("settings.favoriteShortcut.title")) {
                 KeyboardShortcuts.Recorder(
                     for: .showFavorites,
+                    onChange: { _ in onShortcutChange() }
+                )
+            }
+
+            settingRow(title: L10n.tr("settings.helpShortcut.title")) {
+                KeyboardShortcuts.Recorder(
+                    for: .showHelp,
                     onChange: { _ in onShortcutChange() }
                 )
             }

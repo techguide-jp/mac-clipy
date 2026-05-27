@@ -22,6 +22,7 @@ struct FavoritesManagementView: View {
     }
 
     @Bindable var model: FavoritesModel
+    let searchFocusRevision: Int
     @State var query = ""
     @State var assignmentFolderID: UUID?
     @State var isCreatingFolder = false
@@ -32,6 +33,7 @@ struct FavoritesManagementView: View {
     @State var editingFavoriteTitle = ""
     @State var deletionConfirmation: DeletionConfirmation?
     @FocusState var focusedFolderField: FolderFieldFocus?
+    @FocusState private var searchFocused: Bool
 
     var body: some View {
         HStack(spacing: 16) {
@@ -52,6 +54,14 @@ struct FavoritesManagementView: View {
         } message: {
             Text(deletionConfirmationMessage)
         }
+        .onChange(of: searchFocusRevision) {
+            searchFocused = true
+        }
+        .background(
+            KeyboardEventBridge { event, isTextEditing in
+                handleKeyboard(event: event, isTextEditing: isTextEditing)
+            }
+        )
     }
 
     private var folderColumn: some View {
@@ -156,6 +166,7 @@ struct FavoritesManagementView: View {
             }
 
             TextField(L10n.tr("historyPopup.searchPlaceholder"), text: $query)
+                .focused($searchFocused)
 
             ScrollView {
                 LazyVStack(spacing: 4) {
@@ -251,7 +262,7 @@ struct FavoritesManagementView: View {
         }
     }
 
-    private var selectedFavorite: FavoriteItem? {
+    var selectedFavorite: FavoriteItem? {
         guard let selectedFavoriteID = model.selectedFavoriteID else {
             return nil
         }

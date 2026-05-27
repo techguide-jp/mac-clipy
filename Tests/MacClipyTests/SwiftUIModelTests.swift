@@ -345,6 +345,7 @@ final class SwiftUIModelTests: XCTestCase {
             StatusItemController.commandItemOrder,
             [
                 .settings,
+                .help,
                 .search,
                 .favorites,
                 .pause,

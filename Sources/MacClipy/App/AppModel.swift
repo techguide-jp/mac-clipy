@@ -20,6 +20,7 @@ final class AppModel {
     private var floatingPanelController: FloatingPanelController?
     @ObservationIgnored private var settingsWindowController: SettingsWindowController?
     private var previousApplication: NSRunningApplication?
+    var isKeyboardHelpPresented = false
 
     var isPaused: Bool {
         monitor?.isPaused == true
@@ -33,6 +34,9 @@ final class AppModel {
         }
         popupModel.onSettingsRequested = { [weak self] in
             self?.showSettings()
+        }
+        popupModel.onHelpRequested = { [weak self] in
+            self?.showKeyboardHelp()
         }
         settingsWindowController = SettingsWindowController(appModel: self)
     }
@@ -75,6 +79,11 @@ final class AppModel {
         settingsWindowController?.show()
     }
 
+    func showKeyboardHelp() {
+        floatingPanelController?.close()
+        settingsWindowController?.showKeyboardHelp()
+    }
+
     func refreshStatusMenu() {
         statusItemController?.rebuild()
     }
@@ -111,6 +120,7 @@ final class AppModel {
             },
             onShowHistory: { [weak self] in self?.showHistoryPopup() },
             onShowFavorites: { [weak self] in self?.showFavoritePopup() },
+            onShowHelp: { [weak self] in self?.showKeyboardHelp() },
             onTogglePause: { [weak self] in self?.togglePause() },
             onClearHistory: { [weak self] in self?.clearHistory() },
             onShowSettings: { [weak self] in self?.showSettings() },
@@ -132,6 +142,12 @@ final class AppModel {
         KeyboardShortcuts.onKeyUp(for: .showFavorites) { [weak self] in
             Task { @MainActor in
                 self?.showFavoritePopup()
+            }
+        }
+
+        KeyboardShortcuts.onKeyUp(for: .showHelp) { [weak self] in
+            Task { @MainActor in
+                self?.showKeyboardHelp()
             }
         }
     }

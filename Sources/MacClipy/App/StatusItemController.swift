@@ -5,6 +5,7 @@ import KeyboardShortcuts
 final class StatusItemController: NSObject, NSMenuDelegate {
     enum CommandItem: Equatable {
         case settings
+        case help
         case search
         case favorites
         case pause
@@ -15,6 +16,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     static let commandItemOrder: [CommandItem] = [
         .settings,
+        .help,
         .search,
         .favorites,
         .pause,
@@ -28,6 +30,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     private let onCopyHistoryItem: (ClipboardItem) -> Void
     private let onShowHistory: () -> Void
     private let onShowFavorites: () -> Void
+    private let onShowHelp: () -> Void
     private let onTogglePause: () -> Void
     private let onClearHistory: () -> Void
     private let onShowSettings: () -> Void
@@ -41,6 +44,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         onCopyHistoryItem: @escaping (ClipboardItem) -> Void,
         onShowHistory: @escaping () -> Void,
         onShowFavorites: @escaping () -> Void,
+        onShowHelp: @escaping () -> Void,
         onTogglePause: @escaping () -> Void,
         onClearHistory: @escaping () -> Void,
         onShowSettings: @escaping () -> Void,
@@ -51,6 +55,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         self.onCopyHistoryItem = onCopyHistoryItem
         self.onShowHistory = onShowHistory
         self.onShowFavorites = onShowFavorites
+        self.onShowHelp = onShowHelp
         self.onTogglePause = onTogglePause
         self.onClearHistory = onClearHistory
         self.onShowSettings = onShowSettings
@@ -129,6 +134,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         favoriteHotKeyItem.isEnabled = false
         menu.addItem(favoriteHotKeyItem)
 
+        let helpHotKeyItem = NSMenuItem(
+            title: L10n.tr("menu.helpHotKey", shortcutDisplayName(for: .showHelp)),
+            action: nil,
+            keyEquivalent: ""
+        )
+        helpHotKeyItem.isEnabled = false
+        menu.addItem(helpHotKeyItem)
+
         if monitorState() {
             let pausedItem = NSMenuItem(title: L10n.tr("menu.pauseStatus"), action: nil, keyEquivalent: "")
             pausedItem.isEnabled = false
@@ -141,6 +154,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             switch item {
             case .settings:
                 let menuItem = NSMenuItem(title: L10n.tr("menu.settings"), action: #selector(showSettings), keyEquivalent: ",")
+                menuItem.target = self
+                menu.addItem(menuItem)
+            case .help:
+                let menuItem = NSMenuItem(title: L10n.tr("menu.keyboardHelp"), action: #selector(showHelp), keyEquivalent: "/")
+                menuItem.keyEquivalentModifierMask = [.command, .shift]
                 menuItem.target = self
                 menu.addItem(menuItem)
             case .search:
@@ -172,7 +190,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
 
     private func shortcutDisplayName(for name: KeyboardShortcuts.Name) -> String {
-        KeyboardShortcuts.getShortcut(for: name).map { "\($0)" } ?? L10n.tr("settings.shortcut.notSet")
+        KeyboardShortcutDisplay.displayName(for: name)
     }
 
     @objc private func copyMenuItem(_ sender: NSMenuItem) {
@@ -192,6 +210,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     @objc private func showFavorites() {
         onShowFavorites()
+    }
+
+    @objc private func showHelp() {
+        onShowHelp()
     }
 
     @objc private func togglePause() {
