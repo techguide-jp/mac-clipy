@@ -99,13 +99,8 @@ extension FavoritesManagementView {
     }
 
     func commitFavoriteRename(_ favoriteID: UUID) {
-        let trimmedTitle = editingFavoriteTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedTitle.isEmpty else {
-            return
-        }
-
         model.selectFavorite(model.items.first { $0.id == favoriteID })
-        model.draftFavoriteTitle = trimmedTitle
+        model.draftFavoriteTitle = editingFavoriteTitle
         model.updateSelectedFavoriteTitle()
         cancelFavoriteEditing()
     }

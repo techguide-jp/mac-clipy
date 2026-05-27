@@ -109,6 +109,33 @@ final class FavoriteStoreTests: XCTestCase {
         XCTAssertFalse(favorite.hasCustomDisplayTitle)
     }
 
+    func testEmptyDisplayTitleFallsBackToContentTitle() throws {
+        let store = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let favorite = try store.addFavorite(
+            for: makeItem(content: "copied value", at: 10),
+            displayTitle: "   "
+        )
+
+        XCTAssertEqual(favorite.displayTitle, "copied value")
+        XCTAssertEqual(favorite.menuTitle, "copied value")
+        XCTAssertFalse(favorite.hasCustomDisplayTitle)
+    }
+
+    func testUpdatingDisplayTitleToEmptyFallsBackToContentTitle() throws {
+        let store = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let favorite = try store.addFavorite(
+            for: makeItem(content: "copied value", at: 10),
+            displayTitle: "Custom Name"
+        )
+
+        try store.updateDisplayTitle(id: favorite.id, title: "")
+
+        let updated = try XCTUnwrap(store.items.first)
+        XCTAssertEqual(updated.displayTitle, "copied value")
+        XCTAssertEqual(updated.menuTitle, "copied value")
+        XCTAssertFalse(updated.hasCustomDisplayTitle)
+    }
+
     func testFavoriteSnapshotSurvivesHistoryTrim() throws {
         let historyStore = ClipboardStore(historyURL: temporaryHistoryURL(), maxItems: 1)
         let favoriteStore = FavoriteStore(favoritesURL: temporaryFavoritesURL())

@@ -199,7 +199,6 @@ extension FavoritesManagementView {
                     .accessibilityLabel(L10n.tr("button.save"))
             }
             .buttonStyle(.plain)
-            .disabled(editingFavoriteTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
             Button {
                 cancelFavoriteEditing()

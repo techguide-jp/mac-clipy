@@ -301,6 +301,24 @@ final class SwiftUIModelTests: XCTestCase {
         XCTAssertEqual(model.selectedFolderFilter, .folder(folderID))
     }
 
+    func testFavoritesModelEmptyDraftTitleFallsBackToCopiedContent() throws {
+        let model = FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
+        let favorite = try model.store.addFavorite(
+            for: makeItem(content: "copied value", at: 10),
+            displayTitle: "Custom Name"
+        )
+        model.refreshFromStore()
+
+        model.selectFavorite(favorite)
+        model.draftFavoriteTitle = ""
+        model.updateSelectedFavoriteTitle()
+
+        let updated = try XCTUnwrap(model.items.first)
+        XCTAssertEqual(updated.displayTitle, "copied value")
+        XCTAssertEqual(updated.menuTitle, "copied value")
+        XCTAssertFalse(updated.hasCustomDisplayTitle)
+    }
+
     func testSettingsWindowFrameIsCenteredInsideVisibleFrame() {
         let visibleFrame = NSRect(x: 0, y: 0, width: 1000, height: 800)
         let windowSize = NSSize(width: 360, height: 300)
