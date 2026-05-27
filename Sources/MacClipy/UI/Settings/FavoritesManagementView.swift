@@ -32,8 +32,9 @@ struct FavoritesManagementView: View {
     @State var editingFavoriteID: UUID?
     @State var editingFavoriteTitle = ""
     @State var deletionConfirmation: DeletionConfirmation?
+    @State var keyboardFocus: FavoritesKeyboardFocus = .folders
     @FocusState var focusedFolderField: FolderFieldFocus?
-    @FocusState private var searchFocused: Bool
+    @FocusState var searchFocused: Bool
 
     var body: some View {
         HStack(spacing: 16) {
@@ -55,7 +56,13 @@ struct FavoritesManagementView: View {
             Text(deletionConfirmationMessage)
         }
         .onChange(of: searchFocusRevision) {
+            keyboardFocus = .search
             searchFocused = true
+        }
+        .onChange(of: searchFocused) {
+            if searchFocused {
+                keyboardFocus = .search
+            }
         }
         .background(
             KeyboardEventBridge { event, isTextEditing in
@@ -167,6 +174,9 @@ struct FavoritesManagementView: View {
 
             TextField(L10n.tr("historyPopup.searchPlaceholder"), text: $query)
                 .focused($searchFocused)
+                .simultaneousGesture(TapGesture().onEnded {
+                    keyboardFocus = .search
+                })
 
             ScrollView {
                 LazyVStack(spacing: 4) {

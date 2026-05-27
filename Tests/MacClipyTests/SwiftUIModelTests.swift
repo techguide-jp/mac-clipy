@@ -301,6 +301,44 @@ final class SwiftUIModelTests: XCTestCase {
         XCTAssertEqual(model.selectedFolderFilter, .folder(folderID))
     }
 
+    func testFavoritesModelMovesSelectedFolderFilterForKeyboardNavigation() throws {
+        let model = FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
+        let firstFolder = try model.store.createFolder(named: "Work")
+        let secondFolder = try model.store.createFolder(named: "Private")
+        model.refreshFromStore()
+
+        XCTAssertTrue(model.moveSelectedFolderFilter(by: 1))
+        XCTAssertEqual(model.selectedFolderFilter, .unclassified)
+
+        XCTAssertTrue(model.moveSelectedFolderFilter(by: 1))
+        XCTAssertEqual(model.selectedFolderFilter, .folder(firstFolder.id))
+
+        XCTAssertTrue(model.moveSelectedFolderFilter(by: 1))
+        XCTAssertEqual(model.selectedFolderFilter, .folder(secondFolder.id))
+
+        XCTAssertTrue(model.moveSelectedFolderFilter(by: 1))
+        XCTAssertEqual(model.selectedFolderFilter, .folder(secondFolder.id))
+    }
+
+    func testFavoritesModelMovesSelectedFavoriteForKeyboardNavigation() throws {
+        let model = FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
+        let firstFavorite = try model.store.addFavorite(for: makeItem(content: "alpha", at: 10))
+        let secondFavorite = try model.store.addFavorite(for: makeItem(content: "beta", at: 20))
+        model.refreshFromStore()
+
+        XCTAssertTrue(model.moveSelectedFavorite(by: 1))
+        XCTAssertEqual(model.selectedFavoriteID, firstFavorite.id)
+
+        XCTAssertTrue(model.moveSelectedFavorite(by: 1))
+        XCTAssertEqual(model.selectedFavoriteID, secondFavorite.id)
+
+        XCTAssertTrue(model.moveSelectedFavorite(by: 1))
+        XCTAssertEqual(model.selectedFavoriteID, secondFavorite.id)
+
+        XCTAssertTrue(model.moveSelectedFavorite(by: -1))
+        XCTAssertEqual(model.selectedFavoriteID, firstFavorite.id)
+    }
+
     func testFavoritesModelEmptyDraftTitleFallsBackToCopiedContent() throws {
         let model = FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
         let favorite = try model.store.addFavorite(

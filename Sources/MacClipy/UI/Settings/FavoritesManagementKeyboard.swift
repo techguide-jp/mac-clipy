@@ -3,8 +3,16 @@ import Carbon
 
 extension FavoritesManagementView {
     func handleKeyboard(event: NSEvent, isTextEditing: Bool) -> Bool {
-        if isTextEditing {
+        if handleTabNavigation(event: event) {
+            return true
+        }
+
+        if isTextEditing, isInlineEditing {
             return handleTextEditingKeyboard(event: event)
+        }
+
+        if isTextEditing, keyboardFocus == .search {
+            return handleSearchKeyboard(event: event)
         }
 
         if handleFavoritesCommand(event: event) {
@@ -12,12 +20,16 @@ extension FavoritesManagementView {
         }
 
         switch event.keyCode {
+        case UInt16(kVK_UpArrow):
+            return moveKeyboardSelection(by: -1)
+        case UInt16(kVK_DownArrow):
+            return moveKeyboardSelection(by: 1)
         case UInt16(kVK_Escape):
             return cancelActiveFavoritesInput()
         case UInt16(kVK_Return), UInt16(kVK_F2):
-            return beginRenamingSelectedEntry()
+            return beginRenamingFocusedEntry()
         case UInt16(kVK_Delete), UInt16(kVK_ForwardDelete):
-            return requestDeletingSelectedEntry()
+            return requestDeletingFocusedEntry()
         default:
             return false
         }
@@ -29,6 +41,36 @@ extension FavoritesManagementView {
         }
 
         return cancelActiveFavoritesInput()
+    }
+
+    private func handleSearchKeyboard(event: NSEvent) -> Bool {
+        switch event.keyCode {
+        case UInt16(kVK_UpArrow):
+            moveFavoriteSelectionFromKeyboard(by: -1)
+        case UInt16(kVK_DownArrow):
+            moveFavoriteSelectionFromKeyboard(by: 1)
+        case UInt16(kVK_Escape):
+            cancelActiveFavoritesInput()
+        default:
+            false
+        }
+    }
+
+    private func handleTabNavigation(event: NSEvent) -> Bool {
+        guard event.keyCode == UInt16(kVK_Tab) else {
+            return false
+        }
+
+        let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        guard !modifiers.contains(.command),
+              !modifiers.contains(.option),
+              !modifiers.contains(.control)
+        else {
+            return false
+        }
+
+        moveKeyboardFocus(backward: modifiers.contains(.shift))
+        return true
     }
 
     private func handleFavoritesCommand(event: NSEvent) -> Bool {
@@ -79,13 +121,15 @@ extension FavoritesManagementView {
         return false
     }
 
-    private func beginRenamingSelectedEntry() -> Bool {
-        if let selectedFavorite {
+    private func beginRenamingFocusedEntry() -> Bool {
+        if keyboardFocus == .items, let selectedFavorite {
             beginRenamingFavorite(selectedFavorite)
             return true
         }
 
-        guard let selectedFolder else {
+        guard keyboardFocus == .folders,
+              let selectedFolder
+        else {
             return false
         }
 
@@ -93,18 +137,36 @@ extension FavoritesManagementView {
         return true
     }
 
-    private func requestDeletingSelectedEntry() -> Bool {
-        if model.selectedFavoriteID != nil {
+    private func requestDeletingFocusedEntry() -> Bool {
+        if keyboardFocus == .items, model.selectedFavoriteID != nil {
             requestRemoveSelectedFavorite()
             return true
         }
 
-        guard selectedFolder != nil else {
+        guard keyboardFocus == .folders,
+              selectedFolder != nil
+        else {
             return false
         }
 
         requestDeleteSelectedFolder()
         return true
+    }
+
+    private func moveKeyboardSelection(by offset: Int) -> Bool {
+        switch keyboardFocus {
+        case .folders:
+            focusFoldersForKeyboard()
+            return model.moveSelectedFolderFilter(by: offset)
+        case .search, .items:
+            return moveFavoriteSelectionFromKeyboard(by: offset)
+        }
+    }
+
+    private func moveFavoriteSelectionFromKeyboard(by offset: Int) -> Bool {
+        searchFocused = false
+        keyboardFocus = .items
+        return model.moveSelectedFavorite(by: offset, query: query)
     }
 
     private func moveSelectedFolderFromKeyboard(by offset: Int) -> Bool {
@@ -122,5 +184,9 @@ extension FavoritesManagementView {
         }
 
         return model.folders.first { $0.id == folderID }
+    }
+
+    private var isInlineEditing: Bool {
+        isCreatingFolder || editingFolderID != nil || editingFavoriteID != nil
     }
 }
