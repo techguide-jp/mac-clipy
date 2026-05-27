@@ -127,6 +127,62 @@ final class SwiftUIModelTests: XCTestCase {
         XCTAssertNotEqual(popupModel.results.first?.id, favorite.id)
     }
 
+    func testHistoryPopupDisplaysCopiedContentBeforeCustomFavoriteTitleInHistoryMode() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        let favoriteStore = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let item = try XCTUnwrap(
+            try historyModel.store.add(content: "copied body", sourceBundleID: nil, at: Date(timeIntervalSince1970: 10))
+        )
+        try favoriteStore.addFavorite(for: item, displayTitle: "custom favorite name")
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: favoriteStore)
+        )
+
+        popupModel.prepare(initialMode: .all)
+
+        XCTAssertEqual(popupModel.results.first?.title, "copied body")
+        XCTAssertEqual(popupModel.results.first?.detail, "custom favorite name")
+    }
+
+    func testHistoryPopupDisplaysCopiedContentBeforeCustomFavoriteTitleInFavoritesMode() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        let favoriteStore = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let item = makeItem(content: "favorite copied body", at: 10)
+        try favoriteStore.addFavorite(for: item, displayTitle: "custom favorite name")
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: favoriteStore)
+        )
+
+        popupModel.prepare(initialMode: .favorites)
+
+        XCTAssertEqual(popupModel.results.first?.title, "favorite copied body")
+        XCTAssertEqual(popupModel.results.first?.detail, "custom favorite name")
+    }
+
+    func testHistoryPopupFavoritesModeChoosesItemMatchingDisplayedTitle() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        let favoriteStore = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+        let item = makeItem(content: "favorite copied body", at: 10)
+        try favoriteStore.addFavorite(for: item, displayTitle: "custom favorite name")
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: favoriteStore)
+        )
+        var chosenItem: ClipboardItem?
+        popupModel.onChoose = { item in
+            chosenItem = item
+        }
+
+        popupModel.prepare(initialMode: .favorites)
+        let displayedResult = try XCTUnwrap(popupModel.results.first)
+        popupModel.chooseItem(id: displayedResult.id)
+
+        XCTAssertEqual(chosenItem?.menuTitle, displayedResult.title)
+        XCTAssertEqual(chosenItem?.content, "favorite copied body")
+    }
+
     func testFavoritesModelFiltersAssignsAndRemovesFolders() throws {
         let model = FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
         let favorite = try model.store.addFavorite(for: makeItem(content: "deploy command", at: 10))

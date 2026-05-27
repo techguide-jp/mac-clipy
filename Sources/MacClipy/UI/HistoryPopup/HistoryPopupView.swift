@@ -94,7 +94,8 @@ struct HistoryPopupView: View {
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, minHeight: 300)
                     } else {
-                        ForEach(Array(model.results.enumerated()), id: \.element.id) { row, result in
+                        ForEach(model.results.indices, id: \.self) { row in
+                            let result = model.results[row]
                             HistoryPopupRow(
                                 result: result,
                                 isSelected: row == model.selectedRow,
@@ -105,7 +106,6 @@ struct HistoryPopupView: View {
                                     model.toggleFavorite(id: result.id)
                                 }
                             )
-                            .id(row)
                         }
                     }
                 }

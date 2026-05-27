@@ -21,12 +21,12 @@ struct HistoryPopupResult: Identifiable, Equatable {
     }
 
     var title: String {
-        favorite?.menuTitle ?? item.menuTitle
+        item.menuTitle
     }
 
     var detail: String? {
         if let favorite, favorite.hasCustomDisplayTitle {
-            favorite.contentMenuTitle
+            favorite.menuTitle
         } else {
             item.sourceBundleID
         }
