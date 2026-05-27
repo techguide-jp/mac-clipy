@@ -5,6 +5,11 @@ import Observation
 @MainActor
 @Observable
 final class AppModel {
+    private struct ClipboardSourceContext {
+        let bundleIdentifier: String?
+        let canCaptureNow: Bool
+    }
+
     let settingsModel = SettingsModel()
     let historyModel = ClipboardHistoryModel()
     let favoritesModel = FavoritesModel()
@@ -55,12 +60,14 @@ final class AppModel {
     }
 
     func showHistoryPopup() {
-        rememberFrontmostApplication()
+        let clipboardSource = rememberFrontmostApplication()
+        syncCurrentClipboard(from: clipboardSource)
         floatingPanelController?.show(at: NSEvent.mouseLocation, initialMode: .all)
     }
 
     func showFavoritePopup() {
-        rememberFrontmostApplication()
+        let clipboardSource = rememberFrontmostApplication()
+        syncCurrentClipboard(from: clipboardSource)
         floatingPanelController?.show(at: NSEvent.mouseLocation, initialMode: .favorites)
     }
 
@@ -186,14 +193,25 @@ final class AppModel {
         }
     }
 
-    private func rememberFrontmostApplication() {
+    private func syncCurrentClipboard(from source: ClipboardSourceContext) {
+        if source.canCaptureNow {
+            monitor?.captureCurrentPasteboardIfNeeded(sourceBundleID: source.bundleIdentifier)
+        }
+        historyModel.refreshFromStore()
+    }
+
+    @discardableResult
+    private func rememberFrontmostApplication() -> ClipboardSourceContext {
         guard let frontmostApplication = NSWorkspace.shared.frontmostApplication else {
-            return
+            return ClipboardSourceContext(bundleIdentifier: nil, canCaptureNow: false)
         }
 
         if frontmostApplication.processIdentifier != ProcessInfo.processInfo.processIdentifier {
             previousApplication = frontmostApplication
+            return ClipboardSourceContext(bundleIdentifier: frontmostApplication.bundleIdentifier, canCaptureNow: true)
         }
+
+        return ClipboardSourceContext(bundleIdentifier: nil, canCaptureNow: false)
     }
 
     private func showAlert(title: String, message: String) {

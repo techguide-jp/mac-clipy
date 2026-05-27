@@ -1,3 +1,5 @@
+import AppKit
+import Carbon
 @testable import MacClipy
 import XCTest
 
@@ -12,6 +14,59 @@ final class SwiftUIModelTests: XCTestCase {
 
         XCTAssertEqual(model.items.map(\.content), ["beta note", "alpha note"])
         XCTAssertEqual(model.search("alpha").map(\.content), ["alpha note"])
+    }
+
+    func testClipboardMonitorCapturesPasteboardImmediatelyForPopupDisplay() {
+        let pasteboard = NSPasteboard(name: NSPasteboard.Name("MacClipyTests-\(UUID().uuidString)"))
+        pasteboard.clearContents()
+
+        let store = ClipboardStore(historyURL: temporaryHistoryURL())
+        var changeCount = 0
+        let monitor = ClipboardMonitor(
+            store: store,
+            excludedBundleIdentifiers: { [] },
+            pasteboard: pasteboard,
+            onChange: {
+                changeCount += 1
+            }
+        )
+
+        pasteboard.clearContents()
+        pasteboard.setString("instant clip", forType: .string)
+
+        XCTAssertTrue(monitor.captureCurrentPasteboardIfNeeded(sourceBundleID: "com.example.Editor"))
+        XCTAssertEqual(store.items.map(\.content), ["instant clip"])
+        XCTAssertEqual(store.items.first?.sourceBundleID, "com.example.Editor")
+        XCTAssertEqual(changeCount, 1)
+    }
+
+    func testHistoryPopupArrowKeysMoveSelectionWhenSearchFieldFocused() throws {
+        let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
+        try historyModel.store.add(content: "first", sourceBundleID: nil, at: Date(timeIntervalSince1970: 10))
+        try historyModel.store.add(content: "second", sourceBundleID: nil, at: Date(timeIntervalSince1970: 20))
+        let popupModel = HistoryPopupModel(
+            historyModel: historyModel,
+            favoritesModel: FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
+        )
+        popupModel.prepare(initialMode: .all)
+
+        XCTAssertTrue(
+            try HistoryPopupKeyAction.handle(
+                event: keyEvent(keyCode: kVK_DownArrow),
+                isTextEditing: true,
+                model: popupModel
+            )
+        )
+        XCTAssertEqual(popupModel.selectedRow, 1)
+
+        XCTAssertTrue(
+            try HistoryPopupKeyAction.handle(
+                event: keyEvent(keyCode: kVK_UpArrow),
+                isTextEditing: true,
+                model: popupModel
+            )
+        )
+        XCTAssertEqual(popupModel.selectedRow, 0)
     }
 
     func testFavoritesModelFiltersAssignsAndRemovesFolders() throws {
@@ -63,5 +118,20 @@ final class SwiftUIModelTests: XCTestCase {
         FileManager.default.temporaryDirectory
             .appendingPathComponent("MacClipyTests-\(UUID().uuidString)", isDirectory: true)
             .appendingPathComponent("favorites.json")
+    }
+
+    private func keyEvent(keyCode: Int) throws -> NSEvent {
+        try XCTUnwrap(NSEvent.keyEvent(
+            with: .keyDown,
+            location: .zero,
+            modifierFlags: [],
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            characters: "",
+            charactersIgnoringModifiers: "",
+            isARepeat: false,
+            keyCode: UInt16(keyCode)
+        ))
     }
 }

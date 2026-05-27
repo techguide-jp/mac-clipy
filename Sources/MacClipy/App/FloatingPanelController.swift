@@ -25,6 +25,11 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.contentView = NSHostingView(rootView: HistoryPopupView(model: model))
+        panel.onKeyDown = { [model] event, isTextEditing in
+            MainActor.assumeIsolated {
+                HistoryPopupKeyAction.handle(event: event, isTextEditing: isTextEditing, model: model)
+            }
+        }
 
         model.onClose = { [weak self] in
             self?.panel.orderOut(nil)
@@ -76,8 +81,19 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
 }
 
 final class PopupPanel: NSPanel {
+    var onKeyDown: ((NSEvent, Bool) -> Bool)?
+
     override var canBecomeKey: Bool {
         true
+    }
+
+    override func sendEvent(_ event: NSEvent) {
+        if event.type == .keyDown,
+           onKeyDown?(event, firstResponder is NSTextView) == true {
+            return
+        }
+
+        super.sendEvent(event)
     }
 
     override func cancelOperation(_: Any?) {
