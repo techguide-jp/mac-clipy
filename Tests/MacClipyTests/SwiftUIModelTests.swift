@@ -337,6 +337,12 @@ final class SwiftUIModelTests: XCTestCase {
         )
     }
 
+    func testPasteControllerReactivatesPreviousApplicationBeforePasting() {
+        XCTAssertTrue(
+            PasteController.previousApplicationActivationOptions.contains(.activateAllWindows)
+        )
+    }
+
     private func makeItem(content: String, at timestamp: TimeInterval) -> ClipboardItem {
         ClipboardItem(
             content: content,
