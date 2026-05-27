@@ -145,7 +145,8 @@ private struct HistoryPopupRow: View {
                 onToggleFavorite()
             } label: {
                 Image(systemName: result.favorite == nil ? "star" : "star.fill")
-                    .foregroundStyle(result.favorite == nil ? Color.secondary : Color.yellow)
+                    .symbolRenderingMode(.monochrome)
+                    .foregroundColor(result.favorite == nil ? .secondary : .yellow)
                     .accessibilityLabel(L10n.tr("favorites.toggle"))
             }
             .buttonStyle(.plain)
