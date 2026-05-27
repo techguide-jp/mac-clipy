@@ -8,5 +8,13 @@ struct MacClipyApp: App {
         Settings {
             SettingsView(appModel: appDelegate.appModel)
         }
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button(L10n.tr("menu.settings")) {
+                    appDelegate.appModel.showSettings()
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
+        }
     }
 }

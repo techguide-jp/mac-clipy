@@ -16,7 +16,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         }
 
         if let window {
-            keepWindowVisible(window)
+            centerWindow(window)
             bringForward(window)
             return
         }
@@ -33,8 +33,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.isReleasedWhenClosed = false
         window.collectionBehavior = [.moveToActiveSpace]
         window.delegate = self
-        window.center()
-        keepWindowVisible(window)
+        centerWindow(window)
         self.window = window
         bringForward(window)
     }
@@ -45,37 +44,36 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     private func bringForward(_ window: NSWindow) {
         NSApp.activate(ignoringOtherApps: true)
-        keepWindowVisible(window)
+        centerWindow(window)
         window.makeKeyAndOrderFront(nil)
+        centerWindow(window)
     }
 
-    private func keepWindowVisible(_ window: NSWindow) {
+    private func centerWindow(_ window: NSWindow) {
         guard let visibleFrame = targetScreen(for: window)?.visibleFrame else {
             return
         }
 
-        let fittedFrame = Self.frame(window.frame, fittingIn: visibleFrame)
-        if window.frame != fittedFrame {
-            window.setFrame(fittedFrame, display: true)
+        let centeredFrame = Self.centeredFrame(for: window.frame.size, in: visibleFrame)
+        if window.frame != centeredFrame {
+            window.setFrame(centeredFrame, display: true)
         }
     }
 
     private func targetScreen(for window: NSWindow) -> NSScreen? {
-        window.screen
+        Self.screen(containing: NSEvent.mouseLocation)
+            ?? window.screen
             ?? Self.screen(containing: window.frame.center)
-            ?? Self.screen(containing: NSEvent.mouseLocation)
             ?? NSScreen.main
             ?? NSScreen.screens.first
     }
 
-    static func frame(_ frame: NSRect, fittingIn visibleFrame: NSRect) -> NSRect {
-        let width = min(frame.width, visibleFrame.width)
-        let height = min(frame.height, visibleFrame.height)
-        let maxX = visibleFrame.maxX - width
-        let maxY = visibleFrame.maxY - height
+    static func centeredFrame(for size: NSSize, in visibleFrame: NSRect) -> NSRect {
+        let width = min(size.width, visibleFrame.width)
+        let height = min(size.height, visibleFrame.height)
         let origin = NSPoint(
-            x: min(max(frame.minX, visibleFrame.minX), maxX),
-            y: min(max(frame.minY, visibleFrame.minY), maxY)
+            x: visibleFrame.minX + ((visibleFrame.width - width) / 2),
+            y: visibleFrame.minY + ((visibleFrame.height - height) / 2)
         )
 
         return NSRect(origin: origin, size: NSSize(width: width, height: height))
