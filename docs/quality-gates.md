@@ -19,7 +19,11 @@ scripts/check.sh
 - `dist/MacClipy.app/Contents/Info.plist` の検証
 - 実行ファイルの存在確認
 - `ja.lproj` / `en.lproj` の localization resource 存在確認
+- `AppIcon.icns` の存在確認
+- `Info.plist` の Bundle ID、version、category、icon 設定確認
 - `Info.plist` の `LSMinimumSystemVersion` が `14.0` であること
+- `BUILD_ARCHS` 指定時は app binary の architecture が一致すること
+- app bundle の `codesign --verify --deep --strict` 通過
 
 ローカルに SwiftLint / SwiftFormat がない場合は lint をスキップします。
 CI では `REQUIRE_SWIFTLINT=1 REQUIRE_SWIFTFORMAT=1` を付けて実行するため、lint tool がない状態や lint 違反は失敗として扱います。
@@ -40,6 +44,8 @@ UI 文言は Swift ソースに直接書かず、`Localizable.strings` に移し
 
 GitHub Actions では macOS runner で `scripts/check.sh` を実行します。
 PR と `main` への push の両方で、テスト、lint、release build、`.app` 生成が通ることを必須条件にします。
+
+`v*` tag または手動実行の `Release` workflow では `scripts/package-release.sh` を実行し、背景画像と Finder レイアウトを設定した DMG と checksum を GitHub Release にアップロードします。
 
 ## SwiftLint 方針
 
