@@ -62,6 +62,7 @@ APP_VERSION=0.1.0 BUILD_NUMBER=1 scripts/package-release.sh
 ```
 
 作成されるファイルは `dist/release/MacClipy-v0.1.0.dmg` と `dist/release/MacClipy-v0.1.0.dmg.sha256` です。
+配布用 DMG の app binary は Apple Silicon / Intel 両対応の universal binary です。
 Bundle ID は `jp.techguide.macclipy` です。将来の Developer ID 署名、公証、自動更新、フリーミアム対応でもこの Bundle ID を継続利用します。
 
 ## 未署名アプリの起動手順

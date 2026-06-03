@@ -7,6 +7,8 @@ cd "$ROOT_DIR"
 APP_NAME="MacClipy"
 APP_VERSION="${APP_VERSION:-0.1.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
+BUNDLE_ID="jp.techguide.macclipy"
+BUILD_ARCHS="x86_64 arm64"
 DIST_DIR="$ROOT_DIR/dist"
 RELEASE_DIR="$DIST_DIR/release"
 STAGING_DIR="$DIST_DIR/dmg-staging"
@@ -33,8 +35,10 @@ if [[ "$APP_VERSION" == v* ]]; then
 fi
 
 echo "==> Checks and app bundle"
-APP_VERSION="$APP_VERSION" \
+BUNDLE_ID="$BUNDLE_ID" \
+  APP_VERSION="$APP_VERSION" \
   BUILD_NUMBER="$BUILD_NUMBER" \
+  BUILD_ARCHS="$BUILD_ARCHS" \
   BUILD_CONFIG=release \
   DEVELOPMENT_CRASH_MODAL_ENABLED=0 \
   scripts/check.sh
@@ -76,24 +80,24 @@ fi
 
 echo "==> Finder layout"
 osascript <<APPLESCRIPT
+set volumeAlias to POSIX file "$MOUNT_DIR" as alias
 tell application "Finder"
-  tell disk "$VOLUME_NAME"
-    open
-    set current view of container window to icon view
-    set toolbar visible of container window to false
-    set statusbar visible of container window to false
-    set bounds of container window to {120, 120, 780, 520}
-    set viewOptions to icon view options of container window
-    set arrangement of viewOptions to not arranged
-    set icon size of viewOptions to 112
-    set backgroundAlias to POSIX file "$MOUNT_DIR/$BACKGROUND_DIR_NAME/$BACKGROUND_FILE_NAME" as alias
-    set background picture of viewOptions to backgroundAlias
-    set position of item "$APP_NAME.app" of container window to {185, 238}
-    set position of item "Applications" of container window to {475, 238}
-    update without registering applications
-    delay 1
-    close
-  end tell
+  open volumeAlias
+  set targetWindow to container window of volumeAlias
+  set current view of targetWindow to icon view
+  set toolbar visible of targetWindow to false
+  set statusbar visible of targetWindow to false
+  set bounds of targetWindow to {120, 120, 780, 520}
+  set viewOptions to icon view options of targetWindow
+  set arrangement of viewOptions to not arranged
+  set icon size of viewOptions to 112
+  set backgroundAlias to POSIX file "$MOUNT_DIR/$BACKGROUND_DIR_NAME/$BACKGROUND_FILE_NAME" as alias
+  set background picture of viewOptions to backgroundAlias
+  set position of item "$APP_NAME.app" of targetWindow to {185, 238}
+  set position of item "Applications" of targetWindow to {475, 238}
+  update volumeAlias without registering applications
+  delay 1
+  close targetWindow
 end tell
 APPLESCRIPT
 

@@ -22,6 +22,7 @@ scripts/check.sh
 - `AppIcon.icns` の存在確認
 - `Info.plist` の Bundle ID、version、category、icon 設定確認
 - `Info.plist` の `LSMinimumSystemVersion` が `14.0` であること
+- `BUILD_ARCHS` 指定時は app binary の architecture が一致すること
 - app bundle の `codesign --verify --deep --strict` 通過
 
 ローカルに SwiftLint / SwiftFormat がない場合は lint をスキップします。

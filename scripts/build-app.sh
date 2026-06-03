@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_CONFIG="${BUILD_CONFIG:-release}"
+BUILD_ARCHS="${BUILD_ARCHS:-}"
 BUNDLE_ID="${BUNDLE_ID:-jp.techguide.macclipy}"
 APP_VERSION="${APP_VERSION:-0.1.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
@@ -15,18 +16,28 @@ RESOURCES_DIR="$CONTENTS_DIR/Resources"
 ICON_NAME="AppIcon"
 ICON_FILE="$ICON_NAME.icns"
 
+SWIFT_BUILD_ARGS=(swift build -c "$BUILD_CONFIG" --package-path "$ROOT_DIR")
+BINARY_PATH="$ROOT_DIR/.build/$BUILD_CONFIG/$APP_NAME"
+
+if [[ -n "$BUILD_ARCHS" ]]; then
+  for arch in $BUILD_ARCHS; do
+    SWIFT_BUILD_ARGS+=(--arch "$arch")
+  done
+  BINARY_PATH="$ROOT_DIR/.build/apple/Products/$(tr '[:lower:]' '[:upper:]' <<< "${BUILD_CONFIG:0:1}")${BUILD_CONFIG:1}/$APP_NAME"
+fi
+
 if [[ "$DEVELOPMENT_CRASH_MODAL_ENABLED" == "1" ]]; then
   DEVELOPMENT_CRASH_MODAL_PLIST_VALUE="<true/>"
 else
   DEVELOPMENT_CRASH_MODAL_PLIST_VALUE="<false/>"
 fi
 
-swift build -c "$BUILD_CONFIG" --package-path "$ROOT_DIR"
+"${SWIFT_BUILD_ARGS[@]}"
 
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 
-cp "$ROOT_DIR/.build/$BUILD_CONFIG/$APP_NAME" "$MACOS_DIR/$APP_NAME"
+cp "$BINARY_PATH" "$MACOS_DIR/$APP_NAME"
 chmod +x "$MACOS_DIR/$APP_NAME"
 cp -R "$ROOT_DIR/Sources/MacClipy/Resources/"*.lproj "$RESOURCES_DIR/"
 cp "$ROOT_DIR/Sources/MacClipy/Resources/$ICON_FILE" "$RESOURCES_DIR/$ICON_FILE"

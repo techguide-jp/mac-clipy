@@ -7,6 +7,7 @@ cd "$ROOT_DIR"
 EXPECTED_BUNDLE_ID="${BUNDLE_ID:-jp.techguide.macclipy}"
 EXPECTED_APP_VERSION="${APP_VERSION:-0.1.0}"
 EXPECTED_BUILD_NUMBER="${BUILD_NUMBER:-1}"
+EXPECTED_BUILD_ARCHS="${BUILD_ARCHS:-}"
 
 echo "==> Swift version"
 swift --version
@@ -50,6 +51,10 @@ test "$(plutil -extract CFBundleVersion raw dist/MacClipy.app/Contents/Info.plis
 test "$(plutil -extract CFBundleIconFile raw dist/MacClipy.app/Contents/Info.plist)" = "AppIcon"
 test "$(plutil -extract LSApplicationCategoryType raw dist/MacClipy.app/Contents/Info.plist)" = "public.app-category.productivity"
 test "$(plutil -extract LSMinimumSystemVersion raw dist/MacClipy.app/Contents/Info.plist)" = "14.0"
+if [[ -n "$EXPECTED_BUILD_ARCHS" ]]; then
+  actual_archs="$(lipo -archs dist/MacClipy.app/Contents/MacOS/MacClipy)"
+  test "$actual_archs" = "$EXPECTED_BUILD_ARCHS"
+fi
 codesign --verify --deep --strict --verbose=2 dist/MacClipy.app
 
 echo "All checks passed."

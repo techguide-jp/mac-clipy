@@ -6,6 +6,7 @@
 - 自社 LP は案内ページとして使い、ダウンロードボタンから GitHub Releases へ誘導する。
 - 初回配布版は Developer ID 署名・公証なし。app bundle は ad-hoc 署名のみ。
 - Bundle ID は `jp.techguide.macclipy` に固定する。
+- 配布用 app binary は Apple Silicon / Intel 両対応の universal binary として生成する。
 - このリポジトリには OSS ライセンスを付与しない。バイナリは無償利用可、ソースコードの複製・改変・再配布は別途許諾が必要。
 
 ## DMG 作成
@@ -22,6 +23,7 @@ APP_VERSION=0.1.0 BUILD_NUMBER=1 scripts/package-release.sh
 
 `scripts/package-release.sh` は `scripts/check.sh` を実行してから、DMG 内に `MacClipy.app` と `/Applications` symlink を配置する。
 DMG には背景画像、ウィンドウサイズ、アイコン位置を焼き込み、開いた時にドラッグインストールの導線が見えるようにする。
+このスクリプトは release 用の Bundle ID を `jp.techguide.macclipy` に固定し、`x86_64 arm64` の universal binary を検証する。
 
 ## GitHub Release 作成
 
