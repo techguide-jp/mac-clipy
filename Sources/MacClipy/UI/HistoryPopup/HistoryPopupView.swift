@@ -39,6 +39,15 @@ struct HistoryPopupView: View {
                 }
 
             Button {
+                model.requestHelp()
+            } label: {
+                Image(systemName: "questionmark.circle")
+                    .accessibilityLabel(L10n.tr("button.keyboardHelp"))
+            }
+            .buttonStyle(.bordered)
+            .help(L10n.tr("button.keyboardHelp"))
+
+            Button {
                 model.requestSettings()
             } label: {
                 Image(systemName: "gearshape")

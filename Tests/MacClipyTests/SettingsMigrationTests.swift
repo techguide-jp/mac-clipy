@@ -83,5 +83,6 @@ final class SettingsMigrationTests: XCTestCase {
         Defaults.Keys.didMigrateLegacySettings.reset()
         KeyboardShortcuts.setShortcut(nil, for: .showHistory)
         KeyboardShortcuts.setShortcut(nil, for: .showFavorites)
+        KeyboardShortcuts.setShortcut(nil, for: .showHelp)
     }
 }

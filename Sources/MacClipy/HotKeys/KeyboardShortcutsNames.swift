@@ -12,6 +12,11 @@ extension KeyboardShortcuts.Name {
         "showFavorites",
         default: KeyboardShortcuts.Shortcut(.v, modifiers: [.command, .option])
     )
+
+    static let showHelp = Self(
+        "showHelp",
+        default: KeyboardShortcuts.Shortcut(.slash, modifiers: [.command, .shift])
+    )
 }
 
 enum LegacyShortcutConverter {
