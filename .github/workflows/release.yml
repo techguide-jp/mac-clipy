@@ -1,0 +1,89 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version without the leading v
+        required: true
+        default: "0.1.0"
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Package and publish
+    runs-on: macos-26
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Tool versions
+        run: |
+          xcodebuild -version
+          swift --version
+          hdiutil help | head -n 1
+
+      - name: Install lint tools
+        run: brew install swiftlint swiftformat
+
+      - name: Resolve version
+        id: release
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            release_tag="$GITHUB_REF_NAME"
+            app_version="${release_tag#v}"
+          else
+            app_version="${{ inputs.version }}"
+            release_tag="v$app_version"
+          fi
+
+          if [[ -z "$app_version" || "$app_version" == v* ]]; then
+            echo "Invalid version: $app_version" >&2
+            exit 1
+          fi
+
+          echo "app_version=$app_version" >> "$GITHUB_OUTPUT"
+          echo "build_number=$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Package release
+        env:
+          APP_VERSION: ${{ steps.release.outputs.app_version }}
+          BUILD_NUMBER: ${{ steps.release.outputs.build_number }}
+          REQUIRE_SWIFTLINT: "1"
+          REQUIRE_SWIFTFORMAT: "1"
+        run: scripts/package-release.sh
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_VERSION: ${{ steps.release.outputs.app_version }}
+          RELEASE_TAG: ${{ steps.release.outputs.release_tag }}
+        run: |
+          dmg_path="dist/release/MacClipy-v$APP_VERSION.dmg"
+          checksum_path="$dmg_path.sha256"
+          notes_file="$(mktemp)"
+          cat > "$notes_file" <<'NOTES'
+          MacClipy の初回配布版です。
+
+          この DMG は Developer ID 署名・公証前の暫定配布物です。初回起動時に macOS の警告が出る場合があります。
+          起動できない場合は README の「未署名アプリの起動手順」を確認してください。
+          NOTES
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$dmg_path" "$checksum_path" --clobber
+            gh release edit "$RELEASE_TAG" --title "MacClipy $RELEASE_TAG" --notes-file "$notes_file"
+          else
+            gh release create "$RELEASE_TAG" "$dmg_path" "$checksum_path" --title "MacClipy $RELEASE_TAG" --notes-file "$notes_file"
+          fi

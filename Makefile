@@ -1,18 +1,23 @@
 APP_BUNDLE := dist/MacClipy.app
-BUNDLE_ID := com.local.MacClipy
+BUNDLE_ID ?= jp.techguide.macclipy
 BUILD_CONFIG ?= release
+APP_VERSION ?= 0.1.0
+BUILD_NUMBER ?= 1
 DEVELOPMENT_CRASH_MODAL_ENABLED ?= 0
 
-.PHONY: build-app check format reapply-local run
+.PHONY: build-app check format package-release reapply-local run
 
 build-app:
-	@BUILD_CONFIG="$(BUILD_CONFIG)" DEVELOPMENT_CRASH_MODAL_ENABLED="$(DEVELOPMENT_CRASH_MODAL_ENABLED)" scripts/build-app.sh
+	@BUNDLE_ID="$(BUNDLE_ID)" BUILD_CONFIG="$(BUILD_CONFIG)" APP_VERSION="$(APP_VERSION)" BUILD_NUMBER="$(BUILD_NUMBER)" DEVELOPMENT_CRASH_MODAL_ENABLED="$(DEVELOPMENT_CRASH_MODAL_ENABLED)" scripts/build-app.sh
 
 check:
 	@scripts/check.sh
 
 format:
 	@scripts/format.sh
+
+package-release:
+	@APP_VERSION="$(APP_VERSION)" BUILD_NUMBER="$(BUILD_NUMBER)" scripts/package-release.sh
 
 reapply-local: build-app
 	@osascript -e 'if application id "$(BUNDLE_ID)" is running then tell application id "$(BUNDLE_ID)" to quit'

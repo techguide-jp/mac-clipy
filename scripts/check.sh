@@ -4,6 +4,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
+EXPECTED_BUNDLE_ID="${BUNDLE_ID:-jp.techguide.macclipy}"
+EXPECTED_APP_VERSION="${APP_VERSION:-0.1.0}"
+EXPECTED_BUILD_NUMBER="${BUILD_NUMBER:-1}"
+
 echo "==> Swift version"
 swift --version
 
@@ -39,6 +43,13 @@ plutil -lint dist/MacClipy.app/Contents/Info.plist
 test -x dist/MacClipy.app/Contents/MacOS/MacClipy
 test -f dist/MacClipy.app/Contents/Resources/ja.lproj/Localizable.strings
 test -f dist/MacClipy.app/Contents/Resources/en.lproj/Localizable.strings
+test -f dist/MacClipy.app/Contents/Resources/AppIcon.icns
+test "$(plutil -extract CFBundleIdentifier raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_BUNDLE_ID"
+test "$(plutil -extract CFBundleShortVersionString raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_APP_VERSION"
+test "$(plutil -extract CFBundleVersion raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_BUILD_NUMBER"
+test "$(plutil -extract CFBundleIconFile raw dist/MacClipy.app/Contents/Info.plist)" = "AppIcon"
+test "$(plutil -extract LSApplicationCategoryType raw dist/MacClipy.app/Contents/Info.plist)" = "public.app-category.productivity"
 test "$(plutil -extract LSMinimumSystemVersion raw dist/MacClipy.app/Contents/Info.plist)" = "14.0"
+codesign --verify --deep --strict --verbose=2 dist/MacClipy.app
 
 echo "All checks passed."

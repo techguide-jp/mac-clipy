@@ -3,12 +3,17 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_CONFIG="${BUILD_CONFIG:-release}"
+BUNDLE_ID="${BUNDLE_ID:-jp.techguide.macclipy}"
+APP_VERSION="${APP_VERSION:-0.1.0}"
+BUILD_NUMBER="${BUILD_NUMBER:-1}"
 DEVELOPMENT_CRASH_MODAL_ENABLED="${DEVELOPMENT_CRASH_MODAL_ENABLED:-0}"
 APP_NAME="MacClipy"
 APP_DIR="$ROOT_DIR/dist/$APP_NAME.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
+ICON_NAME="AppIcon"
+ICON_FILE="$ICON_NAME.icns"
 
 if [[ "$DEVELOPMENT_CRASH_MODAL_ENABLED" == "1" ]]; then
   DEVELOPMENT_CRASH_MODAL_PLIST_VALUE="<true/>"
@@ -24,6 +29,7 @@ mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 cp "$ROOT_DIR/.build/$BUILD_CONFIG/$APP_NAME" "$MACOS_DIR/$APP_NAME"
 chmod +x "$MACOS_DIR/$APP_NAME"
 cp -R "$ROOT_DIR/Sources/MacClipy/Resources/"*.lproj "$RESOURCES_DIR/"
+cp "$ROOT_DIR/Sources/MacClipy/Resources/$ICON_FILE" "$RESOURCES_DIR/$ICON_FILE"
 
 cat > "$CONTENTS_DIR/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -39,8 +45,10 @@ cat > "$CONTENTS_DIR/Info.plist" <<PLIST
   </array>
   <key>CFBundleExecutable</key>
   <string>MacClipy</string>
+  <key>CFBundleIconFile</key>
+  <string>${ICON_NAME}</string>
   <key>CFBundleIdentifier</key>
-  <string>com.local.MacClipy</string>
+  <string>${BUNDLE_ID}</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
@@ -48,9 +56,11 @@ cat > "$CONTENTS_DIR/Info.plist" <<PLIST
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>0.1.0</string>
+  <string>${APP_VERSION}</string>
   <key>CFBundleVersion</key>
-  <string>1</string>
+  <string>${BUILD_NUMBER}</string>
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.productivity</string>
   <key>LSMinimumSystemVersion</key>
   <string>14.0</string>
   <key>LSUIElement</key>
@@ -62,5 +72,7 @@ cat > "$CONTENTS_DIR/Info.plist" <<PLIST
 </dict>
 </plist>
 PLIST
+
+codesign --force --deep --sign - "$APP_DIR"
 
 echo "Created $APP_DIR"
