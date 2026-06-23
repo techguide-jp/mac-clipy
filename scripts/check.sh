@@ -12,6 +12,9 @@ EXPECTED_BUILD_ARCHS="${BUILD_ARCHS:-}"
 echo "==> Swift version"
 swift --version
 
+echo "==> App lifecycle helper"
+BUNDLE_ID=jp.techguide.macclipy.check-missing scripts/app-lifecycle.swift wait-stopped
+
 if command -v swiftlint >/dev/null 2>&1; then
   echo "==> SwiftLint"
   swiftlint lint --strict --no-cache
