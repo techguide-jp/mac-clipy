@@ -41,7 +41,6 @@ public enum AppConstants {
     }
 
     public enum MenuBar {
-        public static let statusItemWidth: CGFloat = 84
         public static let recentHistoryItemLimit = 10
         public static let keyEquivalentItemLimit = 9
     }

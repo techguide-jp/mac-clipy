@@ -394,6 +394,11 @@ final class SwiftUIModelTests: XCTestCase {
         )
     }
 
+    func testStatusMenuUsesIconOnlySquareItem() {
+        XCTAssertEqual(StatusItemController.menuBarIconSymbolName, "clipboard")
+        XCTAssertEqual(StatusItemController.statusItemLength, NSStatusItem.squareLength)
+    }
+
     func testPasteControllerReactivatesPreviousApplicationBeforePasting() {
         XCTAssertTrue(
             PasteController.previousApplicationActivationOptions.contains(.activateAllWindows)

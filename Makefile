@@ -19,12 +19,11 @@ format:
 package-release:
 	@APP_VERSION="$(APP_VERSION)" BUILD_NUMBER="$(BUILD_NUMBER)" scripts/package-release.sh
 
-reapply-local: build-app
-	@osascript -e 'if application id "$(BUNDLE_ID)" is running then tell application id "$(BUNDLE_ID)" to quit'
-	@sleep 1
+reapply-local:
+	@BUNDLE_ID="$(BUNDLE_ID)" scripts/app-lifecycle.swift quit-and-wait
+	@BUNDLE_ID="$(BUNDLE_ID)" BUILD_CONFIG="$(BUILD_CONFIG)" APP_VERSION="$(APP_VERSION)" BUILD_NUMBER="$(BUILD_NUMBER)" DEVELOPMENT_CRASH_MODAL_ENABLED="$(DEVELOPMENT_CRASH_MODAL_ENABLED)" scripts/build-app.sh
 	@open "$(APP_BUNDLE)"
-	@sleep 1
-	@osascript -e 'application id "$(BUNDLE_ID)" is running'
+	@BUNDLE_ID="$(BUNDLE_ID)" scripts/app-lifecycle.swift wait-running
 
 run: BUILD_CONFIG = debug
 run: DEVELOPMENT_CRASH_MODAL_ENABLED = 1

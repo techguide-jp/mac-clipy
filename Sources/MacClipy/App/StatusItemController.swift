@@ -25,6 +25,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         .quit
     ]
 
+    static let menuBarIconSymbolName = "clipboard"
+    static let statusItemLength = NSStatusItem.squareLength
+
     private let historyModel: ClipboardHistoryModel
     private let monitorState: () -> Bool
     private let onCopyHistoryItem: (ClipboardItem) -> Void
@@ -63,13 +66,19 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
 
     func install() {
-        let item = NSStatusBar.system.statusItem(withLength: AppConstants.MenuBar.statusItemWidth)
+        let item = NSStatusBar.system.statusItem(withLength: Self.statusItemLength)
         statusItem = item
 
         if let button = item.button {
-            button.image = nil
-            button.imagePosition = .noImage
-            button.title = "MacClipy"
+            if let icon = Self.makeMenuBarIcon() {
+                button.image = icon
+                button.imagePosition = .imageOnly
+                button.title = ""
+            } else {
+                button.image = nil
+                button.imagePosition = .noImage
+                button.title = "MacClipy"
+            }
             button.toolTip = "MacClipy"
         }
 
@@ -77,6 +86,15 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.delegate = self
         item.menu = menu
         rebuild()
+    }
+
+    private static func makeMenuBarIcon() -> NSImage? {
+        guard let image = NSImage(systemSymbolName: menuBarIconSymbolName, accessibilityDescription: "MacClipy") else {
+            return nil
+        }
+
+        image.isTemplate = true
+        return image
     }
 
     func menuNeedsUpdate(_: NSMenu) {
