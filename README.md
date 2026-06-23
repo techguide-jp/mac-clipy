@@ -51,7 +51,7 @@ make reapply-local
 ```
 
 作成される `.app` は Developer ID 署名・公証なしのローカル実行用です。app bundle は ad-hoc 署名されます。
-`make reapply-local` は `dist/MacClipy.app` を作り直し、起動中の MacClipy を終了してから再起動します。
+`make reapply-local` は起動中の MacClipy の終了完了を待ってから `dist/MacClipy.app` を作り直し、再起動します。
 短い alias として `make run` も使えます。
 
 ## 配布用 DMG の作成
