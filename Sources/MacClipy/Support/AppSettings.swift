@@ -4,13 +4,16 @@ import Foundation
 import Observation
 
 public enum SettingsDefaults {
+    public static let currentBundleIdentifier = "jp.techguide.macclipy"
+    private static let legacyLocalBundleIdentifier = "com.local.MacClipy"
+
     public static let defaultExcludedBundleIdentifiers = [
         "com.1password.1password",
         "com.agilebits.onepassword7",
         "com.bitwarden.desktop",
         "org.keepassxc.keepassxc",
         "com.apple.keychainaccess",
-        "com.local.MacClipy"
+        currentBundleIdentifier
     ]
 
     public static func normalizedBundleIdentifiers(_ identifiers: [String]) -> [String] {
@@ -23,13 +26,14 @@ public enum SettingsDefaults {
                 continue
             }
 
-            let key = trimmed.lowercased()
+            let canonicalIdentifier = canonicalBundleIdentifier(trimmed)
+            let key = canonicalIdentifier.lowercased()
             guard !seen.contains(key) else {
                 continue
             }
 
             seen.insert(key)
-            normalized.append(trimmed)
+            normalized.append(canonicalIdentifier)
         }
 
         return normalized
@@ -57,11 +61,19 @@ public enum SettingsDefaults {
             L10n.tr("appName.keepassxc")
         case "com.apple.keychainaccess":
             L10n.tr("appName.keychainAccess")
-        case "com.local.MacClipy":
+        case currentBundleIdentifier:
             L10n.tr("appName.macclipy")
         default:
             bundleIdentifier
         }
+    }
+
+    private static func canonicalBundleIdentifier(_ identifier: String) -> String {
+        if identifier.caseInsensitiveCompare(legacyLocalBundleIdentifier) == .orderedSame {
+            return currentBundleIdentifier
+        }
+
+        return identifier
     }
 }
 
@@ -72,6 +84,10 @@ extension Defaults.Keys {
     )
 
     static let didMigrateLegacySettings = Key<Bool>("didMigrateLegacySettings", default: false)
+    static let didMigrateBundleID = Key<Bool>(
+        "didMigrateBundleID",
+        default: false
+    )
 }
 
 @MainActor

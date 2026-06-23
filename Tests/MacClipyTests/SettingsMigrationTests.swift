@@ -14,6 +14,52 @@ final class SettingsMigrationTests: XCTestCase {
         super.tearDown()
     }
 
+    func testDefaultExcludedBundleIdentifiersUseCurrentBundleID() {
+        XCTAssertTrue(
+            SettingsDefaults.defaultExcludedBundleIdentifiers.contains(SettingsDefaults.currentBundleIdentifier)
+        )
+        XCTAssertFalse(
+            SettingsDefaults.defaultExcludedBundleIdentifiers.contains("com.local.MacClipy")
+        )
+    }
+
+    func testDisplayNameUsesMacClipyForCurrentBundleID() {
+        XCTAssertEqual(
+            SettingsDefaults.displayName(for: SettingsDefaults.currentBundleIdentifier),
+            "MacClipy"
+        )
+    }
+
+    @MainActor
+    func testResetExcludedAppsUsesCurrentBundleID() {
+        let model = SettingsModel()
+        model.setExcludedBundleIdentifiers(["com.example.Editor"])
+
+        model.resetExcludedApps()
+
+        XCTAssertEqual(model.excludedBundleIdentifiers, SettingsDefaults.defaultExcludedBundleIdentifiers)
+        XCTAssertTrue(model.excludedBundleIdentifiers.contains(SettingsDefaults.currentBundleIdentifier))
+        XCTAssertFalse(model.excludedBundleIdentifiers.contains("com.local.MacClipy"))
+        XCTAssertEqual(Defaults[.excludedBundleIdentifiers], SettingsDefaults.defaultExcludedBundleIdentifiers)
+    }
+
+    func testMigratesExistingDefaultsFromLegacyLocalBundleIdentifier() throws {
+        Defaults[.didMigrateLegacySettings] = true
+        Defaults[.excludedBundleIdentifiers] = [
+            "COM.LOCAL.MACCLIPY",
+            "com.example.Secret",
+            SettingsDefaults.currentBundleIdentifier
+        ]
+
+        try SettingsMigration.migrateIfNeeded(settingsURL: temporarySettingsURL())
+
+        XCTAssertEqual(
+            Defaults[.excludedBundleIdentifiers],
+            [SettingsDefaults.currentBundleIdentifier, "com.example.Secret"]
+        )
+        XCTAssertTrue(Defaults[.didMigrateBundleID])
+    }
+
     func testMigratesLegacySettingsJSONOnce() throws {
         let settingsURL = temporarySettingsURL()
         try FileManager.default.createDirectory(
@@ -21,7 +67,13 @@ final class SettingsMigrationTests: XCTestCase {
             withIntermediateDirectories: true
         )
         try legacyJSON(
-            excludedBundleIdentifiers: [" com.example.Secret ", "COM.EXAMPLE.SECRET", "com.example.Other"],
+            excludedBundleIdentifiers: [
+                " com.example.Secret ",
+                "COM.EXAMPLE.SECRET",
+                "com.local.MacClipy",
+                SettingsDefaults.currentBundleIdentifier,
+                "com.example.Other"
+            ],
             hotKey: #"{"key":"space","modifiers":["control","option"]}"#,
             favoriteHotKey: #"{"key":"v","modifiers":["command","option"]}"#
         )
@@ -29,7 +81,10 @@ final class SettingsMigrationTests: XCTestCase {
 
         try SettingsMigration.migrateIfNeeded(settingsURL: settingsURL)
 
-        XCTAssertEqual(Defaults[.excludedBundleIdentifiers], ["com.example.Secret", "com.example.Other"])
+        XCTAssertEqual(
+            Defaults[.excludedBundleIdentifiers],
+            ["com.example.Secret", SettingsDefaults.currentBundleIdentifier, "com.example.Other"]
+        )
         XCTAssertEqual(
             KeyboardShortcuts.getShortcut(for: .showHistory),
             KeyboardShortcuts.Shortcut(.space, modifiers: [.control, .option])
@@ -48,7 +103,10 @@ final class SettingsMigrationTests: XCTestCase {
 
         try SettingsMigration.migrateIfNeeded(settingsURL: settingsURL)
 
-        XCTAssertEqual(Defaults[.excludedBundleIdentifiers], ["com.example.Secret", "com.example.Other"])
+        XCTAssertEqual(
+            Defaults[.excludedBundleIdentifiers],
+            ["com.example.Secret", SettingsDefaults.currentBundleIdentifier, "com.example.Other"]
+        )
         XCTAssertEqual(
             KeyboardShortcuts.getShortcut(for: .showHistory),
             KeyboardShortcuts.Shortcut(.space, modifiers: [.control, .option])
@@ -81,6 +139,7 @@ final class SettingsMigrationTests: XCTestCase {
     private func resetDefaults() {
         Defaults.Keys.excludedBundleIdentifiers.reset()
         Defaults.Keys.didMigrateLegacySettings.reset()
+        Defaults.Keys.didMigrateBundleID.reset()
         KeyboardShortcuts.setShortcut(nil, for: .showHistory)
         KeyboardShortcuts.setShortcut(nil, for: .showFavorites)
         KeyboardShortcuts.setShortcut(nil, for: .showHelp)

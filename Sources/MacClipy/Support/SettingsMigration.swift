@@ -10,6 +10,8 @@ enum SettingsMigration {
     }
 
     static func migrateIfNeeded(settingsURL: URL = AppPaths.settingsURL) throws {
+        migrateExcludedBundleIdentifiersToCurrentBundleIDIfNeeded()
+
         guard !Defaults[.didMigrateLegacySettings] else {
             return
         }
@@ -39,5 +41,19 @@ enum SettingsMigration {
         }
 
         Defaults[.didMigrateLegacySettings] = true
+    }
+
+    private static func migrateExcludedBundleIdentifiersToCurrentBundleIDIfNeeded() {
+        guard !Defaults[.didMigrateBundleID] else {
+            return
+        }
+
+        let identifiers = Defaults[.excludedBundleIdentifiers]
+        let normalized = SettingsDefaults.normalizedBundleIdentifiers(identifiers)
+        if identifiers != normalized {
+            Defaults[.excludedBundleIdentifiers] = normalized
+        }
+
+        Defaults[.didMigrateBundleID] = true
     }
 }
