@@ -11,7 +11,7 @@ struct DevelopmentCrashReportView: View {
         VStack(alignment: .leading, spacing: 16) {
             header
             message
-            logPath
+            reportPaths
             logBody
             footer
         }
@@ -44,17 +44,34 @@ struct DevelopmentCrashReportView: View {
     }
 
     @ViewBuilder
-    private var logPath: some View {
-        if let logURL = report.logURL {
+    private var reportPaths: some View {
+        if report.diagnosticReportURL != nil || report.logURL != nil {
             VStack(alignment: .leading, spacing: 4) {
-                Text(L10n.tr("developmentCrashReport.logPath"))
+                Text(L10n.tr("developmentCrashReport.reportPaths"))
                     .font(.headline)
-                Text(verbatim: logURL.path)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
+
+                if let diagnosticReportURL = report.diagnosticReportURL {
+                    pathText(
+                        label: L10n.tr("developmentCrashReport.diagnosticReportPath"),
+                        path: diagnosticReportURL.path
+                    )
+                }
+
+                if let logURL = report.logURL {
+                    pathText(
+                        label: L10n.tr("developmentCrashReport.logPath"),
+                        path: logURL.path
+                    )
+                }
             }
         }
+    }
+
+    private func pathText(label: String, path: String) -> some View {
+        Text(verbatim: "\(label): \(path)")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .textSelection(.enabled)
     }
 
     private var logBody: some View {
@@ -102,7 +119,7 @@ struct DevelopmentCrashReportView: View {
             } label: {
                 Label(L10n.tr("developmentCrashReport.revealInFinder"), systemImage: "folder")
             }
-            .disabled(report.logURL == nil)
+            .disabled(primaryReportURL == nil)
 
             Button(L10n.tr("button.close")) {
                 onClose()
@@ -112,6 +129,10 @@ struct DevelopmentCrashReportView: View {
     }
 
     private var displayLogText: String {
+        if !report.diagnosticReportText.isEmpty {
+            return report.diagnosticReportText
+        }
+
         if !report.logText.isEmpty {
             return report.logText
         }
@@ -130,17 +151,21 @@ struct DevelopmentCrashReportView: View {
     }
 
     private func revealLogInFinder() {
-        guard let logURL = report.logURL else {
+        guard let reportURL = primaryReportURL else {
             return
         }
 
-        NSWorkspace.shared.activateFileViewerSelecting([logURL])
+        NSWorkspace.shared.activateFileViewerSelecting([reportURL])
     }
 
     private var clipboardText: String {
         var sections: [String] = [
             L10n.tr("developmentCrashReport.message", formattedDate(report.previousLaunchDate))
         ]
+
+        if let diagnosticReportURL = report.diagnosticReportURL {
+            sections.append("\(L10n.tr("developmentCrashReport.diagnosticReportPath")): \(diagnosticReportURL.path)")
+        }
 
         if let logURL = report.logURL {
             sections.append("\(L10n.tr("developmentCrashReport.logPath")): \(logURL.path)")
@@ -149,5 +174,9 @@ struct DevelopmentCrashReportView: View {
         sections.append(displayLogText)
 
         return sections.joined(separator: "\n\n")
+    }
+
+    private var primaryReportURL: URL? {
+        report.diagnosticReportURL ?? report.logURL
     }
 }

@@ -24,10 +24,12 @@
 "clipboard.emptyWhitespace" = "(空白のみ)";
 "developmentCrashReport.copied" = "ログをコピーしました";
 "developmentCrashReport.copyLog" = "ログをコピー";
+"developmentCrashReport.diagnosticReportPath" = "診断レポート";
 "developmentCrashReport.logMissing" = "macOS のクラッシュログは見つかりませんでした。アプリが強制終了された、または crash report の生成前に終了した可能性があります。";
-"developmentCrashReport.logPath" = "クラッシュログ";
+"developmentCrashReport.logPath" = "macOSクラッシュログ";
 "developmentCrashReport.logTruncated" = "ログが長いため先頭部分だけを表示しています。";
 "developmentCrashReport.message" = "前回の開発環境起動が正常終了しませんでした。前回起動: %@";
+"developmentCrashReport.reportPaths" = "レポート";
 "developmentCrashReport.revealInFinder" = "Finderで表示";
 "developmentCrashReport.title" = "前回のクラッシュログ";
 "favorites.error.emptyName" = "名前を入力してください。";

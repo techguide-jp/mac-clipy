@@ -9,12 +9,27 @@ final class DevelopmentCrashReporterTests: XCTestCase {
         let diagnosticsURL = rootURL.appendingPathComponent("DiagnosticReports", isDirectory: true)
         let reporter = DevelopmentCrashReporter(
             isEnabled: false,
+            isFileOutputEnabled: false,
             stateURL: stateURL,
             diagnosticsDirectoryURL: diagnosticsURL
         )
 
         XCTAssertNil(reporter.startLaunch())
         XCTAssertFalse(FileManager.default.fileExists(atPath: stateURL.path))
+    }
+
+    func testFileReporterCreatesStateWhenModalIsDisabled() throws {
+        let rootURL = try temporaryDirectory()
+        let stateURL = rootURL.appendingPathComponent("state.json")
+        let diagnosticsURL = rootURL.appendingPathComponent("DiagnosticReports", isDirectory: true)
+        let reporter = DevelopmentCrashReporter(
+            isEnabled: false,
+            stateURL: stateURL,
+            diagnosticsDirectoryURL: diagnosticsURL
+        )
+
+        XCTAssertNil(reporter.startLaunch())
+        XCTAssertTrue(FileManager.default.fileExists(atPath: stateURL.path))
     }
 
     func testPreviousUncleanLaunchReportsLatestCrashLog() throws {
@@ -51,6 +66,47 @@ final class DevelopmentCrashReporterTests: XCTestCase {
         XCTAssertEqual(report.logURL?.resolvingSymlinksInPath(), latestURL.resolvingSymlinksInPath())
         XCTAssertEqual(report.logText, "latest log")
         XCTAssertFalse(report.isLogTruncated)
+        XCTAssertTrue(report.diagnosticReportText.contains("MacClipy Unclean Termination Report"))
+        XCTAssertTrue(report.diagnosticReportText.contains(latestURL.lastPathComponent))
+        XCTAssertEqual(
+            report.diagnosticReportURL?.deletingLastPathComponent().resolvingSymlinksInPath(),
+            rootURL.appendingPathComponent("CrashReports", isDirectory: true).resolvingSymlinksInPath()
+        )
+        XCTAssertEqual(try report.diagnosticReportURL.map { try String(contentsOf: $0, encoding: .utf8) }, report.diagnosticReportText)
+    }
+
+    func testPreviousUncleanLaunchWritesDiagnosticReportWhenModalIsDisabled() throws {
+        let rootURL = try temporaryDirectory()
+        let stateURL = rootURL.appendingPathComponent("state.json")
+        let diagnosticsURL = rootURL.appendingPathComponent("DiagnosticReports", isDirectory: true)
+        let previousLaunchDate = Date(timeIntervalSince1970: 1000)
+        try writeState(
+            to: stateURL,
+            launchDate: previousLaunchDate,
+            terminatedCleanly: false
+        )
+
+        let reporter = DevelopmentCrashReporter(
+            isEnabled: false,
+            stateURL: stateURL,
+            diagnosticsDirectoryURL: diagnosticsURL,
+            now: { Date(timeIntervalSince1970: 2000) }
+        )
+
+        XCTAssertNil(reporter.startLaunch())
+
+        let reportDirectoryURL = rootURL.appendingPathComponent("CrashReports", isDirectory: true)
+        let reportURLs = try FileManager.default.contentsOfDirectory(
+            at: reportDirectoryURL,
+            includingPropertiesForKeys: nil
+        )
+        XCTAssertEqual(reportURLs.count, 1)
+
+        let reportText = try String(contentsOf: reportURLs[0], encoding: .utf8)
+        XCTAssertTrue(reportText.contains("MacClipy Unclean Termination Report"))
+        XCTAssertTrue(reportText.contains("Previous Launch:"))
+        XCTAssertTrue(reportText.contains("Started At: 1970-01-01T00:16:40Z"))
+        XCTAssertTrue(reportText.contains("macOS Crash Log: Not found"))
     }
 
     func testPreviousUncleanLaunchReportsMissingLog() throws {
