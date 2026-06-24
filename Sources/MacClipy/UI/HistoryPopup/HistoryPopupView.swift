@@ -97,16 +97,18 @@ struct HistoryPopupView: View {
     }
 
     private var resultsList: some View {
-        ScrollViewReader { proxy in
+        let results = model.results
+
+        return ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 4) {
-                    if model.results.isEmpty {
+                    if results.isEmpty {
                         Text(L10n.tr("historyPopup.noMatches"))
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, minHeight: 300)
                     } else {
-                        ForEach(model.results.indices, id: \.self) { row in
-                            let result = model.results[row]
+                        ForEach(results.indices, id: \.self) { row in
+                            let result = results[row]
                             HistoryPopupRow(
                                 result: result,
                                 isSelected: row == model.selectedRow,
