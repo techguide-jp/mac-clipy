@@ -196,6 +196,18 @@ final class HistoryPopupModel {
         refresh()
     }
 
+    @discardableResult
+    func deleteLastSearchCharacter() -> Bool {
+        guard !query.isEmpty else {
+            return false
+        }
+
+        query.removeLast()
+        selectedRow = 0
+        refresh()
+        return true
+    }
+
     private func normalizeFolderFilter() {
         guard isAvailableFolderFilter(folderFilter) else {
             folderFilter = .all

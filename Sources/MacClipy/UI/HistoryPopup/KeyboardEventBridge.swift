@@ -80,6 +80,27 @@ enum HistoryPopupKeyAction {
             return true
         }
 
+        if let keyActionHandled = handleKeyAction(event: event, isTextEditing: isTextEditing, model: model) {
+            return keyActionHandled
+        }
+
+        guard !isTextEditing,
+              shouldAppendToSearch(event),
+              let text = event.charactersIgnoringModifiers
+        else {
+            return false
+        }
+
+        model.appendSearchText(text)
+        return true
+    }
+
+    @MainActor
+    private static func handleKeyAction(
+        event: NSEvent,
+        isTextEditing: Bool,
+        model: HistoryPopupModel
+    ) -> Bool? {
         switch event.keyCode {
         case UInt16(kVK_Return):
             model.chooseSelectedItem()
@@ -93,6 +114,11 @@ enum HistoryPopupKeyAction {
         case UInt16(kVK_UpArrow):
             model.moveSelection(by: -1)
             return true
+        case UInt16(kVK_Delete):
+            guard !isTextEditing else {
+                return false
+            }
+            return model.deleteLastSearchCharacter()
         case UInt16(kVK_LeftArrow):
             guard model.query.isEmpty else {
                 return false
@@ -106,15 +132,7 @@ enum HistoryPopupKeyAction {
             model.selectMode(.favorites)
             return true
         default:
-            guard !isTextEditing,
-                  shouldAppendToSearch(event),
-                  let text = event.charactersIgnoringModifiers
-            else {
-                return false
-            }
-
-            model.appendSearchText(text)
-            return true
+            return nil
         }
     }
 
@@ -154,11 +172,16 @@ enum HistoryPopupKeyAction {
         let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
         guard !modifiers.contains(.command),
               !modifiers.contains(.option),
-              !modifiers.contains(.control)
+              !modifiers.contains(.control),
+              let text = event.charactersIgnoringModifiers,
+              text.count == 1
         else {
             return false
         }
 
-        return event.charactersIgnoringModifiers?.count == 1
+        return text.unicodeScalars.allSatisfy { scalar in
+            !CharacterSet.controlCharacters.contains(scalar)
+                && !CharacterSet.newlines.contains(scalar)
+        }
     }
 }
