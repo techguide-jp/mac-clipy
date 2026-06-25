@@ -383,6 +383,7 @@ final class SwiftUIModelTests: XCTestCase {
             StatusItemController.commandItemOrder,
             [
                 .settings,
+                .checkForUpdates,
                 .help,
                 .search,
                 .favorites,

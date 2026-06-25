@@ -57,13 +57,48 @@ jobs:
           echo "build_number=$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
           echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
 
+      - name: Import Developer ID certificate
+        env:
+          MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          if [[ -z "$MACOS_CERTIFICATE_P12_BASE64" || -z "$MACOS_CERTIFICATE_PASSWORD" ]]; then
+            echo "MACOS_CERTIFICATE_P12_BASE64 and MACOS_CERTIFICATE_PASSWORD secrets are required." >&2
+            exit 1
+          fi
+
+          keychain_path="$RUNNER_TEMP/macclipy-signing.keychain-db"
+          certificate_path="$RUNNER_TEMP/developer-id.p12"
+          echo "$MACOS_CERTIFICATE_P12_BASE64" | base64 -D > "$certificate_path"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+          security import "$certificate_path" -k "$keychain_path" -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security list-keychains -d user -s "$keychain_path" $(security list-keychains -d user | tr -d '"')
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$keychain_path"
+
       - name: Package release
         env:
           APP_VERSION: ${{ steps.release.outputs.app_version }}
           BUILD_NUMBER: ${{ steps.release.outputs.build_number }}
           REQUIRE_SWIFTLINT: "1"
           REQUIRE_SWIFTFORMAT: "1"
+          SIGNING_MODE: developer-id
+          DEVELOPER_ID_APPLICATION: ${{ secrets.DEVELOPER_ID_APPLICATION }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
         run: scripts/package-release.sh
+
+      - name: Generate Sparkle appcast
+        env:
+          APP_VERSION: ${{ steps.release.outputs.app_version }}
+          RELEASE_TAG: ${{ steps.release.outputs.release_tag }}
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: scripts/generate-appcast.sh
 
       - name: Publish GitHub Release
         env:
@@ -73,17 +108,18 @@ jobs:
         run: |
           dmg_path="dist/release/MacClipy-v$APP_VERSION.dmg"
           checksum_path="$dmg_path.sha256"
+          appcast_path="dist/release/appcast.xml"
           notes_file="$(mktemp)"
           cat > "$notes_file" <<'NOTES'
-          MacClipy の初回配布版です。
+          MacClipy の自社配布版です。
 
-          この DMG は Developer ID 署名・公証前の暫定配布物です。初回起動時に macOS の警告が出る場合があります。
-          起動できない場合は README の「未署名アプリの起動手順」を確認してください。
+          この DMG は Developer ID 署名・公証済みです。
+          アプリ内の「アップデートを確認...」から今後の更新を確認できます。
           NOTES
 
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" "$dmg_path" "$checksum_path" --clobber
+            gh release upload "$RELEASE_TAG" "$dmg_path" "$checksum_path" "$appcast_path" --clobber
             gh release edit "$RELEASE_TAG" --title "MacClipy $RELEASE_TAG" --notes-file "$notes_file"
           else
-            gh release create "$RELEASE_TAG" "$dmg_path" "$checksum_path" --title "MacClipy $RELEASE_TAG" --notes-file "$notes_file"
+            gh release create "$RELEASE_TAG" "$dmg_path" "$checksum_path" "$appcast_path" --title "MacClipy $RELEASE_TAG" --notes-file "$notes_file"
           fi

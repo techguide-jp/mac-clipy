@@ -14,6 +14,7 @@ final class AppModel {
     let historyModel = ClipboardHistoryModel()
     let favoritesModel = FavoritesModel()
     let historyPopupModel: HistoryPopupModel
+    let appUpdater = AppUpdater()
 
     private var monitor: ClipboardMonitor?
     private var statusItemController: StatusItemController?
@@ -93,6 +94,10 @@ final class AppModel {
         settingsWindowController?.showKeyboardHelp()
     }
 
+    func checkForUpdates() {
+        appUpdater.checkForUpdates()
+    }
+
     func showDevelopmentCrashReport(_ report: DevelopmentCrashReport) {
         floatingPanelController?.close()
         isKeyboardHelpPresented = false
@@ -140,6 +145,8 @@ final class AppModel {
             onTogglePause: { [weak self] in self?.togglePause() },
             onClearHistory: { [weak self] in self?.clearHistory() },
             onShowSettings: { [weak self] in self?.showSettings() },
+            canCheckForUpdates: { [weak self] in self?.appUpdater.canCheckForUpdates == true },
+            onCheckForUpdates: { [weak self] in self?.checkForUpdates() },
             onQuit: {
                 NSApp.terminate(nil)
             }
