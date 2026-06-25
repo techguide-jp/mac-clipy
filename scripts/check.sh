@@ -8,6 +8,8 @@ EXPECTED_BUNDLE_ID="${BUNDLE_ID:-jp.techguide.macclipy}"
 EXPECTED_APP_VERSION="${APP_VERSION:-0.1.0}"
 EXPECTED_BUILD_NUMBER="${BUILD_NUMBER:-1}"
 EXPECTED_BUILD_ARCHS="${BUILD_ARCHS:-}"
+EXPECTED_SPARKLE_FEED_URL="${SPARKLE_FEED_URL:-https://github.com/techguide-jp/mac-clipy/releases/latest/download/appcast.xml}"
+EXPECTED_SPARKLE_PUBLIC_ED_KEY="${SPARKLE_PUBLIC_ED_KEY:-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}"
 
 echo "==> Swift version"
 swift --version
@@ -48,12 +50,18 @@ test -x dist/MacClipy.app/Contents/MacOS/MacClipy
 test -f dist/MacClipy.app/Contents/Resources/ja.lproj/Localizable.strings
 test -f dist/MacClipy.app/Contents/Resources/en.lproj/Localizable.strings
 test -f dist/MacClipy.app/Contents/Resources/AppIcon.icns
+test -d dist/MacClipy.app/Contents/Frameworks/Sparkle.framework
 test "$(plutil -extract CFBundleIdentifier raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_BUNDLE_ID"
 test "$(plutil -extract CFBundleShortVersionString raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_APP_VERSION"
 test "$(plutil -extract CFBundleVersion raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_BUILD_NUMBER"
 test "$(plutil -extract CFBundleIconFile raw dist/MacClipy.app/Contents/Info.plist)" = "AppIcon"
 test "$(plutil -extract LSApplicationCategoryType raw dist/MacClipy.app/Contents/Info.plist)" = "public.app-category.productivity"
 test "$(plutil -extract LSMinimumSystemVersion raw dist/MacClipy.app/Contents/Info.plist)" = "14.0"
+test "$(plutil -extract SUFeedURL raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_SPARKLE_FEED_URL"
+test "$(plutil -extract SUPublicEDKey raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_SPARKLE_PUBLIC_ED_KEY"
+test "$(plutil -extract SUEnableAutomaticChecks raw dist/MacClipy.app/Contents/Info.plist)" = "true"
+test "$(plutil -extract SUAutomaticallyUpdate raw dist/MacClipy.app/Contents/Info.plist)" = "false"
+test "$(plutil -extract SUVerifyUpdateBeforeExtraction raw dist/MacClipy.app/Contents/Info.plist)" = "true"
 if [[ -n "$EXPECTED_BUILD_ARCHS" ]]; then
   actual_archs="$(lipo -archs dist/MacClipy.app/Contents/MacOS/MacClipy)"
   test "$actual_archs" = "$EXPECTED_BUILD_ARCHS"

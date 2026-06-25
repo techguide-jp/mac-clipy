@@ -45,7 +45,7 @@ UI 文言は Swift ソースに直接書かず、`Localizable.strings` に移し
 GitHub Actions では macOS runner で `scripts/check.sh` を実行します。
 PR と `main` への push の両方で、テスト、lint、release build、`.app` 生成が通ることを必須条件にします。
 
-`v*` tag または手動実行の `Release` workflow では `scripts/package-release.sh` を実行し、背景画像と Finder レイアウトを設定した DMG と checksum を GitHub Release にアップロードします。
+`v*` tag または手動実行の `Release` workflow では `scripts/package-release.sh` を Developer ID モードで実行し、署名・公証・staple 済み DMG、checksum、Sparkle `appcast.xml` を GitHub Release にアップロードします。
 
 ## SwiftLint 方針
 

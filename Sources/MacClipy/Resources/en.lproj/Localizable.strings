@@ -83,6 +83,7 @@
 "keyboardHelp.settings.switchTabs" = "Switch between General and Favorites";
 "keyboardHelp.title" = "Keyboard Help";
 "menu.clearHistory" = "Delete History...";
+"menu.checkForUpdates" = "Check for Updates...";
 "menu.emptyHistory" = "No history";
 "menu.favoriteHotKey" = "Favorites: %@";
 "menu.helpHotKey" = "Help: %@";
@@ -158,6 +159,10 @@
 "settings.shortcut.reset" = "Restore Default";
 "settings.shortcut.title" = "History Menu Shortcut";
 "settings.status.appAlreadyAdded" = "%@ is already added.";
+"settings.updates.automaticChecks" = "Automatically Check for Updates";
+"settings.updates.automaticDownloads" = "Automatically Download and Install Updates";
+"settings.updates.checkNow" = "Check for Updates...";
+"settings.updates.title" = "Updates";
 "settings.status.appCapturedAgain" = "%@ will be saved to history again.";
 "settings.status.appExcluded" = "%@ will not be saved to history.";
 "settings.status.appReadFailed" = "Could not read app information. Choose another app.";
