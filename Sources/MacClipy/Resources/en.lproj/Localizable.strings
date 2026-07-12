@@ -82,7 +82,7 @@
 "keyboardHelp.settings.moveSelection" = "Move selection in lists";
 "keyboardHelp.settings.newFolder" = "Create a new folder";
 "keyboardHelp.settings.renameSelected" = "Rename the selected favorite or folder";
-"keyboardHelp.settings.switchTabs" = "Switch between General, Favorites, and Excluded Apps";
+"keyboardHelp.settings.switchTabs" = "Switch between General, Favorites, Excluded Apps, and About";
 "keyboardHelp.title" = "Keyboard Help";
 "menu.clearHistory" = "Delete History...";
 "menu.checkForUpdates" = "Check for Updates...";
@@ -99,6 +99,7 @@
 "menu.favorites" = "Favorites...";
 "menu.search" = "Search...";
 "menu.settings" = "Settings...";
+"menu.about" = "About MacClipy...";
 "onboarding.accessibility.description" = "Allow access to paste a selected item into the last app you used. Copying still works without access.";
 "onboarding.accessibility.enable" = "Enable Automatic Paste";
 "onboarding.accessibility.enabled" = "Enabled";
@@ -205,7 +206,18 @@
 "settings.tab.excludedApps" = "Excluded Apps";
 "settings.tab.favorites" = "Favorites";
 "settings.tab.general" = "General";
+"settings.tab.about" = "About";
+"settings.about.appName" = "MacClipy";
+"settings.about.contactLink" = "Contact MacClipy Support";
+"settings.about.externalLinkHelp" = "Links open in your default web browser.";
+"settings.about.operatedBy" = "Developed and operated by";
+"settings.about.operatorLink" = "Operator Information";
+"settings.about.operatorName" = "TechGuide LLC";
+"settings.about.version" = "Version %@";
+"settings.about.versionUnknown" = "Development Build";
+"settings.about.versionWithBuild" = "Version %@ (Build %@)";
 "settings.title" = "MacClipy Settings";
+"support.contactSubject" = "MacClipyについて";
 "shortcutRecorder.cancelled" = "Change canceled.";
 "shortcutRecorder.idleSubtitle" = "Click to change";
 "shortcutRecorder.missingModifier" = "Press a key together with ⌘, ⌥, or ⌃.";

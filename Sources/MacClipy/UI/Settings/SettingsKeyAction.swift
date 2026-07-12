@@ -4,6 +4,7 @@ enum SettingsTab: Hashable {
     case general
     case favorites
     case excludedApps
+    case about
 }
 
 enum SettingsKeyAction {
@@ -43,6 +44,9 @@ enum SettingsKeyAction {
             return true
         case "3":
             selectTab(.excludedApps)
+            return true
+        case "4":
+            selectTab(.about)
             return true
         case "f":
             selectTab(.favorites)

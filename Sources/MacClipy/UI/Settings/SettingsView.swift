@@ -4,11 +4,10 @@ import SwiftUI
 
 struct SettingsView: View {
     @Bindable var appModel: AppModel
-    @State private var selectedTab: SettingsTab = .general
     @State private var favoriteSearchFocusRevision = 0
 
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: $appModel.selectedSettingsTab) {
             GeneralSettingsView(
                 updater: appModel.appUpdater,
                 onShortcutChange: appModel.refreshStatusMenu,
@@ -34,6 +33,12 @@ struct SettingsView: View {
                     Label(L10n.tr("settings.tab.excludedApps"), systemImage: "eye.slash")
                 }
                 .tag(SettingsTab.excludedApps)
+
+            AboutSettingsView()
+                .tabItem {
+                    Label(L10n.tr("settings.tab.about"), systemImage: "info.circle")
+                }
+                .tag(SettingsTab.about)
         }
         .padding(16)
         .frame(width: 820, height: 580)
@@ -52,7 +57,7 @@ struct SettingsView: View {
                 SettingsKeyAction.handle(
                     event: event,
                     isTextEditing: isTextEditing,
-                    selectTab: { selectedTab = $0 },
+                    selectTab: { appModel.selectedSettingsTab = $0 },
                     focusFavoritesSearch: {
                         favoriteSearchFocusRevision += 1
                     },
@@ -60,6 +65,62 @@ struct SettingsView: View {
                 )
             }
         )
+    }
+}
+
+private struct AboutSettingsView: View {
+    private var versionDescription: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
+
+        guard let version, !version.isEmpty else {
+            return L10n.tr("settings.about.versionUnknown")
+        }
+        guard let build, !build.isEmpty else {
+            return L10n.tr("settings.about.version", version)
+        }
+        return L10n.tr("settings.about.versionWithBuild", version, build)
+    }
+
+    var body: some View {
+        VStack(spacing: 22) {
+            Image(nsImage: NSApplication.shared.applicationIconImage)
+                .resizable()
+                .frame(width: 112, height: 112)
+                .accessibilityHidden(true)
+
+            VStack(spacing: 6) {
+                Text(L10n.tr("settings.about.appName"))
+                    .font(.system(size: 28, weight: .bold))
+                Text(versionDescription)
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(spacing: 8) {
+                Text(L10n.tr("settings.about.operatedBy"))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Text(L10n.tr("settings.about.operatorName"))
+                    .font(.headline)
+            }
+
+            HStack(spacing: 12) {
+                Link(destination: AppConstants.Support.operatorInformationURL) {
+                    Label(L10n.tr("settings.about.operatorLink"), systemImage: "building.2")
+                }
+
+                Link(destination: AppConstants.Support.contactURL) {
+                    Label(L10n.tr("settings.about.contactLink"), systemImage: "envelope")
+                }
+                .buttonStyle(.borderedProminent)
+            }
+
+            Text(L10n.tr("settings.about.externalLinkHelp"))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(32)
     }
 }
 

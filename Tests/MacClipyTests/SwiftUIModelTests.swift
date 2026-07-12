@@ -383,6 +383,7 @@ final class SwiftUIModelTests: XCTestCase {
             StatusItemController.commandItemOrder,
             [
                 .settings,
+                .about,
                 .onboarding,
                 .checkForUpdates,
                 .help,
@@ -392,6 +393,22 @@ final class SwiftUIModelTests: XCTestCase {
                 .clearHistory,
                 .separator,
                 .quit
+            ]
+        )
+    }
+
+    func testSupportURLsPointToOfficialOperatorAndMacClipyContact() throws {
+        XCTAssertEqual(AppConstants.Support.operatorInformationURL.absoluteString, "https://techguide.jp/#company")
+
+        let components = try XCTUnwrap(URLComponents(url: AppConstants.Support.contactURL, resolvingAgainstBaseURL: false))
+        XCTAssertEqual(components.scheme, "https")
+        XCTAssertEqual(components.host, "techguide.jp")
+        XCTAssertEqual(components.path, "/contact/")
+        XCTAssertEqual(
+            components.queryItems,
+            [
+                URLQueryItem(name: "category", value: "macclipy"),
+                URLQueryItem(name: "subject", value: L10n.tr("support.contactSubject"))
             ]
         )
     }

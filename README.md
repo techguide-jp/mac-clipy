@@ -117,3 +117,9 @@ MacClipyの設定画面やメニューを操作しても、貼り付け先は上
 GitHub Releases で配布する MacClipy のバイナリは無償で利用できます。
 
 このリポジトリには OSS ライセンスを付与していません。ソースコードは閲覧できますが、明示的な許諾なく複製、改変、再配布することはできません。
+
+## 運営・問い合わせ
+
+MacClipy は [TechGuide合同会社](https://techguide.jp/#company) が開発・運営しています。
+
+不具合、使い方、機能へのご要望は [MacClipy専用お問い合わせフォーム](https://techguide.jp/contact/?category=macclipy&subject=MacClipy%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6) からご連絡ください。
