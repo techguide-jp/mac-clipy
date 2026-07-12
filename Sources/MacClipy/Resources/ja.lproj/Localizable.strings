@@ -6,6 +6,8 @@
 "alert.hotKeyRegistrationFailed.title" = "ホットキー登録に失敗しました";
 "alert.initializationFailed.title" = "初期化に失敗しました";
 "alert.pasteFailed.title" = "貼り付けに失敗しました";
+"alert.pasteDestinationActivationFailed.message" = "最後に操作していたアプリを開けなかったため、コピーだけ行いました。貼り付け先でCommand+Vを押してください。";
+"alert.pasteDestinationUnavailable.message" = "貼り付け先のアプリを確認できなかったため、コピーだけ行いました。貼り付け先でCommand+Vを押してください。";
 "appName.1password" = "1Password";
 "appName.1password7" = "1Password 7";
 "appName.bitwarden" = "Bitwarden";
@@ -97,7 +99,7 @@
 "menu.favorites" = "お気に入り...";
 "menu.search" = "検索...";
 "menu.settings" = "設定...";
-"onboarding.accessibility.description" = "許可すると、選んだ履歴を直前のアプリへ自動で貼り付けます。許可しなくてもコピーはできます。";
+"onboarding.accessibility.description" = "許可すると、選んだ履歴を最後に操作していたアプリへ自動で貼り付けます。許可しなくてもコピーはできます。";
 "onboarding.accessibility.enable" = "自動貼り付けを有効にする";
 "onboarding.accessibility.enabled" = "有効済み";
 "onboarding.accessibility.requested" = "システム設定で許可後、MacClipyに戻ると反映されます。";
