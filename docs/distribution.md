@@ -12,6 +12,8 @@
 - appcast は GitHub Releases の `appcast.xml` を正とする。
 - このリポジトリには OSS ライセンスを付与しない。バイナリは無償利用可、ソースコードの複製・改変・再配布は別途許諾が必要。
 
+証明書、GitHub Secrets、Developer ID 署名、公証、Sparkle appcast の詳細な運用手順は [自社配布リリース Runbook](./release-runbook.md) を参照する。
+
 ## DMG 作成
 
 ```bash
