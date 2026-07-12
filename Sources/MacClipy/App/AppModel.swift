@@ -20,6 +20,7 @@ final class AppModel {
     private var statusItemController: StatusItemController?
     private var floatingPanelController: FloatingPanelController?
     @ObservationIgnored private var settingsWindowController: SettingsWindowController?
+    @ObservationIgnored private var onboardingWindowController: OnboardingWindowController?
     @ObservationIgnored private let developmentCrashReporter = DevelopmentCrashReporter()
     private var previousApplication: NSRunningApplication?
     var isKeyboardHelpPresented = false
@@ -42,11 +43,17 @@ final class AppModel {
             self?.showKeyboardHelp()
         }
         settingsWindowController = SettingsWindowController(appModel: self)
+        onboardingWindowController = OnboardingWindowController(
+            isAccessibilityTrusted: { PasteController.isAccessibilityTrusted },
+            requestAccessibilityPermission: { PasteController.requestAccessibilityPermission() },
+            onDismiss: { OnboardingState.markCompleted() }
+        )
     }
 
     func applicationDidFinishLaunching() {
         NSApp.setActivationPolicy(.accessory)
         let previousCrashReport = developmentCrashReporter.startLaunch()
+        let shouldShowOnboarding = OnboardingState.shouldPresentAtLaunch()
 
         do {
             try SettingsMigration.migrateIfNeeded()
@@ -62,7 +69,9 @@ final class AppModel {
         setupStatusItem()
         setupKeyboardShortcuts()
 
-        if let previousCrashReport {
+        if shouldShowOnboarding {
+            showOnboarding()
+        } else if let previousCrashReport {
             showDevelopmentCrashReport(previousCrashReport)
         }
     }
@@ -92,6 +101,11 @@ final class AppModel {
         floatingPanelController?.close()
         developmentCrashReport = nil
         settingsWindowController?.showKeyboardHelp()
+    }
+
+    func showOnboarding() {
+        floatingPanelController?.close()
+        onboardingWindowController?.show()
     }
 
     func checkForUpdates() {
@@ -142,6 +156,7 @@ final class AppModel {
             onShowHistory: { [weak self] in self?.showHistoryPopup() },
             onShowFavorites: { [weak self] in self?.showFavoritePopup() },
             onShowHelp: { [weak self] in self?.showKeyboardHelp() },
+            onShowOnboarding: { [weak self] in self?.showOnboarding() },
             onTogglePause: { [weak self] in self?.togglePause() },
             onClearHistory: { [weak self] in self?.clearHistory() },
             onShowSettings: { [weak self] in self?.showSettings() },

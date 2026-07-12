@@ -36,8 +36,9 @@ Dock に出て、Command+Tab の対象になり、通常ウィンドウを前面
 - `Info.plist` に `LSUIElement=true` を入れる。
 - `AppDelegateBridge.applicationDidFinishLaunching` で `NSApp.setActivationPolicy(.accessory)` を呼ぶ。
 - Dock には表示しない。
-- 起動時に検索ウィンドウは自動表示しない。
+- 通常起動時に検索ウィンドウは自動表示しない。新規インストールの初回起動時だけ使い方ガイドを表示する。
 - `NSStatusBar.system.statusItem` のメニューバー項目、`Shift + Command + V` の履歴ショートカット、`Option + Command + V` のお気に入りショートカットを入口にする。
+- 使い方ガイドはメニューバーの「使い方...」から再表示できる。
 
 この構成なら、Clipy 系アプリらしく常駐でき、Dock を占有しない。メニューバー項目が多い環境では隠れることがあるため、必要に応じて macOS 側でメニューバー項目を整理する。
 

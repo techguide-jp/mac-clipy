@@ -140,6 +140,8 @@ final class SettingsMigrationTests: XCTestCase {
         Defaults.Keys.excludedBundleIdentifiers.reset()
         Defaults.Keys.didMigrateLegacySettings.reset()
         Defaults.Keys.didMigrateBundleID.reset()
+        Defaults.Keys.didEvaluateOnboardingEligibility.reset()
+        Defaults.Keys.isOnboardingPending.reset()
         KeyboardShortcuts.setShortcut(nil, for: .showHistory)
         KeyboardShortcuts.setShortcut(nil, for: .showFavorites)
         KeyboardShortcuts.setShortcut(nil, for: .showHelp)
