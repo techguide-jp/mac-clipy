@@ -3,6 +3,7 @@ import AppKit
 enum SettingsTab: Hashable {
     case general
     case favorites
+    case excludedApps
 }
 
 enum SettingsKeyAction {
@@ -39,6 +40,9 @@ enum SettingsKeyAction {
             return true
         case "2":
             selectTab(.favorites)
+            return true
+        case "3":
+            selectTab(.excludedApps)
             return true
         case "f":
             selectTab(.favorites)

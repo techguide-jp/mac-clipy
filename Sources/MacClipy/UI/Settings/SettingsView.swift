@@ -8,40 +8,32 @@ struct SettingsView: View {
     @State private var favoriteSearchFocusRevision = 0
 
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Spacer()
-
-                Button {
-                    appModel.showKeyboardHelp()
-                } label: {
-                    Image(systemName: "questionmark.circle")
-                        .accessibilityLabel(L10n.tr("button.keyboardHelp"))
-                }
-                .buttonStyle(.bordered)
-                .help(L10n.tr("button.keyboardHelp"))
+        TabView(selection: $selectedTab) {
+            GeneralSettingsView(
+                updater: appModel.appUpdater,
+                onShortcutChange: appModel.refreshStatusMenu,
+                onShowOnboarding: appModel.showOnboarding,
+                onShowKeyboardHelp: appModel.showKeyboardHelp
+            )
+            .tabItem {
+                Label(L10n.tr("settings.tab.general"), systemImage: "gearshape")
             }
+            .tag(SettingsTab.general)
 
-            TabView(selection: $selectedTab) {
-                GeneralSettingsView(
-                    model: appModel.settingsModel,
-                    updater: appModel.appUpdater,
-                    onShortcutChange: appModel.refreshStatusMenu
-                )
-                .tabItem {
-                    Text(L10n.tr("settings.tab.general"))
-                }
-                .tag(SettingsTab.general)
-
-                FavoritesManagementView(
-                    model: appModel.favoritesModel,
-                    searchFocusRevision: favoriteSearchFocusRevision
-                )
-                .tabItem {
-                    Text(L10n.tr("settings.tab.favorites"))
-                }
-                .tag(SettingsTab.favorites)
+            FavoritesManagementView(
+                model: appModel.favoritesModel,
+                searchFocusRevision: favoriteSearchFocusRevision
+            )
+            .tabItem {
+                Label(L10n.tr("settings.tab.favorites"), systemImage: "star")
             }
+            .tag(SettingsTab.favorites)
+
+            ExcludedAppsSettingsView(model: appModel.settingsModel)
+                .tabItem {
+                    Label(L10n.tr("settings.tab.excludedApps"), systemImage: "eye.slash")
+                }
+                .tag(SettingsTab.excludedApps)
         }
         .padding(16)
         .frame(width: 820, height: 580)
@@ -72,148 +64,117 @@ struct SettingsView: View {
 }
 
 private struct GeneralSettingsView: View {
-    @Bindable var model: SettingsModel
     @Bindable var updater: AppUpdater
     let onShortcutChange: () -> Void
-    @State private var selectedExcludedApp: String?
+    let onShowOnboarding: () -> Void
+    let onShowKeyboardHelp: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            startupAndShortcutSection
-
-            Divider()
-
-            updatesSection
-
-            Divider()
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text(L10n.tr("settings.excludedApps.title"))
-                    .font(.headline)
-                Text(L10n.tr("settings.excludedApps.help"))
-                    .foregroundStyle(.secondary)
-
-                List(selection: $selectedExcludedApp) {
-                    ForEach(model.excludedBundleIdentifiers, id: \.self) { bundleIdentifier in
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(verbatim: SettingsDefaults.displayName(for: bundleIdentifier))
-                            Text(verbatim: bundleIdentifier)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                SettingsSection(
+                    title: L10n.tr("settings.general.startup.title"),
+                    description: L10n.tr("settings.general.startup.help"),
+                    systemImage: "power"
+                ) {
+                    settingRow(title: L10n.tr("settings.launchAtLogin")) {
+                        LaunchAtLogin.Toggle {
+                            Text(L10n.tr("settings.launchAtLogin"))
                         }
-                        .padding(.vertical, 2)
-                        .tag(bundleIdentifier)
+                        .labelsHidden()
                     }
                 }
-                .frame(maxWidth: .infinity, minHeight: 240)
 
-                HStack {
-                    Button {
-                        model.chooseExcludedApp()
-                    } label: {
-                        Label(L10n.tr("settings.excludedApps.add"), systemImage: "plus")
-                    }
-
-                    Button {
-                        if let selectedExcludedApp {
-                            model.removeExcludedApp(selectedExcludedApp)
-                            self.selectedExcludedApp = nil
+                SettingsSection(
+                    title: L10n.tr("settings.general.shortcuts.title"),
+                    description: L10n.tr("settings.general.shortcuts.help"),
+                    systemImage: "keyboard"
+                ) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        settingRow(title: L10n.tr("settings.shortcut.title")) {
+                            KeyboardShortcuts.Recorder(
+                                for: .showHistory,
+                                onChange: { _ in onShortcutChange() }
+                            )
                         }
-                    } label: {
-                        Label(L10n.tr("settings.excludedApps.remove"), systemImage: "minus")
+
+                        settingRow(title: L10n.tr("settings.favoriteShortcut.title")) {
+                            KeyboardShortcuts.Recorder(
+                                for: .showFavorites,
+                                onChange: { _ in onShortcutChange() }
+                            )
+                        }
+
+                        settingRow(title: L10n.tr("settings.helpShortcut.title")) {
+                            KeyboardShortcuts.Recorder(
+                                for: .showHelp,
+                                onChange: { _ in onShortcutChange() }
+                            )
+                        }
                     }
-                    .disabled(selectedExcludedApp == nil)
+                }
 
-                    Button {
-                        model.resetExcludedApps()
-                        selectedExcludedApp = nil
-                    } label: {
-                        Label(L10n.tr("settings.excludedApps.reset"), systemImage: "arrow.counterclockwise")
+                SettingsSection(
+                    title: L10n.tr("settings.updates.title"),
+                    description: L10n.tr("settings.updates.help"),
+                    systemImage: "arrow.triangle.2.circlepath"
+                ) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        settingRow(title: L10n.tr("settings.updates.automaticChecks")) {
+                            Toggle(
+                                L10n.tr("settings.updates.automaticChecks"),
+                                isOn: Binding(
+                                    get: { updater.automaticallyChecksForUpdates },
+                                    set: { updater.automaticallyChecksForUpdates = $0 }
+                                )
+                            )
+                            .labelsHidden()
+                        }
+
+                        settingRow(title: L10n.tr("settings.updates.automaticDownloads")) {
+                            Toggle(
+                                L10n.tr("settings.updates.automaticDownloads"),
+                                isOn: Binding(
+                                    get: { updater.automaticallyDownloadsUpdates },
+                                    set: { updater.automaticallyDownloadsUpdates = $0 }
+                                )
+                            )
+                            .labelsHidden()
+                            .disabled(!updater.allowsAutomaticUpdates)
+                        }
+
+                        Button {
+                            updater.checkForUpdates()
+                        } label: {
+                            Label(L10n.tr("settings.updates.checkNow"), systemImage: "arrow.down.circle")
+                        }
+                        .disabled(!updater.canCheckForUpdates)
                     }
+                }
 
-                    Spacer()
+                SettingsSection(
+                    title: L10n.tr("settings.general.guide.title"),
+                    description: L10n.tr("settings.general.guide.help"),
+                    systemImage: "book.closed"
+                ) {
+                    HStack(spacing: 10) {
+                        Button(action: onShowOnboarding) {
+                            Label(L10n.tr("settings.general.guide.show"), systemImage: "play.rectangle")
+                        }
 
-                    Text(verbatim: model.statusMessage)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        Button(action: onShowKeyboardHelp) {
+                            Label(L10n.tr("settings.general.guide.keyboardHelp"), systemImage: "keyboard")
+                        }
+
+                        Spacer()
+                    }
                 }
             }
+            .padding(.horizontal, 2)
+            .padding(.top, 18)
+            .padding(.bottom, 28)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-
-    private var startupAndShortcutSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(L10n.tr("settings.general.startupAndShortcuts"))
-                .font(.headline)
-
-            settingRow(title: L10n.tr("settings.launchAtLogin")) {
-                LaunchAtLogin.Toggle {
-                    Text(L10n.tr("settings.launchAtLogin"))
-                }
-                .labelsHidden()
-            }
-
-            settingRow(title: L10n.tr("settings.shortcut.title")) {
-                KeyboardShortcuts.Recorder(
-                    for: .showHistory,
-                    onChange: { _ in onShortcutChange() }
-                )
-            }
-
-            settingRow(title: L10n.tr("settings.favoriteShortcut.title")) {
-                KeyboardShortcuts.Recorder(
-                    for: .showFavorites,
-                    onChange: { _ in onShortcutChange() }
-                )
-            }
-
-            settingRow(title: L10n.tr("settings.helpShortcut.title")) {
-                KeyboardShortcuts.Recorder(
-                    for: .showHelp,
-                    onChange: { _ in onShortcutChange() }
-                )
-            }
-        }
-    }
-
-    private var updatesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(L10n.tr("settings.updates.title"))
-                .font(.headline)
-
-            settingRow(title: L10n.tr("settings.updates.automaticChecks")) {
-                Toggle(
-                    L10n.tr("settings.updates.automaticChecks"),
-                    isOn: Binding(
-                        get: { updater.automaticallyChecksForUpdates },
-                        set: { updater.automaticallyChecksForUpdates = $0 }
-                    )
-                )
-                .labelsHidden()
-            }
-
-            settingRow(title: L10n.tr("settings.updates.automaticDownloads")) {
-                Toggle(
-                    L10n.tr("settings.updates.automaticDownloads"),
-                    isOn: Binding(
-                        get: { updater.automaticallyDownloadsUpdates },
-                        set: { updater.automaticallyDownloadsUpdates = $0 }
-                    )
-                )
-                .labelsHidden()
-                .disabled(!updater.allowsAutomaticUpdates)
-            }
-
-            Button {
-                updater.checkForUpdates()
-            } label: {
-                Label(L10n.tr("settings.updates.checkNow"), systemImage: "arrow.down.circle")
-            }
-            .disabled(!updater.canCheckForUpdates)
-        }
+        .scrollIndicators(.never)
     }
 
     private func settingRow(title: String, @ViewBuilder control: () -> some View) -> some View {
@@ -224,6 +185,45 @@ private struct GeneralSettingsView: View {
             control()
 
             Spacer()
+        }
+    }
+}
+
+private struct SettingsSection<Content: View>: View {
+    let title: String
+    let description: String
+    let systemImage: String
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color.accentColor)
+                    .frame(width: 30, height: 30)
+                    .background(Color.accentColor.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 7))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(verbatim: title)
+                        .font(.headline)
+                    Text(verbatim: description)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            content()
+                .padding(.leading, 42)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.secondary.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.secondary.opacity(0.14), lineWidth: 1)
         }
     }
 }
