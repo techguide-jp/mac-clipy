@@ -48,6 +48,7 @@ if [[ -n "$BUILD_ARCHS" ]]; then
   done
   BINARY_PATH="$ROOT_DIR/.build/apple/Products/$(tr '[:lower:]' '[:upper:]' <<< "${BUILD_CONFIG:0:1}")${BUILD_CONFIG:1}/$APP_NAME"
 fi
+BUILD_PRODUCTS_DIR="$(dirname "$BINARY_PATH")"
 
 if [[ "$DEVELOPMENT_CRASH_MODAL_ENABLED" == "1" ]]; then
   DEVELOPMENT_CRASH_MODAL_PLIST_VALUE="<true/>"
@@ -64,6 +65,10 @@ cp "$BINARY_PATH" "$MACOS_DIR/$APP_NAME"
 chmod +x "$MACOS_DIR/$APP_NAME"
 cp -R "$ROOT_DIR/Sources/MacClipy/Resources/"*.lproj "$RESOURCES_DIR/"
 cp "$ROOT_DIR/Sources/MacClipy/Resources/$ICON_FILE" "$RESOURCES_DIR/$ICON_FILE"
+for resource_bundle in "$BUILD_PRODUCTS_DIR"/*.bundle; do
+  [[ -d "$resource_bundle" ]] || continue
+  ditto "$resource_bundle" "$RESOURCES_DIR/$(basename "$resource_bundle")"
+done
 
 SPARKLE_FRAMEWORK="$ROOT_DIR/.build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework"
 if [[ ! -d "$SPARKLE_FRAMEWORK" ]]; then

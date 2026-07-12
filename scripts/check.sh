@@ -50,6 +50,9 @@ test -x dist/MacClipy.app/Contents/MacOS/MacClipy
 test -f dist/MacClipy.app/Contents/Resources/ja.lproj/Localizable.strings
 test -f dist/MacClipy.app/Contents/Resources/en.lproj/Localizable.strings
 test -f dist/MacClipy.app/Contents/Resources/AppIcon.icns
+test -d dist/MacClipy.app/Contents/Resources/Defaults_Defaults.bundle
+test -d dist/MacClipy.app/Contents/Resources/KeyboardShortcuts_KeyboardShortcuts.bundle
+test -d dist/MacClipy.app/Contents/Resources/MacClipy_MacClipy.bundle
 test -d dist/MacClipy.app/Contents/Frameworks/Sparkle.framework
 test "$(plutil -extract CFBundleIdentifier raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_BUNDLE_ID"
 test "$(plutil -extract CFBundleShortVersionString raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_APP_VERSION"
