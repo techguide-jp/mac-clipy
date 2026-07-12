@@ -25,6 +25,7 @@ struct SettingsView: View {
             TabView(selection: $selectedTab) {
                 GeneralSettingsView(
                     model: appModel.settingsModel,
+                    updater: appModel.appUpdater,
                     onShortcutChange: appModel.refreshStatusMenu
                 )
                 .tabItem {
@@ -72,12 +73,17 @@ struct SettingsView: View {
 
 private struct GeneralSettingsView: View {
     @Bindable var model: SettingsModel
+    let updater: AppUpdater
     let onShortcutChange: () -> Void
     @State private var selectedExcludedApp: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             startupAndShortcutSection
+
+            Divider()
+
+            updatesSection
 
             Divider()
 
@@ -170,6 +176,42 @@ private struct GeneralSettingsView: View {
                     onChange: { _ in onShortcutChange() }
                 )
             }
+        }
+    }
+
+    private var updatesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L10n.tr("settings.updates.title"))
+                .font(.headline)
+
+            settingRow(title: L10n.tr("settings.updates.automaticChecks")) {
+                Toggle(
+                    L10n.tr("settings.updates.automaticChecks"),
+                    isOn: Binding(
+                        get: { updater.automaticallyChecksForUpdates },
+                        set: { updater.automaticallyChecksForUpdates = $0 }
+                    )
+                )
+                .labelsHidden()
+            }
+
+            settingRow(title: L10n.tr("settings.updates.automaticDownloads")) {
+                Toggle(
+                    L10n.tr("settings.updates.automaticDownloads"),
+                    isOn: Binding(
+                        get: { updater.automaticallyDownloadsUpdates },
+                        set: { updater.automaticallyDownloadsUpdates = $0 }
+                    )
+                )
+                .labelsHidden()
+            }
+
+            Button {
+                updater.checkForUpdates()
+            } label: {
+                Label(L10n.tr("settings.updates.checkNow"), systemImage: "arrow.down.circle")
+            }
+            .disabled(!updater.canCheckForUpdates)
         }
     }
 

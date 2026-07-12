@@ -83,6 +83,7 @@
 "keyboardHelp.settings.switchTabs" = "一般とお気に入りを切り替え";
 "keyboardHelp.title" = "キーバインドヘルプ";
 "menu.clearHistory" = "履歴を削除...";
+"menu.checkForUpdates" = "アップデートを確認...";
 "menu.emptyHistory" = "履歴はありません";
 "menu.favoriteHotKey" = "お気に入り: %@";
 "menu.helpHotKey" = "ヘルプ: %@";
@@ -158,6 +159,10 @@
 "settings.shortcut.reset" = "既定に戻す";
 "settings.shortcut.title" = "履歴メニューのショートカット";
 "settings.status.appAlreadyAdded" = "%@ はすでに追加されています。";
+"settings.updates.automaticChecks" = "更新を自動で確認";
+"settings.updates.automaticDownloads" = "更新を自動でダウンロード/インストール";
+"settings.updates.checkNow" = "アップデートを確認...";
+"settings.updates.title" = "アップデート";
 "settings.status.appCapturedAgain" = "%@ を履歴保存の対象に戻しました。";
 "settings.status.appExcluded" = "%@ を履歴に保存しない設定にしました。";
 "settings.status.appReadFailed" = "アプリ情報を読み取れませんでした。別のアプリを選んでください。";

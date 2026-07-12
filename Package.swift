@@ -14,7 +14,8 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/sindresorhus/KeyboardShortcuts", from: "2.4.0"),
         .package(url: "https://github.com/sindresorhus/LaunchAtLogin-Modern", from: "1.1.0"),
-        .package(url: "https://github.com/sindresorhus/Defaults", from: "9.0.8")
+        .package(url: "https://github.com/sindresorhus/Defaults", from: "9.0.8"),
+        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.9.3")
     ],
     targets: [
         .executableTarget(
@@ -22,7 +23,8 @@ let package = Package(
             dependencies: [
                 .product(name: "KeyboardShortcuts", package: "KeyboardShortcuts"),
                 .product(name: "LaunchAtLogin", package: "LaunchAtLogin-Modern"),
-                .product(name: "Defaults", package: "Defaults")
+                .product(name: "Defaults", package: "Defaults"),
+                .product(name: "Sparkle", package: "Sparkle")
             ],
             resources: [
                 .process("Resources")

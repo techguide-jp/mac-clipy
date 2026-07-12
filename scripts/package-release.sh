@@ -9,6 +9,7 @@ APP_VERSION="${APP_VERSION:-0.1.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
 BUNDLE_ID="jp.techguide.macclipy"
 BUILD_ARCHS="x86_64 arm64"
+SIGNING_MODE="${SIGNING_MODE:-adhoc}"
 DIST_DIR="$ROOT_DIR/dist"
 RELEASE_DIR="$DIST_DIR/release"
 STAGING_DIR="$DIST_DIR/dmg-staging"
@@ -19,6 +20,19 @@ VOLUME_NAME="$APP_NAME $APP_VERSION"
 RW_DMG_NAME="$APP_NAME-v$APP_VERSION-rw.dmg"
 BACKGROUND_DIR_NAME=".background"
 BACKGROUND_FILE_NAME="background.png"
+
+if [[ "$SIGNING_MODE" != "adhoc" && "$SIGNING_MODE" != "developer-id" ]]; then
+  echo "SIGNING_MODE must be adhoc or developer-id." >&2
+  exit 1
+fi
+
+require_env() {
+  local name="$1"
+  if [[ -z "${!name:-}" ]]; then
+    echo "$name is required when SIGNING_MODE=developer-id." >&2
+    exit 1
+  fi
+}
 
 cleanup() {
   if [[ -n "$MOUNT_DIR" ]] && mount | grep -F -q "on $MOUNT_DIR "; then
@@ -34,6 +48,14 @@ if [[ "$APP_VERSION" == v* ]]; then
   exit 1
 fi
 
+if [[ "$SIGNING_MODE" == "developer-id" ]]; then
+  require_env "DEVELOPER_ID_APPLICATION"
+  require_env "APPLE_ID"
+  require_env "APPLE_TEAM_ID"
+  require_env "APPLE_APP_SPECIFIC_PASSWORD"
+  require_env "SPARKLE_PUBLIC_ED_KEY"
+fi
+
 echo "==> Checks and app bundle"
 BUNDLE_ID="$BUNDLE_ID" \
   APP_VERSION="$APP_VERSION" \
@@ -41,6 +63,9 @@ BUNDLE_ID="$BUNDLE_ID" \
   BUILD_ARCHS="$BUILD_ARCHS" \
   BUILD_CONFIG=release \
   DEVELOPMENT_CRASH_MODAL_ENABLED=0 \
+  SIGNING_MODE="$SIGNING_MODE" \
+  CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:-${DEVELOPER_ID_APPLICATION:-}}" \
+  SPARKLE_PUBLIC_ED_KEY="${SPARKLE_PUBLIC_ED_KEY:-}" \
   scripts/check.sh
 
 echo "==> DMG staging"
@@ -111,6 +136,25 @@ hdiutil convert \
   -imagekey zlib-level=9 \
   -o "$RELEASE_DIR/$DMG_NAME"
 rm -f "$RELEASE_DIR/$RW_DMG_NAME"
+
+if [[ "$SIGNING_MODE" == "developer-id" ]]; then
+  echo "==> Developer ID DMG signing"
+  codesign --force --timestamp --sign "$DEVELOPER_ID_APPLICATION" "$RELEASE_DIR/$DMG_NAME"
+  codesign --verify --verbose=2 "$RELEASE_DIR/$DMG_NAME"
+
+  echo "==> Notarization"
+  xcrun notarytool submit \
+    "$RELEASE_DIR/$DMG_NAME" \
+    --apple-id "$APPLE_ID" \
+    --team-id "$APPLE_TEAM_ID" \
+    --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+    --wait
+
+  echo "==> Staple notarization ticket"
+  xcrun stapler staple "$RELEASE_DIR/$DMG_NAME"
+  xcrun stapler validate "$RELEASE_DIR/$DMG_NAME"
+  spctl -a -vv -t open --context context:primary-signature "$RELEASE_DIR/$DMG_NAME"
+fi
 
 echo "==> Checksum"
 (
