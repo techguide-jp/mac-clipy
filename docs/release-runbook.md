@@ -25,7 +25,7 @@
 2026-07-12 時点:
 
 - PR: https://github.com/techguide-jp/mac-clipy/pull/20
-- branch: `codex/issue-8-sparkle-updates`
+- main commit: `c41d534`
 - Apple Developer membership: 承認済み
 - Team ID: `D5J584PC7Z`
 - Developer ID Application certificate: 作成済み
@@ -33,8 +33,10 @@
 - ローカル Developer ID packaging: 実行済み
 - notarization submission: `Accepted` 確認済み
 - DMG staple / Gatekeeper 検証: 通過済み
-- Release workflow 本検証: PR merge 後に実行予定
-- Sparkle appcast の GitHub Actions 生成確認: Release workflow 本検証で確認予定
+- PR #20: merge 済み
+- Release workflow 本検証: `0.1.1` で成功
+- Sparkle appcast の GitHub Actions 生成確認: 成功
+- GitHub Release: https://github.com/techguide-jp/mac-clipy/releases/tag/v0.1.1
 
 ローカルで検証した DMG:
 
@@ -48,6 +50,20 @@ dist/release/MacClipy-v0.1.0.dmg
 dist/release/MacClipy-v0.1.0.dmg: accepted
 source=Notarized Developer ID
 origin=Developer ID Application: yuta takahashi (D5J584PC7Z)
+```
+
+GitHub Release `v0.1.1` で検証した成果物:
+
+```text
+MacClipy-v0.1.1.dmg
+MacClipy-v0.1.1.dmg.sha256
+appcast.xml
+```
+
+Release workflow:
+
+```text
+https://github.com/techguide-jp/mac-clipy/actions/runs/29188056965
 ```
 
 ## Apple Developer Program
@@ -260,7 +276,7 @@ workflow は次を行う。
 
 ### 実行方法
 
-PR #20 merge 後に、次のどちらかで実行する。
+次のどちらかで実行する。
 
 tag push:
 
@@ -278,6 +294,18 @@ gh workflow run Release --repo techguide-jp/mac-clipy --ref main -f version=0.1.
 既存の `v0.1.0` release はすでにあるため、検証を兼ねた本番 workflow は `0.1.1` など新しい version で実行する。
 同じ version を使うと release asset を `--clobber` で上書きする。
 
+今回の本検証は手動実行で完了済み。
+
+```bash
+gh workflow run Release --repo techguide-jp/mac-clipy --ref main -f version=0.1.1
+```
+
+成功した workflow:
+
+```text
+https://github.com/techguide-jp/mac-clipy/actions/runs/29188056965
+```
+
 ## Release workflow 後に確認すること
 
 1. workflow が成功している。
@@ -293,6 +321,25 @@ gh workflow run Release --repo techguide-jp/mac-clipy --ref main -f version=0.1.
 4. `appcast.xml` に `sparkle:edSignature` が入っている。
 5. `appcast.xml` の download URL が対象 release asset を向いている。
 6. 旧 build number の MacClipy から「アップデートを確認...」で新 build を検出できる。
+
+2026-07-12 の `v0.1.1` 検証では、1 から 5 まで完了済み。
+6 は実アプリを旧 build number で起動して確認する手動 QA として残る。
+
+確認済み `appcast.xml`:
+
+```text
+<sparkle:version>2</sparkle:version>
+<sparkle:shortVersionString>0.1.1</sparkle:shortVersionString>
+<enclosure url="https://github.com/techguide-jp/mac-clipy/releases/download/v0.1.1/MacClipy-v0.1.1.dmg" ... sparkle:edSignature="..."/>
+```
+
+確認済み remote DMG:
+
+```text
+MacClipy-v0.1.1.dmg: OK
+source=Notarized Developer ID
+origin=Developer ID Application: yuta takahashi (D5J584PC7Z)
+```
 
 ## トラブルシュート
 
