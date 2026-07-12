@@ -69,6 +69,9 @@ struct OnboardingView: View {
         }
         .frame(width: 680, height: 470)
         .background(Color(nsColor: .windowBackgroundColor))
+        .onAppear {
+            accessibilityTrusted = isAccessibilityTrusted()
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             accessibilityTrusted = isAccessibilityTrusted()
         }

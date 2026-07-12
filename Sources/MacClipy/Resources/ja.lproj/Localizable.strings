@@ -99,7 +99,7 @@
 "menu.settings" = "設定...";
 "onboarding.accessibility.description" = "許可すると、選んだ履歴を直前のアプリへ自動で貼り付けます。許可しなくてもコピーはできます。";
 "onboarding.accessibility.enable" = "自動貼り付けを有効にする";
-"onboarding.accessibility.enabled" = "設定済み";
+"onboarding.accessibility.enabled" = "有効済み";
 "onboarding.accessibility.requested" = "システム設定で許可後、MacClipyに戻ると反映されます。";
 "onboarding.accessibility.title" = "必要なときだけ自動貼り付け";
 "onboarding.finish" = "使い始める";
