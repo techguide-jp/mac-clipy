@@ -93,7 +93,7 @@ struct KeyboardHelpView: View {
 
     private var settingsRows: [HelpRow] {
         [
-            HelpRow(keys: "Command + 1 / 2", actionKey: "keyboardHelp.settings.switchTabs"),
+            HelpRow(keys: "Command + 1 / 2 / 3", actionKey: "keyboardHelp.settings.switchTabs"),
             HelpRow(keys: "Command + F", actionKey: "keyboardHelp.settings.focusSearch"),
             HelpRow(keys: "Tab / Shift + Tab", actionKey: "keyboardHelp.settings.moveFocus"),
             HelpRow(keys: "Up / Down", actionKey: "keyboardHelp.settings.moveSelection"),

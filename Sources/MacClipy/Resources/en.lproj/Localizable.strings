@@ -80,7 +80,7 @@
 "keyboardHelp.settings.moveSelection" = "Move selection in lists";
 "keyboardHelp.settings.newFolder" = "Create a new folder";
 "keyboardHelp.settings.renameSelected" = "Rename the selected favorite or folder";
-"keyboardHelp.settings.switchTabs" = "Switch between General and Favorites";
+"keyboardHelp.settings.switchTabs" = "Switch between General, Favorites, and Excluded Apps";
 "keyboardHelp.title" = "Keyboard Help";
 "menu.clearHistory" = "Delete History...";
 "menu.checkForUpdates" = "Check for Updates...";
@@ -120,6 +120,14 @@
 "settings.excludedApps.title" = "Apps Not Saved to History";
 "settings.favoriteShortcut.help" = "The key combination that opens favorites only.";
 "settings.favoriteShortcut.title" = "Favorites Menu Shortcut";
+"settings.general.guide.help" = "Reopen the getting started guide or keyboard shortcut reference at any time.";
+"settings.general.guide.keyboardHelp" = "Show Keyboard Shortcuts";
+"settings.general.guide.show" = "Show Getting Started Guide";
+"settings.general.guide.title" = "Help";
+"settings.general.shortcuts.help" = "Change the key combinations used to open MacClipy.";
+"settings.general.shortcuts.title" = "Keyboard Shortcuts";
+"settings.general.startup.help" = "Choose what happens when you log in to your Mac.";
+"settings.general.startup.title" = "Startup";
 "settings.general.startupAndShortcuts" = "Startup and Shortcuts";
 "settings.helpShortcut.title" = "Keyboard Help Shortcut";
 "settings.launchAtLogin" = "Launch at Login";
@@ -178,6 +186,7 @@
 "settings.updates.automaticChecks" = "Automatically Check for Updates";
 "settings.updates.automaticDownloads" = "Automatically Download and Install Updates";
 "settings.updates.checkNow" = "Check for Updates...";
+"settings.updates.help" = "Choose how updates are checked, downloaded, and installed.";
 "settings.updates.title" = "Updates";
 "settings.status.appCapturedAgain" = "%@ will be saved to history again.";
 "settings.status.appExcluded" = "%@ will not be saved to history.";

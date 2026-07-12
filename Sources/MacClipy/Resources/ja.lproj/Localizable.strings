@@ -80,7 +80,7 @@
 "keyboardHelp.settings.moveSelection" = "一覧の選択を移動";
 "keyboardHelp.settings.newFolder" = "新しいフォルダを作成";
 "keyboardHelp.settings.renameSelected" = "選択中のお気に入りまたはフォルダの名前を変更";
-"keyboardHelp.settings.switchTabs" = "一般とお気に入りを切り替え";
+"keyboardHelp.settings.switchTabs" = "一般・お気に入り・除外アプリを切り替え";
 "keyboardHelp.title" = "キーバインドヘルプ";
 "menu.clearHistory" = "履歴を削除...";
 "menu.checkForUpdates" = "アップデートを確認...";
@@ -120,6 +120,14 @@
 "settings.excludedApps.title" = "履歴に保存しないアプリ";
 "settings.favoriteShortcut.help" = "お気に入りだけを開くキーの組み合わせです。";
 "settings.favoriteShortcut.title" = "お気に入りメニューのショートカット";
+"settings.general.guide.help" = "初回ガイドやキーバインド一覧をいつでも確認できます。";
+"settings.general.guide.keyboardHelp" = "キーバインド一覧を表示";
+"settings.general.guide.show" = "使い方ガイドを表示";
+"settings.general.guide.title" = "使い方";
+"settings.general.shortcuts.help" = "MacClipyを呼び出すキーの組み合わせを変更できます。";
+"settings.general.shortcuts.title" = "ショートカット";
+"settings.general.startup.help" = "Macにログインしたときの動作を設定します。";
+"settings.general.startup.title" = "起動";
 "settings.general.startupAndShortcuts" = "起動とショートカット";
 "settings.helpShortcut.title" = "キーバインドヘルプのショートカット";
 "settings.launchAtLogin" = "ログイン時に起動";
@@ -178,6 +186,7 @@
 "settings.updates.automaticChecks" = "更新を自動で確認";
 "settings.updates.automaticDownloads" = "更新を自動でダウンロード/インストール";
 "settings.updates.checkNow" = "アップデートを確認...";
+"settings.updates.help" = "更新の確認方法とインストール方法を設定します。";
 "settings.updates.title" = "アップデート";
 "settings.status.appCapturedAgain" = "%@ を履歴保存の対象に戻しました。";
 "settings.status.appExcluded" = "%@ を履歴に保存しない設定にしました。";
