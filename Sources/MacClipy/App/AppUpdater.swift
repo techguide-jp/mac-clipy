@@ -1,9 +1,12 @@
 import Foundation
+import Observation
 import Sparkle
 
 @MainActor
+@Observable
 final class AppUpdater: NSObject {
-    private let updaterController: SPUStandardUpdaterController
+    @ObservationIgnored private let updaterController: SPUStandardUpdaterController
+    private var settingsRevision = 0
 
     override init() {
         updaterController = SPUStandardUpdaterController(
@@ -15,24 +18,34 @@ final class AppUpdater: NSObject {
     }
 
     var canCheckForUpdates: Bool {
-        updaterController.updater.canCheckForUpdates
+        _ = settingsRevision
+        return updaterController.updater.canCheckForUpdates
     }
 
     var automaticallyChecksForUpdates: Bool {
         get {
-            updaterController.updater.automaticallyChecksForUpdates
+            _ = settingsRevision
+            return updaterController.updater.automaticallyChecksForUpdates
         }
         set {
             updaterController.updater.automaticallyChecksForUpdates = newValue
+            settingsRevision &+= 1
         }
+    }
+
+    var allowsAutomaticUpdates: Bool {
+        _ = settingsRevision
+        return updaterController.updater.allowsAutomaticUpdates
     }
 
     var automaticallyDownloadsUpdates: Bool {
         get {
-            updaterController.updater.automaticallyDownloadsUpdates
+            _ = settingsRevision
+            return updaterController.updater.automaticallyDownloadsUpdates
         }
         set {
             updaterController.updater.automaticallyDownloadsUpdates = newValue
+            settingsRevision &+= 1
         }
     }
 

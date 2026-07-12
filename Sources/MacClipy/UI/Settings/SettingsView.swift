@@ -73,7 +73,7 @@ struct SettingsView: View {
 
 private struct GeneralSettingsView: View {
     @Bindable var model: SettingsModel
-    let updater: AppUpdater
+    @Bindable var updater: AppUpdater
     let onShortcutChange: () -> Void
     @State private var selectedExcludedApp: String?
 
@@ -204,6 +204,7 @@ private struct GeneralSettingsView: View {
                     )
                 )
                 .labelsHidden()
+                .disabled(!updater.allowsAutomaticUpdates)
             }
 
             Button {
