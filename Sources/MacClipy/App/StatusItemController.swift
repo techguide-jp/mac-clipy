@@ -5,6 +5,7 @@ import KeyboardShortcuts
 final class StatusItemController: NSObject, NSMenuDelegate {
     enum CommandItem: Equatable {
         case settings
+        case onboarding
         case checkForUpdates
         case help
         case search
@@ -17,6 +18,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     static let commandItemOrder: [CommandItem] = [
         .settings,
+        .onboarding,
         .checkForUpdates,
         .help,
         .search,
@@ -36,6 +38,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     private let onShowHistory: () -> Void
     private let onShowFavorites: () -> Void
     private let onShowHelp: () -> Void
+    private let onShowOnboarding: () -> Void
     private let onTogglePause: () -> Void
     private let onClearHistory: () -> Void
     private let onShowSettings: () -> Void
@@ -52,6 +55,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         onShowHistory: @escaping () -> Void,
         onShowFavorites: @escaping () -> Void,
         onShowHelp: @escaping () -> Void,
+        onShowOnboarding: @escaping () -> Void,
         onTogglePause: @escaping () -> Void,
         onClearHistory: @escaping () -> Void,
         onShowSettings: @escaping () -> Void,
@@ -65,6 +69,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         self.onShowHistory = onShowHistory
         self.onShowFavorites = onShowFavorites
         self.onShowHelp = onShowHelp
+        self.onShowOnboarding = onShowOnboarding
         self.onTogglePause = onTogglePause
         self.onClearHistory = onClearHistory
         self.onShowSettings = onShowSettings
@@ -182,6 +187,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                 let menuItem = NSMenuItem(title: L10n.tr("menu.settings"), action: #selector(showSettings), keyEquivalent: ",")
                 menuItem.target = self
                 menu.addItem(menuItem)
+            case .onboarding:
+                let menuItem = NSMenuItem(
+                    title: L10n.tr("menu.onboarding"),
+                    action: #selector(showOnboarding),
+                    keyEquivalent: ""
+                )
+                menuItem.target = self
+                menu.addItem(menuItem)
             case .checkForUpdates:
                 let menuItem = NSMenuItem(
                     title: L10n.tr("menu.checkForUpdates"),
@@ -249,6 +262,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     @objc private func showHelp() {
         onShowHelp()
+    }
+
+    @objc private func showOnboarding() {
+        onShowOnboarding()
     }
 
     @objc private func togglePause() {

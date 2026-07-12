@@ -7,10 +7,18 @@ enum PasteController {
         .activateAllWindows
     ]
 
-    static func pasteIntoPreviousApplication(_ application: NSRunningApplication?) -> Bool {
-        let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
+    static var isAccessibilityTrusted: Bool {
+        AXIsProcessTrusted()
+    }
 
-        guard AXIsProcessTrustedWithOptions(options) else {
+    @discardableResult
+    static func requestAccessibilityPermission() -> Bool {
+        let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
+        return AXIsProcessTrustedWithOptions(options)
+    }
+
+    static func pasteIntoPreviousApplication(_ application: NSRunningApplication?) -> Bool {
+        guard requestAccessibilityPermission() else {
             return false
         }
 
