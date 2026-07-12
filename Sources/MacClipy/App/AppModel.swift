@@ -22,7 +22,7 @@ final class AppModel {
     @ObservationIgnored private var settingsWindowController: SettingsWindowController?
     @ObservationIgnored private var onboardingWindowController: OnboardingWindowController?
     @ObservationIgnored private let developmentCrashReporter = DevelopmentCrashReporter()
-    private var previousApplication: NSRunningApplication?
+    private var pasteDestinationApplication: NSRunningApplication?
     var isKeyboardHelpPresented = false
     var developmentCrashReport: DevelopmentCrashReport?
 
@@ -52,6 +52,7 @@ final class AppModel {
 
     func applicationDidFinishLaunching() {
         NSApp.setActivationPolicy(.accessory)
+        rememberFrontmostApplication()
         let previousCrashReport = developmentCrashReporter.startLaunch()
         let shouldShowOnboarding = OnboardingState.shouldPresentAtLaunch()
 
@@ -79,6 +80,10 @@ final class AppModel {
     func applicationWillTerminate() {
         monitor?.stop()
         developmentCrashReporter.markCleanTermination()
+    }
+
+    func applicationDidActivate(_ application: NSRunningApplication) {
+        rememberPasteDestination(application)
     }
 
     func showHistoryPopup() {
@@ -150,7 +155,6 @@ final class AppModel {
             historyModel: historyModel,
             monitorState: { [weak self] in self?.isPaused == true },
             onCopyHistoryItem: { [weak self] item in
-                self?.rememberFrontmostApplication()
                 self?.copyAndPaste(item)
             },
             onShowHistory: { [weak self] in self?.showHistoryPopup() },
@@ -235,11 +239,23 @@ final class AppModel {
         do {
             try monitor.copyToPasteboard(item)
             historyModel.refreshFromStore()
-            let pasted = PasteController.pasteIntoPreviousApplication(previousApplication)
-            if !pasted {
+            switch PasteController.pasteIntoPreviousApplication(pasteDestinationApplication) {
+            case .scheduled:
+                break
+            case .permissionRequired:
                 showAlert(
                     title: L10n.tr("alert.copy.title"),
                     message: L10n.tr("alert.accessibilityPermission.message")
+                )
+            case .destinationUnavailable:
+                showAlert(
+                    title: L10n.tr("alert.copy.title"),
+                    message: L10n.tr("alert.pasteDestinationUnavailable.message")
+                )
+            case .activationFailed:
+                showAlert(
+                    title: L10n.tr("alert.copy.title"),
+                    message: L10n.tr("alert.pasteDestinationActivationFailed.message")
                 )
             }
         } catch {
@@ -261,11 +277,35 @@ final class AppModel {
         }
 
         if frontmostApplication.processIdentifier != ProcessInfo.processInfo.processIdentifier {
-            previousApplication = frontmostApplication
+            rememberPasteDestination(frontmostApplication)
             return ClipboardSourceContext(bundleIdentifier: frontmostApplication.bundleIdentifier, canCaptureNow: true)
         }
 
         return ClipboardSourceContext(bundleIdentifier: nil, canCaptureNow: false)
+    }
+
+    private func rememberPasteDestination(_ application: NSRunningApplication) {
+        // MacClipyやメニューバー常駐アプリの操作で、実際の貼り付け先を上書きしない。
+        guard Self.shouldRememberPasteDestination(
+            processIdentifier: application.processIdentifier,
+            activationPolicy: application.activationPolicy,
+            isTerminated: application.isTerminated
+        ) else {
+            return
+        }
+
+        pasteDestinationApplication = application
+    }
+
+    static func shouldRememberPasteDestination(
+        processIdentifier: pid_t,
+        activationPolicy: NSApplication.ActivationPolicy,
+        isTerminated: Bool,
+        currentProcessIdentifier: pid_t = ProcessInfo.processInfo.processIdentifier
+    ) -> Bool {
+        processIdentifier != currentProcessIdentifier
+            && activationPolicy == .regular
+            && !isTerminated
     }
 
     private func showAlert(title: String, message: String) {

@@ -6,6 +6,8 @@
 "alert.hotKeyRegistrationFailed.title" = "Failed to register hot key";
 "alert.initializationFailed.title" = "Initialization failed";
 "alert.pasteFailed.title" = "Paste failed";
+"alert.pasteDestinationActivationFailed.message" = "MacClipy could not reopen the last app, so the item was copied only. Press Command+V in the destination app to paste it.";
+"alert.pasteDestinationUnavailable.message" = "MacClipy could not determine the destination app, so the item was copied only. Press Command+V in the destination app to paste it.";
 "appName.1password" = "1Password";
 "appName.1password7" = "1Password 7";
 "appName.bitwarden" = "Bitwarden";
@@ -97,7 +99,7 @@
 "menu.favorites" = "Favorites...";
 "menu.search" = "Search...";
 "menu.settings" = "Settings...";
-"onboarding.accessibility.description" = "Allow access to paste a selected item into the previous app automatically. Copying still works without access.";
+"onboarding.accessibility.description" = "Allow access to paste a selected item into the last app you used. Copying still works without access.";
 "onboarding.accessibility.enable" = "Enable Automatic Paste";
 "onboarding.accessibility.enabled" = "Enabled";
 "onboarding.accessibility.requested" = "Allow MacClipy in System Settings, then return here.";

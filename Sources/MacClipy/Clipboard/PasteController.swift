@@ -3,6 +3,13 @@ import ApplicationServices
 
 @MainActor
 enum PasteController {
+    enum PasteResult: Equatable {
+        case scheduled
+        case permissionRequired
+        case destinationUnavailable
+        case activationFailed
+    }
+
     static let previousApplicationActivationOptions: NSApplication.ActivationOptions = [
         .activateAllWindows
     ]
@@ -17,26 +24,50 @@ enum PasteController {
         return AXIsProcessTrustedWithOptions(options)
     }
 
-    static func pasteIntoPreviousApplication(_ application: NSRunningApplication?) -> Bool {
-        guard requestAccessibilityPermission() else {
-            return false
+    static func pasteIntoPreviousApplication(
+        _ application: NSRunningApplication?,
+        requestPermission: () -> Bool = { requestAccessibilityPermission() },
+        activate: (NSRunningApplication) -> Bool = { application in
+            NSApp.yieldActivation(to: application)
+            return application.activate(from: .current, options: previousApplicationActivationOptions)
         }
-
-        guard let application else {
-            return false
-        }
-
-        // MacClipy owns focus while the popup is open; yield it back before posting Command+V.
-        NSApp.yieldActivation(to: application)
-        guard application.activate(from: .current, options: previousApplicationActivationOptions) else {
-            return false
+    ) -> PasteResult {
+        let result = resolvePasteAttempt(
+            destinationAvailable: application?.isTerminated == false,
+            requestPermission: requestPermission,
+            activate: {
+                guard let application else {
+                    return false
+                }
+                return activate(application)
+            }
+        )
+        guard result == .scheduled else {
+            return result
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + AppConstants.Paste.delayBeforeSendingCommandV) {
             sendCommandV()
         }
 
-        return true
+        return .scheduled
+    }
+
+    static func resolvePasteAttempt(
+        destinationAvailable: Bool,
+        requestPermission: () -> Bool,
+        activate: () -> Bool
+    ) -> PasteResult {
+        guard destinationAvailable else {
+            return .destinationUnavailable
+        }
+        guard requestPermission() else {
+            return .permissionRequired
+        }
+        guard activate() else {
+            return .activationFailed
+        }
+        return .scheduled
     }
 
     private static func sendCommandV() {
