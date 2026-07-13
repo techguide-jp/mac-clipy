@@ -82,7 +82,7 @@
 "keyboardHelp.settings.moveSelection" = "一覧の選択を移動";
 "keyboardHelp.settings.newFolder" = "新しいフォルダを作成";
 "keyboardHelp.settings.renameSelected" = "選択中のお気に入りまたはフォルダの名前を変更";
-"keyboardHelp.settings.switchTabs" = "一般・お気に入り・除外アプリを切り替え";
+"keyboardHelp.settings.switchTabs" = "一般・お気に入り・除外アプリ・情報を切り替え";
 "keyboardHelp.title" = "キーバインドヘルプ";
 "menu.clearHistory" = "履歴を削除...";
 "menu.checkForUpdates" = "アップデートを確認...";
@@ -99,6 +99,7 @@
 "menu.favorites" = "お気に入り...";
 "menu.search" = "検索...";
 "menu.settings" = "設定...";
+"menu.about" = "MacClipyについて...";
 "onboarding.accessibility.description" = "許可すると、選んだ履歴を最後に操作していたアプリへ自動で貼り付けます。許可しなくてもコピーはできます。";
 "onboarding.accessibility.enable" = "自動貼り付けを有効にする";
 "onboarding.accessibility.enabled" = "有効済み";
@@ -205,7 +206,18 @@
 "settings.tab.excludedApps" = "除外アプリ";
 "settings.tab.favorites" = "お気に入り";
 "settings.tab.general" = "一般";
+"settings.tab.about" = "情報";
+"settings.about.appName" = "MacClipy";
+"settings.about.contactLink" = "MacClipyについて問い合わせる";
+"settings.about.externalLinkHelp" = "リンクは既定のWebブラウザで開きます。";
+"settings.about.operatedBy" = "開発・運営";
+"settings.about.operatorLink" = "運営者情報を見る";
+"settings.about.operatorName" = "TechGuide合同会社";
+"settings.about.version" = "バージョン %@";
+"settings.about.versionUnknown" = "開発版";
+"settings.about.versionWithBuild" = "バージョン %@（ビルド %@）";
 "settings.title" = "MacClipy 設定";
+"support.contactSubject" = "MacClipyについて";
 "shortcutRecorder.cancelled" = "変更をキャンセルしました。";
 "shortcutRecorder.idleSubtitle" = "クリックして変更";
 "shortcutRecorder.missingModifier" = "⌘、⌥、⌃ のいずれかとキーを一緒に押してください。";

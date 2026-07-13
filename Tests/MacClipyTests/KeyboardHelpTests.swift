@@ -119,6 +119,26 @@ final class KeyboardHelpTests: XCTestCase {
         XCTAssertEqual(selectedTab, .excludedApps)
     }
 
+    func testSettingsCommand4SelectsAbout() throws {
+        var selectedTab: SettingsTab?
+
+        XCTAssertTrue(
+            try SettingsKeyAction.handle(
+                event: keyEvent(
+                    keyCode: kVK_ANSI_4,
+                    modifierFlags: [.command],
+                    characters: "4",
+                    charactersIgnoringModifiers: "4"
+                ),
+                isTextEditing: false,
+                selectTab: { selectedTab = $0 },
+                focusFavoritesSearch: {},
+                showHelp: {}
+            )
+        )
+        XCTAssertEqual(selectedTab, .about)
+    }
+
     private func temporaryHistoryURL() -> URL {
         FileManager.default.temporaryDirectory
             .appendingPathComponent("MacClipyTests-\(UUID().uuidString)", isDirectory: true)

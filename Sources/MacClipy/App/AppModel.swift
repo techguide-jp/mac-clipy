@@ -25,6 +25,7 @@ final class AppModel {
     private var pasteDestinationApplication: NSRunningApplication?
     var isKeyboardHelpPresented = false
     var developmentCrashReport: DevelopmentCrashReport?
+    var selectedSettingsTab: SettingsTab = .general
 
     var isPaused: Bool {
         monitor?.isPaused == true
@@ -102,6 +103,10 @@ final class AppModel {
         settingsWindowController?.show()
     }
 
+    func showAbout() {
+        settingsWindowController?.show(tab: .about)
+    }
+
     func showKeyboardHelp() {
         floatingPanelController?.close()
         developmentCrashReport = nil
@@ -164,6 +169,7 @@ final class AppModel {
             onTogglePause: { [weak self] in self?.togglePause() },
             onClearHistory: { [weak self] in self?.clearHistory() },
             onShowSettings: { [weak self] in self?.showSettings() },
+            onShowAbout: { [weak self] in self?.showAbout() },
             canCheckForUpdates: { [weak self] in self?.appUpdater.canCheckForUpdates == true },
             onCheckForUpdates: { [weak self] in self?.checkForUpdates() },
             onQuit: {

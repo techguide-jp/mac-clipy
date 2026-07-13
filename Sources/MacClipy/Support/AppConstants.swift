@@ -3,6 +3,33 @@ import CoreGraphics
 import Foundation
 
 public enum AppConstants {
+    public enum Support {
+        public static let operatorInformationURL = makeURL("https://techguide.jp/#company")
+        public static let contactURL: URL = makeContactURL()
+
+        private static func makeURL(_ value: String) -> URL {
+            guard let url = URL(string: value) else {
+                preconditionFailure("Invalid support URL")
+            }
+            return url
+        }
+
+        private static func makeContactURL() -> URL {
+            var components = URLComponents()
+            components.scheme = "https"
+            components.host = "techguide.jp"
+            components.path = "/contact/"
+            components.queryItems = [
+                URLQueryItem(name: "category", value: "macclipy"),
+                URLQueryItem(name: "subject", value: L10n.tr("support.contactSubject"))
+            ]
+            guard let url = components.url else {
+                preconditionFailure("Invalid contact URL")
+            }
+            return url
+        }
+    }
+
     public enum Clipboard {
         public static let defaultMaxItems = 200
         // 軽量なJSON履歴を維持するため、巨大なクリップボード内容は保存しない。

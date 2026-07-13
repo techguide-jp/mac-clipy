@@ -10,9 +10,13 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         self.appModel = appModel
     }
 
-    func show() {
+    func show(tab: SettingsTab? = nil) {
         guard let appModel else {
             return
+        }
+
+        if let tab {
+            appModel.selectedSettingsTab = tab
         }
 
         if let window {
