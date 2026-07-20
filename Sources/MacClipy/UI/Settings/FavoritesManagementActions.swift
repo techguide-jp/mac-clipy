@@ -38,9 +38,15 @@ extension FavoritesManagementView {
     func focusFolderField(_ field: FolderFieldFocus) {
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 50_000_000)
-            if case .newFolder = field, !isCreatingFolder { return }
-            if case let .existingFolder(folderID) = field, editingFolderID != folderID { return }
-            if case let .favorite(favoriteID) = field, editingFavoriteID != favoriteID { return }
+            if case .newFolder = field, !isCreatingFolder {
+                return
+            }
+            if case let .existingFolder(folderID) = field, editingFolderID != folderID {
+                return
+            }
+            if case let .favorite(favoriteID) = field, editingFavoriteID != favoriteID {
+                return
+            }
             focusedFolderField = field
         }
     }

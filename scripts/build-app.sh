@@ -8,6 +8,8 @@ BUNDLE_ID="${BUNDLE_ID:-jp.techguide.macclipy}"
 APP_VERSION="${APP_VERSION:-0.1.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
 DEVELOPMENT_CRASH_MODAL_ENABLED="${DEVELOPMENT_CRASH_MODAL_ENABLED:-0}"
+ANALYTICS_ENABLED="${ANALYTICS_ENABLED:-0}"
+ANALYTICS_ENDPOINT="${ANALYTICS_ENDPOINT:-https://techguide.jp/api/macclipy/analytics}"
 SIGNING_MODE="${SIGNING_MODE:-adhoc}"
 CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:-${DEVELOPER_ID_APPLICATION:-}}"
 SPARKLE_FEED_URL="${SPARKLE_FEED_URL:-https://github.com/techguide-jp/mac-clipy/releases/latest/download/appcast.xml}"
@@ -42,6 +44,16 @@ if [[ "$SIGNING_MODE" == "developer-id" ]]; then
   fi
 fi
 
+if [[ "$ANALYTICS_ENABLED" != "0" && "$ANALYTICS_ENABLED" != "1" ]]; then
+  echo "ANALYTICS_ENABLED must be 0 or 1." >&2
+  exit 1
+fi
+
+if [[ "$ANALYTICS_ENABLED" == "1" && "$SIGNING_MODE" != "developer-id" ]]; then
+  echo "Anonymous analytics can only be enabled for Developer ID builds." >&2
+  exit 1
+fi
+
 if [[ -n "$BUILD_ARCHS" ]]; then
   for arch in $BUILD_ARCHS; do
     SWIFT_BUILD_ARGS+=(--arch "$arch")
@@ -56,6 +68,12 @@ else
   DEVELOPMENT_CRASH_MODAL_PLIST_VALUE="<false/>"
 fi
 
+if [[ "$ANALYTICS_ENABLED" == "1" ]]; then
+  ANALYTICS_ENABLED_PLIST_VALUE="<true/>"
+else
+  ANALYTICS_ENABLED_PLIST_VALUE="<false/>"
+fi
+
 "${SWIFT_BUILD_ARGS[@]}"
 
 rm -rf "$APP_DIR"
@@ -65,6 +83,7 @@ cp "$BINARY_PATH" "$MACOS_DIR/$APP_NAME"
 chmod +x "$MACOS_DIR/$APP_NAME"
 cp -R "$ROOT_DIR/Sources/MacClipy/Resources/"*.lproj "$RESOURCES_DIR/"
 cp "$ROOT_DIR/Sources/MacClipy/Resources/$ICON_FILE" "$RESOURCES_DIR/$ICON_FILE"
+cp "$ROOT_DIR/Sources/MacClipy/Resources/PrivacyInfo.xcprivacy" "$RESOURCES_DIR/PrivacyInfo.xcprivacy"
 for resource_bundle in "$BUILD_PRODUCTS_DIR"/*.bundle; do
   [[ -d "$resource_bundle" ]] || continue
   ditto "$resource_bundle" "$RESOURCES_DIR/$(basename "$resource_bundle")"
@@ -118,6 +137,10 @@ cat > "$CONTENTS_DIR/Info.plist" <<PLIST
   <true/>
   <key>MacClipyDevelopmentCrashModalEnabled</key>
   ${DEVELOPMENT_CRASH_MODAL_PLIST_VALUE}
+  <key>MacClipyAnalyticsEnabled</key>
+  ${ANALYTICS_ENABLED_PLIST_VALUE}
+  <key>MacClipyAnalyticsEndpoint</key>
+  <string>${ANALYTICS_ENDPOINT}</string>
   <key>NSHighResolutionCapable</key>
   <true/>
   <key>SUEnableAutomaticChecks</key>

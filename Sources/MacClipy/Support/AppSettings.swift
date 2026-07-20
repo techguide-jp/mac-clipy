@@ -94,18 +94,26 @@ extension Defaults.Keys {
 @Observable
 final class SettingsModel {
     var excludedBundleIdentifiers: [String]
+    var isAnonymousAnalyticsEnabled: Bool
     var statusMessage = ""
 
     init() {
         excludedBundleIdentifiers = SettingsDefaults.normalizedBundleIdentifiers(
             Defaults[.excludedBundleIdentifiers]
         )
+        isAnonymousAnalyticsEnabled = Defaults[.anonymousAnalyticsEnabled]
     }
 
     func reload() {
         excludedBundleIdentifiers = SettingsDefaults.normalizedBundleIdentifiers(
             Defaults[.excludedBundleIdentifiers]
         )
+        isAnonymousAnalyticsEnabled = Defaults[.anonymousAnalyticsEnabled]
+    }
+
+    func setAnonymousAnalyticsEnabled(_ isEnabled: Bool) {
+        isAnonymousAnalyticsEnabled = isEnabled
+        Defaults[.anonymousAnalyticsEnabled] = isEnabled
     }
 
     func setExcludedBundleIdentifiers(_ identifiers: [String]) {

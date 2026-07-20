@@ -108,7 +108,7 @@
 "onboarding.finish" = "Start Using MacClipy";
 "onboarding.menuBar.description" = "MacClipy does not appear in the Dock. Open it from the clipboard icon in the menu bar.";
 "onboarding.menuBar.title" = "MacClipy stays in the menu bar";
-"onboarding.privacy" = "History and favorites are stored only on this Mac.";
+"onboarding.privacy" = "History and favorite contents stay on this Mac. Anonymous usage reporting can be turned off in Settings.";
 "onboarding.shortcut.accessibilityLabel" = "Shift, Command, V";
 "onboarding.shortcut.description" = "Press the shortcut while working to open searchable history at the pointer.";
 "onboarding.shortcut.title" = "Open history with a shortcut";
@@ -216,6 +216,11 @@
 "settings.about.version" = "Version %@";
 "settings.about.versionUnknown" = "Development Build";
 "settings.about.versionWithBuild" = "Version %@ (Build %@)";
+"settings.analytics.dataDescription" = "Only a random installation ID, launch date, app and macOS versions, and CPU architecture are sent. Clipboard contents, favorites, and app names are never sent.";
+"settings.analytics.enabled" = "Send Anonymous Usage Data";
+"settings.analytics.help" = "Count first launch and daily activity anonymously to guide improvements and support.";
+"settings.analytics.privacyPolicy" = "View Privacy Policy";
+"settings.analytics.title" = "Anonymous Usage Data";
 "settings.title" = "MacClipy Settings";
 "support.contactSubject" = "MacClipyについて";
 "shortcutRecorder.cancelled" = "Change canceled.";

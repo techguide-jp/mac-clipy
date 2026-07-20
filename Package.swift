@@ -26,6 +26,9 @@ let package = Package(
                 .product(name: "Defaults", package: "Defaults"),
                 .product(name: "Sparkle", package: "Sparkle")
             ],
+            exclude: [
+                "Resources/PrivacyInfo.xcprivacy"
+            ],
             resources: [
                 .process("Resources")
             ]
