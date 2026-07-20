@@ -9,6 +9,7 @@ struct SettingsView: View {
     var body: some View {
         TabView(selection: $appModel.selectedSettingsTab) {
             GeneralSettingsView(
+                settingsModel: appModel.settingsModel,
                 updater: appModel.appUpdater,
                 onShortcutChange: appModel.refreshStatusMenu,
                 onShowOnboarding: appModel.showOnboarding,
@@ -125,6 +126,7 @@ private struct AboutSettingsView: View {
 }
 
 private struct GeneralSettingsView: View {
+    @Bindable var settingsModel: SettingsModel
     @Bindable var updater: AppUpdater
     let onShortcutChange: () -> Void
     let onShowOnboarding: () -> Void
@@ -210,6 +212,36 @@ private struct GeneralSettingsView: View {
                             Label(L10n.tr("settings.updates.checkNow"), systemImage: "arrow.down.circle")
                         }
                         .disabled(!updater.canCheckForUpdates)
+                    }
+                }
+
+                SettingsSection(
+                    title: L10n.tr("settings.analytics.title"),
+                    description: L10n.tr("settings.analytics.help"),
+                    systemImage: "chart.bar.xaxis"
+                ) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        settingRow(title: L10n.tr("settings.analytics.enabled")) {
+                            Toggle(
+                                L10n.tr("settings.analytics.enabled"),
+                                isOn: Binding(
+                                    get: { settingsModel.isAnonymousAnalyticsEnabled },
+                                    set: { settingsModel.setAnonymousAnalyticsEnabled($0) }
+                                )
+                            )
+                            .labelsHidden()
+                        }
+
+                        Text(L10n.tr("settings.analytics.dataDescription"))
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+
+                        Link(destination: AppConstants.Support.privacyURL) {
+                            Label(
+                                L10n.tr("settings.analytics.privacyPolicy"),
+                                systemImage: "hand.raised"
+                            )
+                        }
                     }
                 }
 

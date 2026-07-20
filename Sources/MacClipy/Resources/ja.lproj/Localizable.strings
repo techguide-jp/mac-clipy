@@ -108,7 +108,7 @@
 "onboarding.finish" = "使い始める";
 "onboarding.menuBar.description" = "MacClipyはDockに表示されません。メニューバーのクリップボードアイコンから開けます。";
 "onboarding.menuBar.title" = "メニューバーに常駐します";
-"onboarding.privacy" = "履歴とお気に入りはこのMac内に保存されます。";
+"onboarding.privacy" = "履歴とお気に入りの内容はこのMac内に保存されます。匿名の利用状況は設定から送信を停止できます。";
 "onboarding.shortcut.accessibilityLabel" = "Shift、Command、V";
 "onboarding.shortcut.description" = "作業中にショートカットを押すと、マウス位置に検索付きの履歴が開きます。";
 "onboarding.shortcut.title" = "ショートカットですぐ呼び出す";
@@ -216,6 +216,11 @@
 "settings.about.version" = "バージョン %@";
 "settings.about.versionUnknown" = "開発版";
 "settings.about.versionWithBuild" = "バージョン %@（ビルド %@）";
+"settings.analytics.dataDescription" = "送信するのは、ランダムなインストールID、起動日、アプリ・macOSのバージョン、CPU種別だけです。クリップボードやお気に入りの内容、利用したアプリ名は送信しません。";
+"settings.analytics.enabled" = "匿名の利用状況を送信";
+"settings.analytics.help" = "初回起動と日ごとの起動を匿名で集計し、改善とサポート判断に利用します。";
+"settings.analytics.privacyPolicy" = "プライバシーポリシーを確認";
+"settings.analytics.title" = "匿名の利用状況";
 "settings.title" = "MacClipy 設定";
 "support.contactSubject" = "MacClipyについて";
 "shortcutRecorder.cancelled" = "変更をキャンセルしました。";

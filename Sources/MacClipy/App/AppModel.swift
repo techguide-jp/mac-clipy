@@ -22,6 +22,8 @@ final class AppModel {
     @ObservationIgnored private var settingsWindowController: SettingsWindowController?
     @ObservationIgnored private var onboardingWindowController: OnboardingWindowController?
     @ObservationIgnored private let developmentCrashReporter = DevelopmentCrashReporter()
+    @ObservationIgnored private let anonymousAnalyticsRecorder: AnonymousAnalyticsRecorder?
+    @ObservationIgnored private var analyticsTask: Task<Void, Never>?
     private var pasteDestinationApplication: NSRunningApplication?
     var isKeyboardHelpPresented = false
     var developmentCrashReport: DevelopmentCrashReport?
@@ -32,6 +34,7 @@ final class AppModel {
     }
 
     init() {
+        anonymousAnalyticsRecorder = AnonymousAnalyticsFactory.make(settingsModel: settingsModel)
         let popupModel = HistoryPopupModel(historyModel: historyModel, favoritesModel: favoritesModel)
         historyPopupModel = popupModel
         popupModel.onChoose = { [weak self] item in
@@ -70,6 +73,9 @@ final class AppModel {
         setupFloatingPanel()
         setupStatusItem()
         setupKeyboardShortcuts()
+        analyticsTask = Task { [weak self] in
+            await self?.anonymousAnalyticsRecorder?.recordLaunch()
+        }
 
         if shouldShowOnboarding {
             showOnboarding()
@@ -79,6 +85,7 @@ final class AppModel {
     }
 
     func applicationWillTerminate() {
+        analyticsTask?.cancel()
         monitor?.stop()
         developmentCrashReporter.markCleanTermination()
     }

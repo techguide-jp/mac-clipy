@@ -6,6 +6,7 @@ public enum AppConstants {
     public enum Support {
         public static let operatorInformationURL = makeURL("https://techguide.jp/#company")
         public static let contactURL: URL = makeContactURL()
+        public static let privacyURL = makeURL("https://techguide.jp/macclipy/privacy/")
 
         private static func makeURL(_ value: String) -> URL {
             guard let url = URL(string: value) else {
