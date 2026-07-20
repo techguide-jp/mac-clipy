@@ -1,5 +1,32 @@
 import Foundation
 
+final class AnalyticsRedirectRejectingDelegate: NSObject, URLSessionTaskDelegate {
+    static func redirectTarget(for _: URLRequest) -> URLRequest? {
+        nil
+    }
+
+    func urlSession(
+        _: URLSession,
+        task _: URLSessionTask,
+        willPerformHTTPRedirection _: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping @Sendable (URLRequest?) -> Void
+    ) {
+        // 元URLだけを許可しているため、POST本文を検証外のredirect先へ再送しない。
+        completionHandler(Self.redirectTarget(for: request))
+    }
+}
+
+enum AnalyticsURLSessionFactory {
+    static func make() -> URLSession {
+        URLSession(
+            configuration: .ephemeral,
+            delegate: AnalyticsRedirectRejectingDelegate(),
+            delegateQueue: nil
+        )
+    }
+}
+
 struct AnalyticsRuntimeConfiguration: Equatable {
     private static let officialEndpoint = "https://techguide.jp/api/macclipy/analytics"
 
@@ -39,8 +66,9 @@ final class AnalyticsHTTPSender: AnalyticsEventSending {
     }
 
     convenience init(endpoint: URL) {
+        let session = AnalyticsURLSessionFactory.make()
         self.init(endpoint: endpoint) { request in
-            try await URLSession.shared.data(for: request)
+            try await session.data(for: request)
         }
     }
 

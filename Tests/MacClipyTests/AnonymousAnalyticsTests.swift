@@ -213,6 +213,16 @@ final class AnonymousAnalyticsTests: XCTestCase {
         )
     }
 
+    func testAnalyticsURLSessionRejectsRedirects() throws {
+        let session = AnalyticsURLSessionFactory.make()
+        defer { session.invalidateAndCancel() }
+        let redirectURL = try XCTUnwrap(URL(string: "https://example.com/collect"))
+        let redirectRequest = URLRequest(url: redirectURL)
+
+        XCTAssertTrue(session.delegate is AnalyticsRedirectRejectingDelegate)
+        XCTAssertNil(AnalyticsRedirectRejectingDelegate.redirectTarget(for: redirectRequest))
+    }
+
     func testHTTPSenderUsesPostJSONAndShortTimeout() async throws {
         let endpoint = try XCTUnwrap(URL(string: "https://techguide.jp/api/macclipy/analytics"))
         var capturedRequest: URLRequest?
