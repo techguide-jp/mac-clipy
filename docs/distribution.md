@@ -5,8 +5,8 @@
 - 公式配布ページは TechGuide: https://techguide.jp/macclipy/
 - 配布ファイルは GitHub Releases に置き、公式配布ページのダウンロードボタンから最新版へ誘導する。
 - GitHub Release 版は Developer ID 署名・公証済み DMG として配布する。
-- ローカル実行や手元検証の既定は ad-hoc 署名のままにする。
-- Bundle ID は `jp.techguide.macclipy` に固定する。
+- ローカル実行や手元検証の既定は ad-hoc 署名のままにし、Bundle ID `jp.techguide.macclipy.development` で配布版の権限と分離する。
+- 配布版の Bundle ID は `jp.techguide.macclipy` に固定する。
 - 配布用 app binary は Apple Silicon / Intel 両対応の universal binary として生成する。
 - 自社配布版のアップデート確認は Sparkle 2 を使う。
 - appcast は GitHub Releases の `appcast.xml` を正とする。

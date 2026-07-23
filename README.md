@@ -55,7 +55,8 @@ make reapply-local
 ```
 
 作成される `.app` は Developer ID 署名・公証なしのローカル実行用です。app bundle は ad-hoc 署名されます。
-`make reapply-local` は起動中の MacClipy の終了完了を待ってから `dist/MacClipy.app` を作り直し、再起動します。
+ローカル実行用は表示名 `MacClipy Development`、Bundle ID `jp.techguide.macclipy.development` を使い、配布版のアクセシビリティ許可と分離します。
+`make reapply-local` は起動中の配布版と開発版の MacClipy の終了完了を待ってから `dist/MacClipy.app` を作り直し、開発版だけを再起動します。
 短い alias として `make run` も使えます。
 
 ## 配布用 DMG の作成
@@ -67,7 +68,7 @@ APP_VERSION=0.1.0 BUILD_NUMBER=1 scripts/package-release.sh
 
 作成されるファイルは `dist/release/MacClipy-v0.1.0.dmg` と `dist/release/MacClipy-v0.1.0.dmg.sha256` です。
 配布用 DMG の app binary は Apple Silicon / Intel 両対応の universal binary です。
-Bundle ID は `jp.techguide.macclipy` です。将来の Developer ID 署名、公証、自動更新、フリーミアム対応でもこの Bundle ID を継続利用します。
+配布版の Bundle ID は `jp.techguide.macclipy` です。将来の Developer ID 署名、公証、自動更新、フリーミアム対応でもこの Bundle ID を継続利用します。
 
 Developer ID 署名・公証を行う場合は、GitHub Actions の `Release` workflow で tag または手動実行から作成します。
 workflow には Developer ID 証明書、Apple notarization 認証情報、Sparkle EdDSA key の GitHub Secrets が必要です。

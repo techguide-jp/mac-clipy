@@ -26,7 +26,7 @@ enum PasteController {
 
     static func pasteIntoPreviousApplication(
         _ application: NSRunningApplication?,
-        requestPermission: () -> Bool = { requestAccessibilityPermission() },
+        accessibilityTrusted: () -> Bool = { PasteController.isAccessibilityTrusted },
         activate: (NSRunningApplication) -> Bool = { application in
             NSApp.yieldActivation(to: application)
             return application.activate(from: .current, options: previousApplicationActivationOptions)
@@ -34,7 +34,7 @@ enum PasteController {
     ) -> PasteResult {
         let result = resolvePasteAttempt(
             destinationAvailable: application?.isTerminated == false,
-            requestPermission: requestPermission,
+            accessibilityTrusted: accessibilityTrusted,
             activate: {
                 guard let application else {
                     return false
@@ -55,13 +55,13 @@ enum PasteController {
 
     static func resolvePasteAttempt(
         destinationAvailable: Bool,
-        requestPermission: () -> Bool,
+        accessibilityTrusted: () -> Bool,
         activate: () -> Bool
     ) -> PasteResult {
         guard destinationAvailable else {
             return .destinationUnavailable
         }
-        guard requestPermission() else {
+        guard accessibilityTrusted() else {
             return .permissionRequired
         }
         guard activate() else {

@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
 EXPECTED_BUNDLE_ID="${BUNDLE_ID:-jp.techguide.macclipy}"
+EXPECTED_BUNDLE_DISPLAY_NAME="${BUNDLE_DISPLAY_NAME:-MacClipy}"
 EXPECTED_APP_VERSION="${APP_VERSION:-0.1.0}"
 EXPECTED_BUILD_NUMBER="${BUILD_NUMBER:-1}"
 EXPECTED_BUILD_ARCHS="${BUILD_ARCHS:-}"
@@ -58,6 +59,8 @@ test -d dist/MacClipy.app/Contents/Resources/KeyboardShortcuts_KeyboardShortcuts
 test -d dist/MacClipy.app/Contents/Resources/MacClipy_MacClipy.bundle
 test -d dist/MacClipy.app/Contents/Frameworks/Sparkle.framework
 test "$(plutil -extract CFBundleIdentifier raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_BUNDLE_ID"
+test "$(plutil -extract CFBundleDisplayName raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_BUNDLE_DISPLAY_NAME"
+test "$(plutil -extract CFBundleName raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_BUNDLE_DISPLAY_NAME"
 test "$(plutil -extract CFBundleShortVersionString raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_APP_VERSION"
 test "$(plutil -extract CFBundleVersion raw dist/MacClipy.app/Contents/Info.plist)" = "$EXPECTED_BUILD_NUMBER"
 test "$(plutil -extract CFBundleIconFile raw dist/MacClipy.app/Contents/Info.plist)" = "AppIcon"

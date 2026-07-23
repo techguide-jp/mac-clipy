@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_CONFIG="${BUILD_CONFIG:-release}"
 BUILD_ARCHS="${BUILD_ARCHS:-}"
 BUNDLE_ID="${BUNDLE_ID:-jp.techguide.macclipy}"
+BUNDLE_DISPLAY_NAME="${BUNDLE_DISPLAY_NAME:-MacClipy}"
 APP_VERSION="${APP_VERSION:-0.1.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
 DEVELOPMENT_CRASH_MODAL_ENABLED="${DEVELOPMENT_CRASH_MODAL_ENABLED:-0}"
@@ -119,10 +120,12 @@ cat > "$CONTENTS_DIR/Info.plist" <<PLIST
   <string>${ICON_NAME}</string>
   <key>CFBundleIdentifier</key>
   <string>${BUNDLE_ID}</string>
+  <key>CFBundleDisplayName</key>
+  <string>${BUNDLE_DISPLAY_NAME}</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>MacClipy</string>
+  <string>${BUNDLE_DISPLAY_NAME}</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>

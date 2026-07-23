@@ -44,7 +44,7 @@ final class PasteDestinationTests: XCTestCase {
         XCTAssertEqual(
             PasteController.resolvePasteAttempt(
                 destinationAvailable: true,
-                requestPermission: { false },
+                accessibilityTrusted: { false },
                 activate: {
                     XCTFail("Activation must not run without permission")
                     return false
@@ -55,7 +55,7 @@ final class PasteDestinationTests: XCTestCase {
         XCTAssertEqual(
             PasteController.resolvePasteAttempt(
                 destinationAvailable: true,
-                requestPermission: { true },
+                accessibilityTrusted: { true },
                 activate: { false }
             ),
             .activationFailed
@@ -63,7 +63,7 @@ final class PasteDestinationTests: XCTestCase {
         XCTAssertEqual(
             PasteController.resolvePasteAttempt(
                 destinationAvailable: true,
-                requestPermission: { true },
+                accessibilityTrusted: { true },
                 activate: { true }
             ),
             .scheduled
