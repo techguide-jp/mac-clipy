@@ -23,7 +23,7 @@ final class AccessibilityPermissionRegressionTests: XCTestCase {
         XCTAssertFalse(pasteFunction.contains("requestAccessibilityPermission"))
     }
 
-    func testPromptingPermissionRequestIsOnlyWiredToOnboarding() throws {
+    func testPromptingPermissionRequestIsOnlyWiredToExplicitPermissionActions() throws {
         let pasteSource = try swiftSource("Sources/MacClipy/Clipboard/PasteController.swift")
         let trustCheckStart = try XCTUnwrap(
             pasteSource.range(of: "static var isAccessibilityTrusted")
@@ -46,7 +46,7 @@ final class AccessibilityPermissionRegressionTests: XCTestCase {
             try allProductionSwiftSource()
                 .components(separatedBy: "PasteController.requestAccessibilityPermission()")
                 .count - 1,
-            1
+            2
         )
     }
 

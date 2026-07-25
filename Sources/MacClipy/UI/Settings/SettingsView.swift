@@ -54,7 +54,7 @@ struct SettingsView: View {
             }
         }
         .background(
-            KeyboardEventBridge { event, isTextEditing in
+            KeyboardEventBridge { event, isTextEditing, _ in
                 SettingsKeyAction.handle(
                     event: event,
                     isTextEditing: isTextEditing,

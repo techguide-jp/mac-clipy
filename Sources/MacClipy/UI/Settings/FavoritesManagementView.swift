@@ -65,7 +65,7 @@ struct FavoritesManagementView: View {
             }
         }
         .background(
-            KeyboardEventBridge { event, isTextEditing in
+            KeyboardEventBridge { event, isTextEditing, _ in
                 handleKeyboard(event: event, isTextEditing: isTextEditing)
             }
         )

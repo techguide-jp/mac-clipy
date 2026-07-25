@@ -4,7 +4,7 @@ import SwiftUI
 
 @MainActor
 struct KeyboardEventBridge: NSViewRepresentable {
-    let onEvent: @MainActor (NSEvent, Bool) -> Bool
+    let onEvent: @MainActor (NSEvent, Bool, Bool) -> Bool
 
     func makeNSView(context: Context) -> KeyBridgeView {
         let view = KeyBridgeView()
@@ -27,11 +27,14 @@ struct KeyboardEventBridge: NSViewRepresentable {
     final class KeyBridgeView: NSView {}
 
     final class Coordinator {
-        var onEvent: (@MainActor (NSEvent, Bool) -> Bool)?
+        var onEvent: (@MainActor (NSEvent, Bool, Bool) -> Bool)?
         private weak var view: KeyBridgeView?
         private var monitor: Any?
 
-        func install(for view: KeyBridgeView, onEvent: @escaping @MainActor (NSEvent, Bool) -> Bool) {
+        func install(
+            for view: KeyBridgeView,
+            onEvent: @escaping @MainActor (NSEvent, Bool, Bool) -> Bool
+        ) {
             self.view = view
             self.onEvent = onEvent
             removeMonitor()
@@ -48,8 +51,12 @@ struct KeyboardEventBridge: NSViewRepresentable {
                         return false
                     }
 
-                    let isTextEditing = unsafeEvent.window?.firstResponder is NSTextView
-                    return onEvent(unsafeEvent, isTextEditing)
+                    let textView = unsafeEvent.window?.firstResponder as? NSTextView
+                    return onEvent(
+                        unsafeEvent,
+                        textView != nil,
+                        textView?.hasMarkedText() == true
+                    )
                 }
                 return shouldConsume ? nil : event
             }
@@ -70,7 +77,12 @@ struct KeyboardEventBridge: NSViewRepresentable {
 
 enum HistoryPopupKeyAction {
     @MainActor
-    static func handle(event: NSEvent, isTextEditing: Bool, model: HistoryPopupModel) -> Bool {
+    static func handle(
+        event: NSEvent,
+        isTextEditing: Bool,
+        hasMarkedText: Bool = false,
+        model: HistoryPopupModel
+    ) -> Bool {
         if KeyboardHelpKeyAction.isHelpEvent(event) {
             model.requestHelp()
             return true
@@ -78,6 +90,10 @@ enum HistoryPopupKeyAction {
 
         if handleCommand(event: event, model: model) {
             return true
+        }
+
+        guard !hasMarkedText else {
+            return false
         }
 
         if let keyActionHandled = handleKeyAction(event: event, isTextEditing: isTextEditing, model: model) {

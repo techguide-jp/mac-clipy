@@ -25,9 +25,14 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.contentView = NSHostingView(rootView: HistoryPopupView(model: model))
-        panel.onKeyDown = { [model] event, isTextEditing in
+        panel.onKeyDown = { [model] event, isTextEditing, hasMarkedText in
             MainActor.assumeIsolated {
-                HistoryPopupKeyAction.handle(event: event, isTextEditing: isTextEditing, model: model)
+                HistoryPopupKeyAction.handle(
+                    event: event,
+                    isTextEditing: isTextEditing,
+                    hasMarkedText: hasMarkedText,
+                    model: model
+                )
             }
         }
 
@@ -85,15 +90,16 @@ final class FloatingPanelController: NSObject, NSWindowDelegate {
 }
 
 final class PopupPanel: NSPanel {
-    var onKeyDown: ((NSEvent, Bool) -> Bool)?
+    var onKeyDown: ((NSEvent, Bool, Bool) -> Bool)?
 
     override var canBecomeKey: Bool {
         true
     }
 
     override func sendEvent(_ event: NSEvent) {
+        let textView = firstResponder as? NSTextView
         if event.type == .keyDown,
-           onKeyDown?(event, firstResponder is NSTextView) == true {
+           onKeyDown?(event, textView != nil, textView?.hasMarkedText() == true) == true {
             return
         }
 

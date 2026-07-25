@@ -15,12 +15,17 @@ struct HistoryPopupView: View {
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .background(
-            KeyboardEventBridge { event, isTextEditing in
-                HistoryPopupKeyAction.handle(event: event, isTextEditing: isTextEditing, model: model)
+            KeyboardEventBridge { event, isTextEditing, hasMarkedText in
+                HistoryPopupKeyAction.handle(
+                    event: event,
+                    isTextEditing: isTextEditing,
+                    hasMarkedText: hasMarkedText,
+                    model: model
+                )
             }
         )
         .onAppear {
-            searchFocused = true
+            focusSearch()
         }
         .onChange(of: model.query) {
             model.selectedRow = 0
@@ -33,9 +38,8 @@ struct HistoryPopupView: View {
             TextField(L10n.tr("historyPopup.searchPlaceholder"), text: $model.query)
                 .textFieldStyle(.roundedBorder)
                 .focused($searchFocused)
-                .id(model.presentationRevision)
                 .onChange(of: model.presentationRevision) {
-                    searchFocused = true
+                    focusSearch()
                 }
 
             Button {
@@ -139,6 +143,14 @@ struct HistoryPopupView: View {
 
                 proxy.scrollTo(model.selectedRow, anchor: .center)
             }
+        }
+    }
+
+    private func focusSearch() {
+        searchFocused = false
+        Task { @MainActor in
+            await Task.yield()
+            searchFocused = true
         }
     }
 }

@@ -1,4 +1,5 @@
-"alert.accessibilityPermission.message" = "Pasting requires Accessibility permission. Allow MacClipy in System Settings.";
+"alert.accessibilityPermission.message" = "The selected item was copied. To enable automatic paste, allow MacClipy in Accessibility settings.";
+"alert.accessibilityPermission.title" = "Automatic Paste Requires Permission";
 "alert.clearHistory.message" = "This deletes all saved clipboard history.";
 "alert.clearHistory.title" = "Delete clipboard history?";
 "alert.clearHistoryFailed.title" = "Failed to delete history";
@@ -20,6 +21,7 @@
 "button.deleteHistoryAndFavorites" = "Delete History and Favorites";
 "button.deleteHistoryOnly" = "Delete History Only";
 "button.ok" = "OK";
+"button.openSystemSettings" = "Open System Settings";
 "button.save" = "Save";
 "button.keyboardHelp" = "Keyboard Help";
 "button.settings" = "Settings";

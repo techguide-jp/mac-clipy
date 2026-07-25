@@ -69,4 +69,37 @@ final class PasteDestinationTests: XCTestCase {
             .scheduled
         )
     }
+
+    func testPermissionRequestOpensAccessibilitySettingsWhenPermissionIsStillMissing() {
+        var openedURL: URL?
+
+        XCTAssertFalse(
+            PasteController.requestAccessibilityPermission(
+                prompt: { false },
+                openSettings: { url in
+                    openedURL = url
+                    return true
+                }
+            )
+        )
+        XCTAssertEqual(
+            openedURL?.absoluteString,
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+        )
+    }
+
+    func testPermissionRequestDoesNotOpenSettingsWhenPermissionIsAlreadyGranted() {
+        var didOpenSettings = false
+
+        XCTAssertTrue(
+            PasteController.requestAccessibilityPermission(
+                prompt: { true },
+                openSettings: { _ in
+                    didOpenSettings = true
+                    return true
+                }
+            )
+        )
+        XCTAssertFalse(didOpenSettings)
+    }
 }

@@ -60,6 +60,46 @@ final class HistoryPopupKeyActionTests: XCTestCase {
         XCTAssertEqual(popupModel.results.map(\.item.content), ["first"])
     }
 
+    func testReturnFallsThroughWithoutChoosingWhileIMETextIsMarked() throws {
+        let popupModel = try makePopupModel()
+        var chosenItem: ClipboardItem?
+        popupModel.onChoose = { chosenItem = $0 }
+
+        XCTAssertFalse(
+            try HistoryPopupKeyAction.handle(
+                event: keyEvent(
+                    keyCode: kVK_Return,
+                    characters: "\r",
+                    charactersIgnoringModifiers: "\r"
+                ),
+                isTextEditing: true,
+                hasMarkedText: true,
+                model: popupModel
+            )
+        )
+        XCTAssertNil(chosenItem)
+    }
+
+    func testReturnChoosesSelectedItemAfterIMETextIsCommitted() throws {
+        let popupModel = try makePopupModel()
+        var chosenItem: ClipboardItem?
+        popupModel.onChoose = { chosenItem = $0 }
+
+        XCTAssertTrue(
+            try HistoryPopupKeyAction.handle(
+                event: keyEvent(
+                    keyCode: kVK_Return,
+                    characters: "\r",
+                    charactersIgnoringModifiers: "\r"
+                ),
+                isTextEditing: true,
+                hasMarkedText: false,
+                model: popupModel
+            )
+        )
+        XCTAssertEqual(chosenItem?.content, "first")
+    }
+
     private func makePopupModel() throws -> HistoryPopupModel {
         let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
         try historyModel.store.add(content: "first", sourceBundleID: nil, at: Date(timeIntervalSince1970: 10))

@@ -256,10 +256,7 @@ final class AppModel {
             case .scheduled:
                 break
             case .permissionRequired:
-                showAlert(
-                    title: L10n.tr("alert.copy.title"),
-                    message: L10n.tr("alert.accessibilityPermission.message")
-                )
+                showAccessibilityPermissionAlert()
             case .destinationUnavailable:
                 showAlert(
                     title: L10n.tr("alert.copy.title"),
@@ -328,5 +325,18 @@ final class AppModel {
         alert.alertStyle = .informational
         alert.addButton(withTitle: L10n.tr("button.ok"))
         alert.runModal()
+    }
+
+    private func showAccessibilityPermissionAlert() {
+        let alert = NSAlert()
+        alert.messageText = L10n.tr("alert.accessibilityPermission.title")
+        alert.informativeText = L10n.tr("alert.accessibilityPermission.message")
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: L10n.tr("button.openSystemSettings"))
+        alert.addButton(withTitle: L10n.tr("button.cancel"))
+
+        if alert.runModal() == .alertFirstButtonReturn {
+            PasteController.requestAccessibilityPermission()
+        }
     }
 }
