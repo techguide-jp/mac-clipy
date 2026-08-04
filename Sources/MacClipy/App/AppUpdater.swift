@@ -5,6 +5,7 @@ import Sparkle
 @MainActor
 @Observable
 final class AppUpdater: NSObject {
+    @ObservationIgnored private let updaterDelegate: AutomaticUpdateInstaller
     @ObservationIgnored private let updaterController: SPUStandardUpdaterController
     private var settingsRevision = 0
 
@@ -13,9 +14,11 @@ final class AppUpdater: NSObject {
     }
 
     init(startingUpdater: Bool) {
+        let updaterDelegate = AutomaticUpdateInstaller()
+        self.updaterDelegate = updaterDelegate
         updaterController = SPUStandardUpdaterController(
             startingUpdater: startingUpdater,
-            updaterDelegate: nil,
+            updaterDelegate: updaterDelegate,
             userDriverDelegate: nil
         )
         super.init()
