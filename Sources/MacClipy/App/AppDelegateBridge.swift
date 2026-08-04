@@ -11,6 +11,18 @@ final class AppDelegateBridge: NSObject, NSApplicationDelegate {
             name: NSWorkspace.didActivateApplicationNotification,
             object: nil
         )
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self,
+            selector: #selector(applicationDidConfirmRunning(_:)),
+            name: NSWorkspace.didWakeNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationDidConfirmRunning(_:)),
+            name: .NSCalendarDayChanged,
+            object: nil
+        )
         appModel.applicationDidFinishLaunching()
     }
 
@@ -30,5 +42,11 @@ final class AppDelegateBridge: NSObject, NSApplicationDelegate {
         }
 
         appModel.applicationDidActivate(application)
+    }
+
+    @objc private func applicationDidConfirmRunning(_: Notification) {
+        Task { [weak self] in
+            await self?.appModel.applicationDidConfirmRunning()
+        }
     }
 }

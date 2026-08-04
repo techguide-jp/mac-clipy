@@ -22,6 +22,7 @@ final class FavoritesModel {
     var newFolderName = ""
     var selectedFolderName = ""
     var draftFavoriteTitle = ""
+    var onFavoriteManagement: (() -> Void)?
 
     init(store: FavoriteStore = FavoriteStore()) {
         self.store = store
@@ -231,6 +232,7 @@ final class FavoritesModel {
             draftFavoriteTitle = ""
             statusMessage = L10n.tr("settings.favorites.status.favoriteRemoved")
             refreshFromStore()
+            onFavoriteManagement?()
         } catch {
             statusMessage = error.localizedDescription
         }

@@ -218,9 +218,9 @@
 "settings.about.version" = "Version %@";
 "settings.about.versionUnknown" = "Development Build";
 "settings.about.versionWithBuild" = "Version %@ (Build %@)";
-"settings.analytics.dataDescription" = "Only a random installation ID, launch date, app and macOS versions, and CPU architecture are sent. Clipboard contents, favorites, and app names are never sent.";
+"settings.analytics.dataDescription" = "Only a random installation ID, running checks, panel usage, daily feature counts, app and macOS versions, and CPU architecture are sent. Clipboard or favorite contents, search terms, and app names are never sent.";
 "settings.analytics.enabled" = "Send Anonymous Usage Data";
-"settings.analytics.help" = "Count first launch and daily activity anonymously to guide improvements and support.";
+"settings.analytics.help" = "Count app running, history and favorites panel usage, and daily feature totals anonymously to guide improvements and support.";
 "settings.analytics.privacyPolicy" = "View Privacy Policy";
 "settings.analytics.title" = "Anonymous Usage Data";
 "settings.title" = "MacClipy Settings";

@@ -10,11 +10,11 @@ final class AppModel {
         let canCaptureNow: Bool
     }
 
-    let settingsModel = SettingsModel()
-    let historyModel = ClipboardHistoryModel()
-    let favoritesModel = FavoritesModel()
+    let settingsModel: SettingsModel
+    let historyModel: ClipboardHistoryModel
+    let favoritesModel: FavoritesModel
     let historyPopupModel: HistoryPopupModel
-    let appUpdater = AppUpdater()
+    let appUpdater: AppUpdater
 
     private var monitor: ClipboardMonitor?
     private var statusItemController: StatusItemController?
@@ -22,7 +22,7 @@ final class AppModel {
     @ObservationIgnored private var settingsWindowController: SettingsWindowController?
     @ObservationIgnored private var onboardingWindowController: OnboardingWindowController?
     @ObservationIgnored private let developmentCrashReporter = DevelopmentCrashReporter()
-    @ObservationIgnored private let anonymousAnalyticsRecorder: AnonymousAnalyticsRecorder?
+    @ObservationIgnored private let anonymousAnalyticsRecorder: (any AnonymousAnalyticsRecording)?
     @ObservationIgnored private var analyticsTask: Task<Void, Never>?
     private var pasteDestinationApplication: NSRunningApplication?
     var isKeyboardHelpPresented = false
@@ -33,8 +33,44 @@ final class AppModel {
         monitor?.isPaused == true
     }
 
-    init() {
-        anonymousAnalyticsRecorder = AnonymousAnalyticsFactory.make(settingsModel: settingsModel)
+    convenience init() {
+        let settingsModel = SettingsModel()
+        self.init(
+            settingsModel: settingsModel,
+            historyModel: ClipboardHistoryModel(),
+            favoritesModel: FavoritesModel(),
+            appUpdater: AppUpdater(),
+            anonymousAnalyticsRecorder: AnonymousAnalyticsFactory.make(settingsModel: settingsModel)
+        )
+    }
+
+    convenience init(
+        anonymousAnalyticsRecorder: any AnonymousAnalyticsRecording,
+        historyModel: ClipboardHistoryModel,
+        favoritesModel: FavoritesModel,
+        appUpdater: AppUpdater
+    ) {
+        self.init(
+            settingsModel: SettingsModel(),
+            historyModel: historyModel,
+            favoritesModel: favoritesModel,
+            appUpdater: appUpdater,
+            anonymousAnalyticsRecorder: anonymousAnalyticsRecorder
+        )
+    }
+
+    private init(
+        settingsModel: SettingsModel,
+        historyModel: ClipboardHistoryModel,
+        favoritesModel: FavoritesModel,
+        appUpdater: AppUpdater,
+        anonymousAnalyticsRecorder: (any AnonymousAnalyticsRecording)?
+    ) {
+        self.settingsModel = settingsModel
+        self.historyModel = historyModel
+        self.favoritesModel = favoritesModel
+        self.appUpdater = appUpdater
+        self.anonymousAnalyticsRecorder = anonymousAnalyticsRecorder
         let popupModel = HistoryPopupModel(historyModel: historyModel, favoritesModel: favoritesModel)
         historyPopupModel = popupModel
         popupModel.onChoose = { [weak self] item in
@@ -45,6 +81,23 @@ final class AppModel {
         }
         popupModel.onHelpRequested = { [weak self] in
             self?.showKeyboardHelp()
+        }
+        popupModel.onPresented = { [weak self] initialMode in
+            self?.recordPanelPresentation(initialMode)
+        }
+        popupModel.onSearchSession = { [weak self] in
+            self?.anonymousAnalyticsRecorder?.recordFeatureUsage(.searchSession, at: Date())
+        }
+        popupModel.onItemUsed = { [weak self] itemSource in
+            self?.anonymousAnalyticsRecorder?.recordFeatureUsage(itemSource.feature, at: Date())
+        }
+        popupModel.onFavoriteManagement = { [weak self] in
+            self?.anonymousAnalyticsRecorder?.recordFeatureUsage(.favoriteManagement, at: Date())
+        }
+        favoritesModel.onFavoriteManagement = { [weak self] in
+            let date = Date()
+            self?.anonymousAnalyticsRecorder?.recordFeatureUsage(.favoriteManagement, at: date)
+            self?.recordEngagement(at: date)
         }
         settingsWindowController = SettingsWindowController(appModel: self)
         onboardingWindowController = OnboardingWindowController(
@@ -74,7 +127,7 @@ final class AppModel {
         setupStatusItem()
         setupKeyboardShortcuts()
         analyticsTask = Task { [weak self] in
-            await self?.anonymousAnalyticsRecorder?.recordLaunch()
+            await self?.anonymousAnalyticsRecorder?.recordLaunch(at: Date())
         }
 
         if shouldShowOnboarding {
@@ -92,6 +145,10 @@ final class AppModel {
 
     func applicationDidActivate(_ application: NSRunningApplication) {
         rememberPasteDestination(application)
+    }
+
+    func applicationDidConfirmRunning(at date: Date = Date()) async {
+        await anonymousAnalyticsRecorder?.recordRunning(at: date)
     }
 
     func showHistoryPopup() {
@@ -167,7 +224,7 @@ final class AppModel {
             historyModel: historyModel,
             monitorState: { [weak self] in self?.isPaused == true },
             onCopyHistoryItem: { [weak self] item in
-                self?.copyAndPaste(item)
+                self?.useHistoryItemFromMenu(item)
             },
             onShowHistory: { [weak self] in self?.showHistoryPopup() },
             onShowFavorites: { [weak self] in self?.showFavoritePopup() },
@@ -270,6 +327,24 @@ final class AppModel {
             }
         } catch {
             showAlert(title: L10n.tr("alert.pasteFailed.title"), message: error.localizedDescription)
+        }
+    }
+
+    func useHistoryItemFromMenu(_ item: ClipboardItem) {
+        anonymousAnalyticsRecorder?.recordFeatureUsage(.historyItemUse, at: Date())
+        recordEngagement()
+        copyAndPaste(item)
+    }
+
+    private func recordPanelPresentation(_ initialMode: HistoryPopupInitialMode) {
+        let feature: AnalyticsFeature = initialMode == .favorites ? .favoritesPanel : .historyPanel
+        anonymousAnalyticsRecorder?.recordFeatureUsage(feature, at: Date())
+        recordEngagement()
+    }
+
+    private func recordEngagement(at date: Date = Date()) {
+        Task { [weak self] in
+            await self?.anonymousAnalyticsRecorder?.recordEngagement(at: date)
         }
     }
 
