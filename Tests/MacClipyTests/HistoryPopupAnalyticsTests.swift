@@ -2,8 +2,8 @@ import Foundation
 @testable import MacClipy
 import XCTest
 
-@MainActor
 final class HistoryPopupAnalyticsTests: XCTestCase {
+    @MainActor
     func testReportsPresentationAndOneSearchSessionPerOpen() throws {
         let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
         try historyModel.store.add(content: "first", sourceBundleID: nil)
@@ -28,6 +28,7 @@ final class HistoryPopupAnalyticsTests: XCTestCase {
         XCTAssertEqual(searchSessionCount, 2)
     }
 
+    @MainActor
     func testReportsItemUseSourceWithoutItemData() throws {
         let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
         let historyItem = try XCTUnwrap(
@@ -50,6 +51,7 @@ final class HistoryPopupAnalyticsTests: XCTestCase {
         XCTAssertEqual(usedSources, [.history, .favorite])
     }
 
+    @MainActor
     func testReportsSuccessfulFavoriteRemoval() throws {
         let historyModel = ClipboardHistoryModel(store: ClipboardStore(historyURL: temporaryHistoryURL()))
         let historyItem = try XCTUnwrap(
@@ -72,6 +74,7 @@ final class HistoryPopupAnalyticsTests: XCTestCase {
         XCTAssertTrue(favoriteStore.items.isEmpty)
     }
 
+    @MainActor
     func testFavoritesModelReportsSuccessfulFavoriteRemoval() throws {
         let model = FavoritesModel(store: FavoriteStore(favoritesURL: temporaryFavoritesURL()))
         let favorite = try model.store.addFavorite(for: makeItem(content: "remove me", at: 10))
