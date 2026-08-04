@@ -218,9 +218,9 @@
 "settings.about.version" = "バージョン %@";
 "settings.about.versionUnknown" = "開発版";
 "settings.about.versionWithBuild" = "バージョン %@（ビルド %@）";
-"settings.analytics.dataDescription" = "送信するのは、ランダムなインストールID、起動日、アプリ・macOSのバージョン、CPU種別だけです。クリップボードやお気に入りの内容、利用したアプリ名は送信しません。";
+"settings.analytics.dataDescription" = "送信するのは、ランダムなインストールID、生存確認、パネル利用、機能別の日次回数、アプリ・macOSのバージョン、CPU種別です。クリップボードやお気に入りの内容、検索文字列、利用したアプリ名は送信しません。";
 "settings.analytics.enabled" = "匿名の利用状況を送信";
-"settings.analytics.help" = "初回起動と日ごとの起動を匿名で集計し、改善とサポート判断に利用します。";
+"settings.analytics.help" = "アプリの常駐、履歴・お気に入りパネルの利用、機能別の日次回数を匿名で集計し、改善とサポート判断に利用します。";
 "settings.analytics.privacyPolicy" = "プライバシーポリシーを確認";
 "settings.analytics.title" = "匿名の利用状況";
 "settings.title" = "MacClipy 設定";

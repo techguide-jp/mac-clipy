@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 import Observation
 
-enum HistoryPopupInitialMode {
+enum HistoryPopupInitialMode: Equatable {
     case all
     case favorites
 }
@@ -44,7 +44,12 @@ final class HistoryPopupModel {
     private let historyModel: ClipboardHistoryModel
     private let favoritesModel: FavoritesModel
 
-    var query = ""
+    var query = "" {
+        didSet {
+            recordSearchSessionIfNeeded()
+        }
+    }
+
     var mode: Mode = .all
     var folderFilter: FavoriteFolderFilter = .all
     var selectedRow = 0
@@ -57,6 +62,12 @@ final class HistoryPopupModel {
     var onClose: (() -> Void)?
     var onSettingsRequested: (() -> Void)?
     var onHelpRequested: (() -> Void)?
+    var onPresented: ((HistoryPopupInitialMode) -> Void)?
+    var onSearchSession: (() -> Void)?
+    var onItemUsed: ((AnalyticsItemSource) -> Void)?
+    var onFavoriteManagement: (() -> Void)?
+    private var isTrackingPresentation = false
+    private var didRecordSearchSession = false
 
     init(historyModel: ClipboardHistoryModel, favoritesModel: FavoritesModel) {
         self.historyModel = historyModel
@@ -74,12 +85,16 @@ final class HistoryPopupModel {
     }
 
     func prepare(initialMode: HistoryPopupInitialMode) {
+        isTrackingPresentation = false
+        didRecordSearchSession = false
         query = ""
         mode = initialMode == .favorites ? .favorites : .all
         folderFilter = .all
         selectedRow = 0
         presentationRevision += 1
         refresh()
+        isTrackingPresentation = true
+        onPresented?(initialMode)
     }
 
     func refresh() {
@@ -92,6 +107,7 @@ final class HistoryPopupModel {
     }
 
     func close() {
+        isTrackingPresentation = false
         onClose?()
     }
 
@@ -249,6 +265,8 @@ final class HistoryPopupModel {
             revision += 1
         }
 
+        let itemSource: AnalyticsItemSource = mode == .favorites ? .favorite : .history
+        onItemUsed?(itemSource)
         onChoose?(result.item)
         close()
     }
@@ -265,6 +283,7 @@ final class HistoryPopupModel {
                 try favoritesModel.store.addFavorite(for: result.item, displayTitle: title)
             }
 
+            onFavoriteManagement?()
             refresh()
         } catch {
             NSLog("MacClipy failed to toggle favorite: \(error.localizedDescription)")
@@ -277,6 +296,15 @@ final class HistoryPopupModel {
         }
 
         return min(max(row, 0), results.count - 1)
+    }
+
+    private func recordSearchSessionIfNeeded() {
+        guard isTrackingPresentation, !didRecordSearchSession, !query.isEmpty else {
+            return
+        }
+
+        didRecordSearchSession = true
+        onSearchSession?()
     }
 
     private func promptForFavoriteTitle(defaultTitle: String) -> String? {

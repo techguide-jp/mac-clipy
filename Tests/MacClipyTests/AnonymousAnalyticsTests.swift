@@ -12,6 +12,9 @@ final class AnonymousAnalyticsTests: XCTestCase {
         Defaults.Keys.anonymousAnalyticsEnabled.reset()
         Defaults.Keys.didSendAnonymousInstall.reset()
         Defaults.Keys.lastAnonymousDailyActiveDay.reset()
+        Defaults.Keys.lastAnonymousDailyRunningDay.reset()
+        Defaults.Keys.lastAnonymousDailyEngagedDay.reset()
+        Defaults.Keys.anonymousFeatureUsageState.reset()
         super.tearDown()
     }
 
@@ -35,19 +38,19 @@ final class AnonymousAnalyticsTests: XCTestCase {
         XCTAssertEqual(store.savedValues, [identifier.uuidString.lowercased()])
     }
 
-    func testFirstLaunchSendsInstallAndDailyActive() async {
+    func testFirstLaunchSendsInstallAndDailyRunning() async {
         let sender = RecordingAnalyticsSender()
         let state = InMemoryAnalyticsEventStateStore()
         let recorder = makeRecorder(sender: sender, state: state)
 
         await recorder.recordLaunch(at: fixedDate)
 
-        XCTAssertEqual(sender.successfulPayloads.map(\.eventName), [.install, .dailyActive])
+        XCTAssertEqual(sender.successfulPayloads.map(\.eventName), [.install, .dailyRunning])
         XCTAssertTrue(state.didSendInstall)
-        XCTAssertNotNil(state.lastDailyActiveDay)
+        XCTAssertNotNil(state.lastDailyRunningDay)
     }
 
-    func testSameDayLaunchDoesNotSendAgainAndNextDaySendsDailyActive() async {
+    func testSameDayLaunchDoesNotSendAgainAndNextDaySendsDailyRunning() async {
         let sender = RecordingAnalyticsSender()
         let state = InMemoryAnalyticsEventStateStore()
         let recorder = makeRecorder(sender: sender, state: state)
@@ -58,11 +61,11 @@ final class AnonymousAnalyticsTests: XCTestCase {
 
         XCTAssertEqual(
             sender.successfulPayloads.map(\.eventName),
-            [.install, .dailyActive, .dailyActive]
+            [.install, .dailyRunning, .dailyRunning]
         )
     }
 
-    func testFailedInstallIsRetriedWithoutRepeatingSuccessfulDailyActive() async {
+    func testFailedInstallIsRetriedWithoutRepeatingSuccessfulDailyRunning() async {
         let sender = RecordingAnalyticsSender(failOnceFor: [.install])
         let state = InMemoryAnalyticsEventStateStore()
         let recorder = makeRecorder(sender: sender, state: state)
@@ -70,8 +73,8 @@ final class AnonymousAnalyticsTests: XCTestCase {
         await recorder.recordLaunch(at: fixedDate)
         await recorder.recordLaunch(at: fixedDate.addingTimeInterval(3600))
 
-        XCTAssertEqual(sender.attemptedEventNames, [.install, .dailyActive, .install])
-        XCTAssertEqual(sender.successfulPayloads.map(\.eventName), [.dailyActive, .install])
+        XCTAssertEqual(sender.attemptedEventNames, [.install, .dailyRunning, .install])
+        XCTAssertEqual(sender.successfulPayloads.map(\.eventName), [.dailyRunning, .install])
         XCTAssertTrue(state.didSendInstall)
     }
 
@@ -106,11 +109,13 @@ final class AnonymousAnalyticsTests: XCTestCase {
         let sender = RecordingAnalyticsSender {
             isEnabled = false
         }
-        let recorder = makeRecorder(sender: sender, isEnabled: { isEnabled })
+        let state = InMemoryAnalyticsEventStateStore()
+        let recorder = makeRecorder(sender: sender, state: state, isEnabled: { isEnabled })
 
         await recorder.recordLaunch(at: fixedDate)
 
         XCTAssertEqual(sender.attemptedEventNames, [.install])
+        XCTAssertNil(state.lastDailyRunningDay)
     }
 
     func testPayloadEncodingContainsOnlyApprovedSnakeCaseFields() throws {
@@ -240,7 +245,7 @@ final class AnonymousAnalyticsTests: XCTestCase {
                 )
             )
         }
-        let payload = makePayload(eventName: .dailyActive)
+        let payload = makePayload(eventName: .dailyRunning)
 
         try await sender.send(payload)
 
@@ -359,6 +364,9 @@ private final class RecordingInstallationIdentifierProvider: InstallationIdentif
 private final class InMemoryAnalyticsEventStateStore: AnalyticsEventStateStoring {
     var didSendInstall = false
     var lastDailyActiveDay: String?
+    var lastDailyRunningDay: String?
+    var lastDailyEngagedDay: String?
+    var featureUsageState = AnalyticsFeatureUsageState()
 }
 
 @MainActor

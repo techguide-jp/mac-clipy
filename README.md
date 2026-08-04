@@ -22,7 +22,7 @@ MacClipy は macOS 用のメニューバー常駐クリップボード管理ア�
 - 履歴の JSON ローカル保存
 - アプリ選択式の「履歴に保存しないアプリ」設定
 - コピー履歴保存の一時停止、履歴削除、ショートカット変更、SwiftUI 設定画面
-- 匿名の初回起動・日次利用計測と、設定からの送信停止
+- 匿名の初回起動・常駐・明示的な利用・機能別日次回数の計測と、設定からの送信停止
 
 ## 開発
 
@@ -89,12 +89,15 @@ workflow には Developer ID 証明書、Apple notarization 認証情報、Spark
 - 設定: `UserDefaults` / `KeyboardShortcuts`
 - お気に入り: `~/Library/Application Support/MacClipy/favorites.json`
 - 匿名インストールID: macOS Keychain
+- 匿名の日次送信済み状態・機能別カウンター: `UserDefaults`
 
 旧バージョンの `~/Library/Application Support/MacClipy/settings.json` は、初回起動時に新しい設定へ一回だけ移行されます。
 
 ## 匿名の利用状況
 
-配布版は、ランダムなインストールID、初回・日次の起動、アプリとmacOSのバージョン、CPU種別をTechGuideのfirst-party APIへ送信します。クリップボード履歴、お気に入りの内容、利用したアプリ名は送信しません。
+配布版は、ランダムなインストールID、初回起動、その日のプロセス生存、履歴・お気に入りパネルの利用、機能別の日次利用回数、アプリとmacOSのバージョン、CPU種別をTechGuideのfirst-party APIへ送信します。機能別の回数は端末内で日ごとに集計し、完了日分だけを送信します。
+
+クリップボード履歴、お気に入りの内容や表示名、検索文字列、項目・フォルダのID、利用したアプリ名は送信しません。プロセス生存は常駐状態、パネル利用は明示的な利用として別の指標に分けます。
 
 送信は `設定 > 一般 > 匿名の利用状況` から停止できます。ローカルbuild、テスト、`make run`では送信しません。詳細は [MacClipyプライバシーポリシー](https://techguide.jp/macclipy/privacy/) を確認してください。
 
