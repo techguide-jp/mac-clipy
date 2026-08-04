@@ -33,4 +33,4 @@ jobs:
         run: brew install swiftlint swiftformat
 
       - name: Run checks
-        run: CI_TEST_DIAGNOSTICS=1 REQUIRE_SWIFTLINT=1 REQUIRE_SWIFTFORMAT=1 scripts/check.sh
+        run: REQUIRE_SWIFTLINT=1 REQUIRE_SWIFTFORMAT=1 scripts/check.sh

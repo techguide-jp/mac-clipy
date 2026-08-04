@@ -41,35 +41,7 @@ else
 fi
 
 echo "==> Tests"
-if [[ "${CI_TEST_DIAGNOSTICS:-0}" == "1" ]]; then
-  swift test -Xswiftc -warnings-as-errors &
-  swift_test_pid=$!
-  (
-    sleep 75
-    if kill -0 "$swift_test_pid" 2>/dev/null; then
-      echo "==> Test hang diagnostics"
-      ps -axo pid,ppid,state,etime,command
-      xctest_pid="$(pgrep -f 'MacClipyPackageTests' | head -n 1 || true)"
-      if [[ -n "$xctest_pid" ]]; then
-        sample "$xctest_pid" 5 1 || true
-      else
-        echo "MacClipyPackageTests process was not found." >&2
-      fi
-    fi
-  ) &
-  diagnostics_pid=$!
-  set +e
-  wait "$swift_test_pid"
-  test_status=$?
-  set -e
-  kill "$diagnostics_pid" 2>/dev/null || true
-  wait "$diagnostics_pid" 2>/dev/null || true
-  if [[ "$test_status" -ne 0 ]]; then
-    exit "$test_status"
-  fi
-else
-  swift test -Xswiftc -warnings-as-errors
-fi
+swift test -Xswiftc -warnings-as-errors
 
 echo "==> Release build"
 swift build -c release -Xswiftc -warnings-as-errors

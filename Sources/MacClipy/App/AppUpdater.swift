@@ -8,9 +8,13 @@ final class AppUpdater: NSObject {
     @ObservationIgnored private let updaterController: SPUStandardUpdaterController
     private var settingsRevision = 0
 
-    override init() {
+    override convenience init() {
+        self.init(startingUpdater: true)
+    }
+
+    init(startingUpdater: Bool) {
         updaterController = SPUStandardUpdaterController(
-            startingUpdater: true,
+            startingUpdater: startingUpdater,
             updaterDelegate: nil,
             userDriverDelegate: nil
         )

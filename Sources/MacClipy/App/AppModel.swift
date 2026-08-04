@@ -14,7 +14,7 @@ final class AppModel {
     let historyModel: ClipboardHistoryModel
     let favoritesModel: FavoritesModel
     let historyPopupModel: HistoryPopupModel
-    let appUpdater = AppUpdater()
+    let appUpdater: AppUpdater
 
     private var monitor: ClipboardMonitor?
     private var statusItemController: StatusItemController?
@@ -39,6 +39,7 @@ final class AppModel {
             settingsModel: settingsModel,
             historyModel: ClipboardHistoryModel(),
             favoritesModel: FavoritesModel(),
+            appUpdater: AppUpdater(),
             anonymousAnalyticsRecorder: AnonymousAnalyticsFactory.make(settingsModel: settingsModel)
         )
     }
@@ -46,12 +47,14 @@ final class AppModel {
     convenience init(
         anonymousAnalyticsRecorder: any AnonymousAnalyticsRecording,
         historyModel: ClipboardHistoryModel,
-        favoritesModel: FavoritesModel
+        favoritesModel: FavoritesModel,
+        appUpdater: AppUpdater
     ) {
         self.init(
             settingsModel: SettingsModel(),
             historyModel: historyModel,
             favoritesModel: favoritesModel,
+            appUpdater: appUpdater,
             anonymousAnalyticsRecorder: anonymousAnalyticsRecorder
         )
     }
@@ -60,11 +63,13 @@ final class AppModel {
         settingsModel: SettingsModel,
         historyModel: ClipboardHistoryModel,
         favoritesModel: FavoritesModel,
+        appUpdater: AppUpdater,
         anonymousAnalyticsRecorder: (any AnonymousAnalyticsRecording)?
     ) {
         self.settingsModel = settingsModel
         self.historyModel = historyModel
         self.favoritesModel = favoritesModel
+        self.appUpdater = appUpdater
         self.anonymousAnalyticsRecorder = anonymousAnalyticsRecorder
         let popupModel = HistoryPopupModel(historyModel: historyModel, favoritesModel: favoritesModel)
         historyPopupModel = popupModel
