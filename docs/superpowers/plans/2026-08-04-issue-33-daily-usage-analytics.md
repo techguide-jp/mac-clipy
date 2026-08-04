@@ -16,6 +16,7 @@
 - 匿名送信OFF、開発build、テスト、未署名buildでは既存どおり外部送信しない。
 - 通信失敗やtimeoutは履歴表示、コピー、貼り付け、終了を妨げない。
 - 既存の`lastAnonymousDailyActiveDay`はRunning送信済み日へ一度だけ引き継ぐ。
+- 設定画面の表示、名前変更、フォルダ操作はEngaged対象外とし、お気に入りの追加・解除に成功した操作だけをEngagedへ含める。
 
 ---
 

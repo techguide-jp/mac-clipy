@@ -67,6 +67,27 @@ final class AppAnalyticsIntegrationTests: XCTestCase {
         XCTAssertEqual(recorder.engagementDates.count, 2)
     }
 
+    func testSettingsFavoriteRemovalRecordsEngagement() async throws {
+        let recorder = AppAnalyticsRecorderSpy()
+        let appModel = makeAppModel(recorder: recorder)
+        let historyItem = try XCTUnwrap(
+            try appModel.historyModel.store.add(content: "private clipboard text", sourceBundleID: nil)
+        )
+        let favorite = try appModel.favoritesModel.store.addFavorite(for: historyItem)
+        appModel.favoritesModel.refreshFromStore()
+        appModel.favoritesModel.selectFavorite(favorite)
+
+        appModel.favoritesModel.removeSelectedFavorite()
+
+        for _ in 0 ..< 10 {
+            guard recorder.engagementDates.isEmpty else {
+                break
+            }
+            await Task.yield()
+        }
+        XCTAssertEqual(recorder.engagementDates.count, 1)
+    }
+
     private func makeAppModel(recorder: AppAnalyticsRecorderSpy) -> AppModel {
         let testDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent("MacClipyTests-\(UUID().uuidString)", isDirectory: true)

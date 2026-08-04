@@ -90,7 +90,9 @@ final class AppModel {
             self?.anonymousAnalyticsRecorder?.recordFeatureUsage(.favoriteManagement, at: Date())
         }
         favoritesModel.onFavoriteManagement = { [weak self] in
-            self?.anonymousAnalyticsRecorder?.recordFeatureUsage(.favoriteManagement, at: Date())
+            let date = Date()
+            self?.anonymousAnalyticsRecorder?.recordFeatureUsage(.favoriteManagement, at: date)
+            self?.recordEngagement(at: date)
         }
         settingsWindowController = SettingsWindowController(appModel: self)
         onboardingWindowController = OnboardingWindowController(
