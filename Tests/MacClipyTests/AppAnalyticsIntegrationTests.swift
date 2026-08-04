@@ -88,6 +88,60 @@ final class AppAnalyticsIntegrationTests: XCTestCase {
         XCTAssertEqual(recorder.engagementDates.count, 1)
     }
 
+    func testReportsPresentationAndOneSearchSessionPerOpen() throws {
+        let appModel = makeAppModel(recorder: AppAnalyticsRecorderSpy())
+        try appModel.historyModel.store.add(content: "first", sourceBundleID: nil)
+        var presentedModes: [HistoryPopupInitialMode] = []
+        var searchSessionCount = 0
+        appModel.historyPopupModel.onPresented = { presentedModes.append($0) }
+        appModel.historyPopupModel.onSearchSession = { searchSessionCount += 1 }
+
+        appModel.historyPopupModel.prepare(initialMode: .all)
+        appModel.historyPopupModel.query = "f"
+        appModel.historyPopupModel.query = "fi"
+        appModel.historyPopupModel.query = ""
+        appModel.historyPopupModel.query = "first"
+        appModel.historyPopupModel.prepare(initialMode: .favorites)
+        appModel.historyPopupModel.query = "f"
+
+        XCTAssertEqual(presentedModes, [.all, .favorites])
+        XCTAssertEqual(searchSessionCount, 2)
+    }
+
+    func testReportsItemUseSourceWithoutItemData() throws {
+        let appModel = makeAppModel(recorder: AppAnalyticsRecorderSpy())
+        let historyItem = try XCTUnwrap(
+            try appModel.historyModel.store.add(content: "first", sourceBundleID: nil)
+        )
+        try appModel.favoritesModel.store.addFavorite(for: historyItem)
+        var usedSources: [AnalyticsItemSource] = []
+        appModel.historyPopupModel.onItemUsed = { usedSources.append($0) }
+
+        appModel.historyPopupModel.prepare(initialMode: .all)
+        appModel.historyPopupModel.chooseSelectedItem()
+        appModel.historyPopupModel.prepare(initialMode: .favorites)
+        appModel.historyPopupModel.chooseSelectedItem()
+
+        XCTAssertEqual(usedSources, [.history, .favorite])
+    }
+
+    func testReportsSuccessfulFavoriteRemoval() throws {
+        let appModel = makeAppModel(recorder: AppAnalyticsRecorderSpy())
+        let historyItem = try XCTUnwrap(
+            try appModel.historyModel.store.add(content: "first", sourceBundleID: nil)
+        )
+        try appModel.favoritesModel.store.addFavorite(for: historyItem)
+        var managementCount = 0
+        appModel.historyPopupModel.onFavoriteManagement = { managementCount += 1 }
+
+        appModel.historyPopupModel.prepare(initialMode: .favorites)
+        let favoriteID = try XCTUnwrap(appModel.historyPopupModel.results.first?.id)
+        appModel.historyPopupModel.toggleFavorite(id: favoriteID)
+
+        XCTAssertEqual(managementCount, 1)
+        XCTAssertTrue(appModel.favoritesModel.store.items.isEmpty)
+    }
+
     private func makeAppModel(recorder: AppAnalyticsRecorderSpy) -> AppModel {
         let testDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent("MacClipyTests-\(UUID().uuidString)", isDirectory: true)
