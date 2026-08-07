@@ -100,6 +100,40 @@ final class FavoriteStoreTests: XCTestCase {
         XCTAssertEqual(store.items.first?.hasCustomDisplayTitle, true)
     }
 
+    func testAddManualFavoritePersistsExactContentWithoutHistoryLink() throws {
+        let url = temporaryFavoritesURL()
+        let store = FavoriteStore(favoritesURL: url)
+        let registeredAt = Date(timeIntervalSince1970: 20)
+
+        let favorite = try store.addManualFavorite(
+            content: "  first line\nsecond line  ",
+            displayTitle: "Manual Entry",
+            at: registeredAt
+        )
+
+        XCTAssertNil(favorite.clipboardItemID)
+        XCTAssertEqual(favorite.contentSnapshot, "  first line\nsecond line  ")
+        XCTAssertNil(favorite.sourceBundleID)
+        XCTAssertEqual(favorite.displayTitle, "Manual Entry")
+        XCTAssertEqual(favorite.favoritedAt, registeredAt)
+        XCTAssertEqual(favorite.lastUsedAt, registeredAt)
+        XCTAssertEqual(favorite.useCount, 1)
+
+        let restored = FavoriteStore(favoritesURL: url)
+        try restored.load()
+
+        XCTAssertEqual(restored.items, [favorite])
+    }
+
+    func testAddManualFavoriteRejectsWhitespaceOnlyContent() {
+        let store = FavoriteStore(favoritesURL: temporaryFavoritesURL())
+
+        XCTAssertThrowsError(try store.addManualFavorite(content: " \n\t ", displayTitle: "Empty")) { error in
+            XCTAssertEqual(error as? FavoriteStoreError, .emptyContent)
+        }
+        XCTAssertTrue(store.items.isEmpty)
+    }
+
     func testDefaultFavoriteTitleIsNotTreatedAsCustom() throws {
         let store = FavoriteStore(favoritesURL: temporaryFavoritesURL())
         let favorite = try store.addFavorite(for: makeItem(content: "default title", at: 10))

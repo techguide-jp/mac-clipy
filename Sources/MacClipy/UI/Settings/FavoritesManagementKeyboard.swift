@@ -3,7 +3,7 @@ import Carbon
 
 extension FavoritesManagementView {
     func handleKeyboard(event: NSEvent, isTextEditing: Bool) -> Bool {
-        if handleTabNavigation(event: event) {
+        if !(isTextEditing && isCreatingFavorite), handleTabNavigation(event: event) {
             return true
         }
 
@@ -103,6 +103,11 @@ extension FavoritesManagementView {
     }
 
     private func cancelActiveFavoritesInput() -> Bool {
+        if isCreatingFavorite {
+            cancelFavoriteCreation()
+            return true
+        }
+
         if isCreatingFolder || editingFolderID != nil {
             cancelFolderEditing()
             return true
@@ -187,6 +192,6 @@ extension FavoritesManagementView {
     }
 
     private var isInlineEditing: Bool {
-        isCreatingFolder || editingFolderID != nil || editingFavoriteID != nil
+        isCreatingFolder || isCreatingFavorite || editingFolderID != nil || editingFavoriteID != nil
     }
 }

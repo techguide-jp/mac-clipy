@@ -1,29 +1,5 @@
 import Foundation
 
-public enum FavoriteItemSort: String, CaseIterable, Equatable, Hashable {
-    case manual
-    case title
-    case lastUsed
-    case useCount
-}
-
-public enum FavoriteStoreError: LocalizedError, Equatable {
-    case emptyName
-    case favoriteNotFound
-    case folderNotFound
-
-    public var errorDescription: String? {
-        switch self {
-        case .emptyName:
-            L10n.tr("favorites.error.emptyName")
-        case .favoriteNotFound:
-            L10n.tr("favorites.error.favoriteNotFound")
-        case .folderNotFound:
-            L10n.tr("favorites.error.folderNotFound")
-        }
-    }
-}
-
 public struct FavoriteItem: Codable, Equatable, Identifiable {
     public var id: UUID
     public var clipboardItemID: UUID?
@@ -151,22 +127,6 @@ public struct FavoriteFolderMembership: Codable, Equatable, Identifiable {
     }
 }
 
-public struct FavoriteData: Codable, Equatable {
-    public var items: [FavoriteItem]
-    public var folders: [FavoriteFolder]
-    public var memberships: [FavoriteFolderMembership]
-
-    public init(
-        items: [FavoriteItem] = [],
-        folders: [FavoriteFolder] = [],
-        memberships: [FavoriteFolderMembership] = []
-    ) {
-        self.items = items
-        self.folders = folders
-        self.memberships = memberships
-    }
-}
-
 public final class FavoriteStore {
     public private(set) var data: FavoriteData
     public let favoritesURL: URL
@@ -269,6 +229,37 @@ public final class FavoriteStore {
             favoritedAt: date,
             lastUsedAt: item.lastUsedAt,
             useCount: item.useCount,
+            sortOrder: nextSortOrder(for: data.items)
+        )
+        data.items.append(favorite)
+        try save()
+        return favorite
+    }
+
+    @discardableResult
+    public func addManualFavorite(
+        content: String,
+        displayTitle: String? = nil,
+        at date: Date = Date()
+    ) throws -> FavoriteItem {
+        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw FavoriteStoreError.emptyContent
+        }
+
+        let checksum = ClipboardItem.makeChecksum(for: content)
+        if let existing = items.first(where: { $0.checksum == checksum && $0.contentSnapshot == content }) {
+            return existing
+        }
+
+        let favorite = FavoriteItem(
+            clipboardItemID: nil,
+            checksum: checksum,
+            contentSnapshot: content,
+            sourceBundleID: nil,
+            displayTitle: resolvedDisplayTitle(for: content, displayTitle: displayTitle),
+            favoritedAt: date,
+            lastUsedAt: date,
+            useCount: AppConstants.Clipboard.initialUseCount,
             sortOrder: nextSortOrder(for: data.items)
         )
         data.items.append(favorite)

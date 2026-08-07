@@ -14,6 +14,7 @@ extension FavoritesManagementView {
     }
 
     func beginCreatingFolder() {
+        cancelFavoriteCreation()
         cancelFolderEditing()
         cancelFavoriteEditing()
         keyboardFocus = .folders
@@ -24,6 +25,7 @@ extension FavoritesManagementView {
     }
 
     func beginRenamingFolder(_ folder: FavoriteFolder) {
+        cancelFavoriteCreation()
         isCreatingFolder = false
         cancelFavoriteEditing()
         keyboardFocus = .folders
@@ -39,6 +41,9 @@ extension FavoritesManagementView {
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 50_000_000)
             if case .newFolder = field, !isCreatingFolder {
+                return
+            }
+            if case .newFavoriteContent = field, !isCreatingFavorite {
                 return
             }
             if case let .existingFolder(folderID) = field, editingFolderID != folderID {
@@ -92,6 +97,34 @@ extension FavoritesManagementView {
         model.moveSelectedFolder(by: offset)
     }
 
+    func beginCreatingFavorite() {
+        cancelFolderEditing()
+        cancelFavoriteEditing()
+        isCreatingFavorite = true
+        newFavoriteTitle = ""
+        newFavoriteContent = ""
+        focusedFolderField = .newFavoriteContent
+        focusFolderField(.newFavoriteContent)
+    }
+
+    func commitNewFavorite() {
+        guard model.addManualFavorite(content: newFavoriteContent, displayTitle: newFavoriteTitle) else {
+            return
+        }
+
+        cancelFavoriteCreation()
+        query = ""
+        keyboardFocus = .items
+        searchFocused = false
+    }
+
+    func cancelFavoriteCreation() {
+        isCreatingFavorite = false
+        newFavoriteTitle = ""
+        newFavoriteContent = ""
+        focusedFolderField = nil
+    }
+
     func requestDeleteSelectedFolder() {
         guard case let .folder(folderID) = model.selectedFolderFilter else {
             return
@@ -112,6 +145,7 @@ extension FavoritesManagementView {
     }
 
     func beginRenamingFavorite(_ favorite: FavoriteItem) {
+        cancelFavoriteCreation()
         cancelFolderEditing()
         keyboardFocus = .items
         model.selectFavorite(favorite)

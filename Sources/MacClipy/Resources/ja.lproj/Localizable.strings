@@ -37,6 +37,7 @@
 "developmentCrashReport.revealInFinder" = "Finderで表示";
 "developmentCrashReport.title" = "前回のクラッシュログ";
 "favorites.error.emptyName" = "名前を入力してください。";
+"favorites.error.emptyContent" = "保存する内容を入力してください。";
 "favorites.error.favoriteNotFound" = "お気に入りが見つかりません。";
 "favorites.error.folderNotFound" = "フォルダが見つかりません。";
 "favorites.toggle" = "お気に入り";
@@ -154,6 +155,9 @@
 "settings.favorites.folder.up" = "上へ";
 "settings.favorites.folders" = "フォルダ";
 "settings.favorites.item.addToFolder" = "追加";
+"settings.favorites.item.add" = "手動登録";
+"settings.favorites.item.addTitlePrompt" = "お気に入り名（任意）";
+"settings.favorites.item.contentPrompt" = "保存する内容";
 "settings.favorites.item.detail" = "利用 %d 回";
 "settings.favorites.item.detailWithFolders" = "利用 %d 回 / %@";
 "settings.favorites.item.copyValue" = "コピー値";
@@ -171,6 +175,7 @@
 "settings.favorites.sort.titleLabel" = "並び順";
 "settings.favorites.sort.useCount" = "利用回数順";
 "settings.favorites.status.favoriteAssigned" = "フォルダに追加しました";
+"settings.favorites.status.favoriteAdded" = "お気に入りを追加しました";
 "settings.favorites.status.favoriteRemoved" = "お気に入りを解除しました";
 "settings.favorites.status.favoriteRenamed" = "表示名を変更しました";
 "settings.favorites.status.favoriteUnassigned" = "フォルダから外しました";

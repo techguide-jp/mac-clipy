@@ -205,6 +205,24 @@ final class FavoritesModel {
         }
     }
 
+    @discardableResult
+    func addManualFavorite(content: String, displayTitle: String) -> Bool {
+        do {
+            let favorite = try store.addManualFavorite(content: content, displayTitle: displayTitle)
+            if case let .folder(folderID) = selectedFolderFilter {
+                try store.addFavorite(id: favorite.id, to: folderID)
+            }
+            refreshFromStore()
+            selectFavorite(items.first { $0.id == favorite.id } ?? favorite)
+            statusMessage = L10n.tr("settings.favorites.status.favoriteAdded")
+            onFavoriteManagement?()
+            return true
+        } catch {
+            statusMessage = error.localizedDescription
+            return false
+        }
+    }
+
     func updateSelectedFavoriteTitle() {
         guard let favoriteID = selectedFavoriteID else {
             statusMessage = L10n.tr("settings.favorites.status.selectFavorite")

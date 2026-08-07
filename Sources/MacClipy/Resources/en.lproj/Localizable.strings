@@ -37,6 +37,7 @@
 "developmentCrashReport.revealInFinder" = "Show in Finder";
 "developmentCrashReport.title" = "Previous Crash Log";
 "favorites.error.emptyName" = "Enter a name.";
+"favorites.error.emptyContent" = "Enter content to save.";
 "favorites.error.favoriteNotFound" = "Favorite not found.";
 "favorites.error.folderNotFound" = "Folder not found.";
 "favorites.toggle" = "Favorite";
@@ -154,6 +155,9 @@
 "settings.favorites.folder.up" = "Up";
 "settings.favorites.folders" = "Folders";
 "settings.favorites.item.addToFolder" = "Add";
+"settings.favorites.item.add" = "Add Manually";
+"settings.favorites.item.addTitlePrompt" = "Favorite name (optional)";
+"settings.favorites.item.contentPrompt" = "Content to save";
 "settings.favorites.item.detail" = "%d uses";
 "settings.favorites.item.detailWithFolders" = "%d uses / %@";
 "settings.favorites.item.copyValue" = "Copy Value";
@@ -171,6 +175,7 @@
 "settings.favorites.sort.titleLabel" = "Sort";
 "settings.favorites.sort.useCount" = "Use Count";
 "settings.favorites.status.favoriteAssigned" = "Added to folder";
+"settings.favorites.status.favoriteAdded" = "Added favorite";
 "settings.favorites.status.favoriteRemoved" = "Removed favorite";
 "settings.favorites.status.favoriteRenamed" = "Renamed favorite";
 "settings.favorites.status.favoriteUnassigned" = "Removed from folder";

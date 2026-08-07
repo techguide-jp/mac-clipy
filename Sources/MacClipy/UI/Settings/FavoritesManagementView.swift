@@ -3,6 +3,7 @@ import SwiftUI
 struct FavoritesManagementView: View {
     enum FolderFieldFocus: Hashable {
         case newFolder
+        case newFavoriteContent
         case existingFolder(UUID)
         case favorite(UUID)
     }
@@ -27,6 +28,9 @@ struct FavoritesManagementView: View {
     @State var assignmentFolderID: UUID?
     @State var isCreatingFolder = false
     @State var newFolderDraft = ""
+    @State var isCreatingFavorite = false
+    @State var newFavoriteTitle = ""
+    @State var newFavoriteContent = ""
     @State var editingFolderID: UUID?
     @State var editingFolderName = ""
     @State var editingFavoriteID: UUID?
@@ -159,6 +163,15 @@ struct FavoritesManagementView: View {
                 Text(L10n.tr("settings.favorites.items"))
                     .font(.headline)
 
+                Button {
+                    beginCreatingFavorite()
+                } label: {
+                    Image(systemName: "plus")
+                        .accessibilityLabel(L10n.tr("settings.favorites.item.add"))
+                }
+                .buttonStyle(.plain)
+                .help(L10n.tr("settings.favorites.item.add"))
+
                 Spacer()
 
                 Picker(selection: $model.selectedSort) {
@@ -170,6 +183,10 @@ struct FavoritesManagementView: View {
                     Text(L10n.tr("settings.favorites.sort.titleLabel"))
                 }
                 .frame(width: 190)
+            }
+
+            if isCreatingFavorite {
+                newFavoriteForm
             }
 
             TextField(L10n.tr("historyPopup.searchPlaceholder"), text: $query)

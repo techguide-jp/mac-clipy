@@ -1,6 +1,47 @@
 import SwiftUI
 
 extension FavoritesManagementView {
+    var newFavoriteForm: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            TextField(
+                L10n.tr("settings.favorites.item.addTitlePrompt"),
+                text: $newFavoriteTitle
+            )
+            .textFieldStyle(.roundedBorder)
+
+            TextField(
+                L10n.tr("settings.favorites.item.contentPrompt"),
+                text: $newFavoriteContent,
+                axis: .vertical
+            )
+            .textFieldStyle(.roundedBorder)
+            .lineLimit(2 ... 4)
+            .focused($focusedFolderField, equals: .newFavoriteContent)
+
+            HStack(spacing: 8) {
+                Spacer()
+
+                Button(L10n.tr("button.cancel")) {
+                    cancelFavoriteCreation()
+                }
+
+                Button {
+                    commitNewFavorite()
+                } label: {
+                    Label(L10n.tr("settings.favorites.item.add"), systemImage: "star.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(newFavoriteContent.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+        }
+        .padding(10)
+        .background(Color.accentColor.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .onAppear {
+            focusFolderField(.newFavoriteContent)
+        }
+    }
+
     var newFolderRow: some View {
         HStack(spacing: 8) {
             Image(systemName: "folder.badge.plus")
