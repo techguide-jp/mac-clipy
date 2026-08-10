@@ -5,7 +5,12 @@ import XCTest
 @MainActor
 final class AppAnalyticsIntegrationTests: XCTestCase {
     func testDayChangedNotificationCanArriveFromBackgroundQueue() async {
-        let appDelegate = AppDelegateBridge()
+        let recorder = AppAnalyticsRecorderSpy()
+        let runningRecorded = expectation(description: "running recorded")
+        recorder.onRunning = {
+            runningRecorded.fulfill()
+        }
+        let appDelegate = AppDelegateBridge(appModel: makeAppModel(recorder: recorder))
         let selector = NSSelectorFromString("applicationDidConfirmRunning:")
         let notificationPosted = expectation(description: "day changed notification posted")
         NotificationCenter.default.addObserver(
@@ -25,7 +30,8 @@ final class AppAnalyticsIntegrationTests: XCTestCase {
             notificationPosted.fulfill()
         }
 
-        await fulfillment(of: [notificationPosted], timeout: 1)
+        await fulfillment(of: [notificationPosted, runningRecorded], timeout: 1)
+        XCTAssertEqual(recorder.runningDates.count, 1)
     }
 
     func testLifecycleRunningTriggerUsesAnalyticsRecorder() async {
@@ -134,6 +140,7 @@ private final class AppAnalyticsRecorderSpy: AnonymousAnalyticsRecording {
     private(set) var runningDates: [Date] = []
     private(set) var engagementDates: [Date] = []
     private(set) var features: [AnalyticsFeature] = []
+    var onRunning: (() -> Void)?
     var onEngagement: (() -> Void)?
 
     func recordLaunch(at date: Date) async {
@@ -142,6 +149,7 @@ private final class AppAnalyticsRecorderSpy: AnonymousAnalyticsRecording {
 
     func recordRunning(at date: Date) async {
         runningDates.append(date)
+        onRunning?()
     }
 
     func recordEngagement(at date: Date) async {

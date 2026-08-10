@@ -2,7 +2,17 @@ import AppKit
 
 @MainActor
 final class AppDelegateBridge: NSObject, NSApplicationDelegate {
-    let appModel = AppModel()
+    let appModel: AppModel
+
+    override init() {
+        appModel = AppModel()
+        super.init()
+    }
+
+    init(appModel: AppModel) {
+        self.appModel = appModel
+        super.init()
+    }
 
     func applicationDidFinishLaunching(_: Notification) {
         NSWorkspace.shared.notificationCenter.addObserver(
