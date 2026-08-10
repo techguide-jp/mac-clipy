@@ -4,6 +4,30 @@ import XCTest
 
 @MainActor
 final class AppAnalyticsIntegrationTests: XCTestCase {
+    func testDayChangedNotificationCanArriveFromBackgroundQueue() async {
+        let appDelegate = AppDelegateBridge()
+        let selector = NSSelectorFromString("applicationDidConfirmRunning:")
+        let notificationPosted = expectation(description: "day changed notification posted")
+        NotificationCenter.default.addObserver(
+            appDelegate,
+            selector: selector,
+            name: .NSCalendarDayChanged,
+            object: nil
+        )
+        defer {
+            NotificationCenter.default.removeObserver(appDelegate)
+        }
+
+        XCTAssertTrue(appDelegate.responds(to: selector))
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            NotificationCenter.default.post(name: .NSCalendarDayChanged, object: nil)
+            notificationPosted.fulfill()
+        }
+
+        await fulfillment(of: [notificationPosted], timeout: 1)
+    }
+
     func testLifecycleRunningTriggerUsesAnalyticsRecorder() async {
         let recorder = AppAnalyticsRecorderSpy()
         let appModel = makeAppModel(recorder: recorder)

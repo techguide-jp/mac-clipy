@@ -44,8 +44,8 @@ final class AppDelegateBridge: NSObject, NSApplicationDelegate {
         appModel.applicationDidActivate(application)
     }
 
-    @objc private func applicationDidConfirmRunning(_: Notification) {
-        Task { [weak self] in
+    @objc private nonisolated func applicationDidConfirmRunning(_: Notification) {
+        Task { @MainActor [weak self] in
             await self?.appModel.applicationDidConfirmRunning()
         }
     }
