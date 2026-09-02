@@ -3,7 +3,8 @@ import Carbon
 
 extension FavoritesManagementView {
     func handleKeyboard(event: NSEvent, isTextEditing: Bool) -> Bool {
-        if !(isTextEditing && isCreatingFavorite), handleTabNavigation(event: event) {
+        if !(isTextEditing && (isCreatingFavorite || editingFavoriteID != nil)),
+           handleTabNavigation(event: event) {
             return true
         }
 

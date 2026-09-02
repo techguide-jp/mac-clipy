@@ -238,6 +238,25 @@ final class FavoritesModel {
         }
     }
 
+    @discardableResult
+    func updateSelectedFavorite(displayTitle: String, content: String) -> Bool {
+        guard let favoriteID = selectedFavoriteID else {
+            statusMessage = L10n.tr("settings.favorites.status.selectFavorite")
+            return false
+        }
+
+        do {
+            try store.updateFavorite(id: favoriteID, displayTitle: displayTitle, content: content)
+            statusMessage = L10n.tr("settings.favorites.status.favoriteUpdated")
+            refreshFromStore()
+            selectFavorite(items.first { $0.id == favoriteID })
+            return true
+        } catch {
+            statusMessage = error.localizedDescription
+            return false
+        }
+    }
+
     func removeSelectedFavorite() {
         guard let favoriteID = selectedFavoriteID else {
             statusMessage = L10n.tr("settings.favorites.status.selectFavorite")

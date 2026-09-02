@@ -49,7 +49,10 @@ extension FavoritesManagementView {
             if case let .existingFolder(folderID) = field, editingFolderID != folderID {
                 return
             }
-            if case let .favorite(favoriteID) = field, editingFavoriteID != favoriteID {
+            if case let .favoriteTitle(favoriteID) = field, editingFavoriteID != favoriteID {
+                return
+            }
+            if case let .favoriteContent(favoriteID) = field, editingFavoriteID != favoriteID {
                 return
             }
             focusedFolderField = field
@@ -150,15 +153,20 @@ extension FavoritesManagementView {
         keyboardFocus = .items
         model.selectFavorite(favorite)
         editingFavoriteID = favorite.id
-        editingFavoriteTitle = favorite.menuTitle
-        focusedFolderField = .favorite(favorite.id)
-        focusFolderField(.favorite(favorite.id))
+        editingFavoriteTitle = favorite.hasCustomDisplayTitle ? favorite.displayTitle : ""
+        editingFavoriteContent = favorite.contentSnapshot
+        focusedFolderField = .favoriteTitle(favorite.id)
+        focusFolderField(.favoriteTitle(favorite.id))
     }
 
     func commitFavoriteRename(_ favoriteID: UUID) {
         model.selectFavorite(model.items.first { $0.id == favoriteID })
-        model.draftFavoriteTitle = editingFavoriteTitle
-        model.updateSelectedFavoriteTitle()
+        guard model.updateSelectedFavorite(
+            displayTitle: editingFavoriteTitle,
+            content: editingFavoriteContent
+        ) else {
+            return
+        }
         cancelFavoriteEditing()
     }
 
@@ -213,6 +221,7 @@ extension FavoritesManagementView {
     func cancelFavoriteEditing() {
         editingFavoriteID = nil
         editingFavoriteTitle = ""
+        editingFavoriteContent = ""
         focusedFolderField = nil
     }
 

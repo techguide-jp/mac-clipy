@@ -11,13 +11,19 @@ struct HistoryPopupResult: Identifiable, Equatable {
     let id: UUID
     let item: ClipboardItem
     let favorite: FavoriteItem?
+    let folderNames: [String]?
 
     static func historyItem(_ item: ClipboardItem, favorite: FavoriteItem?) -> HistoryPopupResult {
-        HistoryPopupResult(id: item.id, item: item, favorite: favorite)
+        HistoryPopupResult(id: item.id, item: item, favorite: favorite, folderNames: nil)
     }
 
-    static func favoriteItem(_ favorite: FavoriteItem) -> HistoryPopupResult {
-        HistoryPopupResult(id: favorite.id, item: favorite.clipboardItem, favorite: favorite)
+    static func favoriteItem(_ favorite: FavoriteItem, folderNames: [String]? = nil) -> HistoryPopupResult {
+        HistoryPopupResult(
+            id: favorite.id,
+            item: favorite.clipboardItem,
+            favorite: favorite,
+            folderNames: folderNames
+        )
     }
 
     var title: String {
@@ -250,9 +256,21 @@ final class HistoryPopupModel {
             }
         case .favorites:
             favoritesModel.search(query, folderFilter: folderFilter).map { favorite in
-                HistoryPopupResult.favoriteItem(favorite)
+                let folderNames: [String]? = if folderFilter == .all {
+                    resolvedFolderNames(for: favorite.id)
+                } else {
+                    nil
+                }
+                return HistoryPopupResult.favoriteItem(favorite, folderNames: folderNames)
             }
         }
+    }
+
+    private func resolvedFolderNames(for favoriteID: UUID) -> [String] {
+        let folderNames = favoritesModel.folderNames(for: favoriteID)
+        return folderNames.isEmpty
+            ? [L10n.tr("historyPopup.folders.unclassified")]
+            : folderNames
     }
 
     private func choose(_ result: HistoryPopupResult, selectedRow row: Int) {

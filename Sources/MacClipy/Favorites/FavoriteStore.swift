@@ -1,132 +1,5 @@
 import Foundation
 
-public struct FavoriteItem: Codable, Equatable, Identifiable {
-    public var id: UUID
-    public var clipboardItemID: UUID?
-    public var checksum: String
-    // 履歴上限で消えないよう、貼り付け用の正本をお気に入り側に保持する。
-    public var contentSnapshot: String
-    public var sourceBundleID: String?
-    public var displayTitle: String
-    public var favoritedAt: Date
-    public var lastUsedAt: Date
-    public var useCount: Int
-    public var sortOrder: Int
-    public var deletedAt: Date?
-
-    public init(
-        id: UUID = UUID(),
-        clipboardItemID: UUID?,
-        checksum: String,
-        contentSnapshot: String,
-        sourceBundleID: String?,
-        displayTitle: String,
-        favoritedAt: Date,
-        lastUsedAt: Date,
-        useCount: Int,
-        sortOrder: Int,
-        deletedAt: Date? = nil
-    ) {
-        self.id = id
-        self.clipboardItemID = clipboardItemID
-        self.checksum = checksum
-        self.contentSnapshot = contentSnapshot
-        self.sourceBundleID = sourceBundleID
-        self.displayTitle = displayTitle
-        self.favoritedAt = favoritedAt
-        self.lastUsedAt = lastUsedAt
-        self.useCount = useCount
-        self.sortOrder = sortOrder
-        self.deletedAt = deletedAt
-    }
-
-    public var menuTitle: String {
-        let title = displayTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        return title.isEmpty ? Self.defaultDisplayTitle(for: contentSnapshot) : title
-    }
-
-    public var contentMenuTitle: String {
-        Self.defaultDisplayTitle(for: contentSnapshot)
-    }
-
-    public var hasCustomDisplayTitle: Bool {
-        menuTitle != contentMenuTitle
-    }
-
-    public var clipboardItem: ClipboardItem {
-        ClipboardItem(
-            id: clipboardItemID ?? id,
-            content: contentSnapshot,
-            sourceBundleID: sourceBundleID,
-            createdAt: favoritedAt,
-            lastUsedAt: lastUsedAt,
-            useCount: useCount,
-            checksum: checksum
-        )
-    }
-
-    public static func defaultDisplayTitle(for content: String) -> String {
-        let collapsed = content
-            .components(separatedBy: .whitespacesAndNewlines)
-            .filter { !$0.isEmpty }
-            .joined(separator: " ")
-
-        if collapsed.count <= AppConstants.Clipboard.menuTitleCharacterLimit {
-            return collapsed.isEmpty ? L10n.tr("clipboard.emptyWhitespace") : collapsed
-        }
-
-        let index = collapsed.index(collapsed.startIndex, offsetBy: AppConstants.Clipboard.menuTitleCharacterLimit)
-        return String(collapsed[..<index]) + "..."
-    }
-}
-
-public struct FavoriteFolder: Codable, Equatable, Identifiable {
-    public var id: UUID
-    public var name: String
-    public var sortOrder: Int
-    public var createdAt: Date
-    public var updatedAt: Date
-    public var deletedAt: Date?
-
-    public init(
-        id: UUID = UUID(),
-        name: String,
-        sortOrder: Int,
-        createdAt: Date,
-        updatedAt: Date,
-        deletedAt: Date? = nil
-    ) {
-        self.id = id
-        self.name = name
-        self.sortOrder = sortOrder
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.deletedAt = deletedAt
-    }
-}
-
-public struct FavoriteFolderMembership: Codable, Equatable, Identifiable {
-    public var id: UUID
-    public var favoriteItemID: UUID
-    public var folderID: UUID
-    public var createdAt: Date
-    public var deletedAt: Date?
-
-    public init(
-        id: UUID = UUID(),
-        favoriteItemID: UUID,
-        folderID: UUID,
-        createdAt: Date,
-        deletedAt: Date? = nil
-    ) {
-        self.id = id
-        self.favoriteItemID = favoriteItemID
-        self.folderID = folderID
-        self.createdAt = createdAt
-        self.deletedAt = deletedAt
-    }
-}
-
 public final class FavoriteStore {
     public private(set) var data: FavoriteData
     public let favoritesURL: URL
@@ -290,14 +163,35 @@ public final class FavoriteStore {
     }
 
     public func updateDisplayTitle(id: UUID, title: String) throws {
+        guard let favorite = items.first(where: { $0.id == id }) else {
+            throw FavoriteStoreError.favoriteNotFound
+        }
+
+        try updateFavorite(id: id, displayTitle: title, content: favorite.contentSnapshot)
+    }
+
+    public func updateFavorite(id: UUID, displayTitle: String, content: String) throws {
+        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw FavoriteStoreError.emptyContent
+        }
         guard let index = data.items.firstIndex(where: { $0.id == id && $0.deletedAt == nil }) else {
             throw FavoriteStoreError.favoriteNotFound
         }
 
-        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        data.items[index].displayTitle = trimmed.isEmpty
-            ? FavoriteItem.defaultDisplayTitle(for: data.items[index].contentSnapshot)
-            : trimmed
+        let checksum = ClipboardItem.makeChecksum(for: content)
+        guard !items.contains(where: {
+            $0.id != id && $0.checksum == checksum && $0.contentSnapshot == content
+        }) else {
+            throw FavoriteStoreError.duplicateFavorite
+        }
+
+        if data.items[index].contentSnapshot != content {
+            data.items[index].contentSnapshot = content
+            data.items[index].checksum = checksum
+            data.items[index].clipboardItemID = nil
+            data.items[index].sourceBundleID = nil
+        }
+        data.items[index].displayTitle = resolvedDisplayTitle(for: content, displayTitle: displayTitle)
         try save()
     }
 

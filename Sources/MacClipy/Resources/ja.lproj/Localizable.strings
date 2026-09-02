@@ -38,6 +38,7 @@
 "developmentCrashReport.title" = "前回のクラッシュログ";
 "favorites.error.emptyName" = "名前を入力してください。";
 "favorites.error.emptyContent" = "保存する内容を入力してください。";
+"favorites.error.duplicateFavorite" = "同じ内容のお気に入りがすでにあります。";
 "favorites.error.favoriteNotFound" = "お気に入りが見つかりません。";
 "favorites.error.folderNotFound" = "フォルダが見つかりません。";
 "favorites.toggle" = "お気に入り";
@@ -166,7 +167,7 @@
 "settings.favorites.item.remove" = "お気に入り解除";
 "settings.favorites.item.removeConfirmMessage" = "お気に入り「%@」を解除します。履歴のコピー値は削除されません。";
 "settings.favorites.item.removeFromFolder" = "このフォルダから外す";
-"settings.favorites.item.rename" = "表示名変更";
+"settings.favorites.item.rename" = "編集";
 "settings.favorites.item.titlePrompt" = "空欄ならコピー値を使用します。";
 "settings.favorites.items" = "お気に入り";
 "settings.favorites.sort.lastUsed" = "最終利用順";
@@ -178,6 +179,7 @@
 "settings.favorites.status.favoriteAdded" = "お気に入りを追加しました";
 "settings.favorites.status.favoriteRemoved" = "お気に入りを解除しました";
 "settings.favorites.status.favoriteRenamed" = "表示名を変更しました";
+"settings.favorites.status.favoriteUpdated" = "お気に入りを更新しました";
 "settings.favorites.status.favoriteUnassigned" = "フォルダから外しました";
 "settings.favorites.status.folderAdded" = "フォルダを作成しました";
 "settings.favorites.status.folderDeleted" = "フォルダを削除しました";

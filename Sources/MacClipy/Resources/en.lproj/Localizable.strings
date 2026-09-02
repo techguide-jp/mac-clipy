@@ -38,6 +38,7 @@
 "developmentCrashReport.title" = "Previous Crash Log";
 "favorites.error.emptyName" = "Enter a name.";
 "favorites.error.emptyContent" = "Enter content to save.";
+"favorites.error.duplicateFavorite" = "A favorite with the same content already exists.";
 "favorites.error.favoriteNotFound" = "Favorite not found.";
 "favorites.error.folderNotFound" = "Folder not found.";
 "favorites.toggle" = "Favorite";
@@ -166,7 +167,7 @@
 "settings.favorites.item.remove" = "Remove Favorite";
 "settings.favorites.item.removeConfirmMessage" = "Remove \"%@\" from favorites? The copied value will stay in history.";
 "settings.favorites.item.removeFromFolder" = "Remove from Folder";
-"settings.favorites.item.rename" = "Rename Title";
+"settings.favorites.item.rename" = "Edit";
 "settings.favorites.item.titlePrompt" = "Leave blank to use the copied value.";
 "settings.favorites.items" = "Favorites";
 "settings.favorites.sort.lastUsed" = "Last Used";
@@ -178,6 +179,7 @@
 "settings.favorites.status.favoriteAdded" = "Added favorite";
 "settings.favorites.status.favoriteRemoved" = "Removed favorite";
 "settings.favorites.status.favoriteRenamed" = "Renamed favorite";
+"settings.favorites.status.favoriteUpdated" = "Updated favorite";
 "settings.favorites.status.favoriteUnassigned" = "Removed from folder";
 "settings.favorites.status.folderAdded" = "Created folder";
 "settings.favorites.status.folderDeleted" = "Deleted folder";

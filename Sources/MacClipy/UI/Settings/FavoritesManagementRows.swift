@@ -225,38 +225,57 @@ extension FavoritesManagementView {
     }
 
     func editingFavoriteRow(_ favorite: FavoriteItem) -> some View {
-        HStack(spacing: 8) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "star.fill")
                 .foregroundStyle(.yellow)
+                .padding(.top, 6)
 
-            TextField(L10n.tr("settings.favorites.item.titlePrompt"), text: $editingFavoriteTitle)
-                .focused($focusedFolderField, equals: .favorite(favorite.id))
+            VStack(alignment: .leading, spacing: 6) {
+                TextField(
+                    L10n.tr("settings.favorites.item.addTitlePrompt"),
+                    text: $editingFavoriteTitle
+                )
+                .textFieldStyle(.roundedBorder)
+                .focused($focusedFolderField, equals: .favoriteTitle(favorite.id))
                 .onSubmit {
-                    commitFavoriteRename(favorite.id)
+                    focusedFolderField = .favoriteContent(favorite.id)
                 }
 
-            Button {
-                commitFavoriteRename(favorite.id)
-            } label: {
-                Image(systemName: "checkmark")
-                    .accessibilityLabel(L10n.tr("button.save"))
+                TextField(
+                    L10n.tr("settings.favorites.item.contentPrompt"),
+                    text: $editingFavoriteContent,
+                    axis: .vertical
+                )
+                .textFieldStyle(.roundedBorder)
+                .lineLimit(2 ... 4)
+                .focused($focusedFolderField, equals: .favoriteContent(favorite.id))
             }
-            .buttonStyle(.plain)
 
-            Button {
-                cancelFavoriteEditing()
-            } label: {
-                Image(systemName: "xmark")
-                    .accessibilityLabel(L10n.tr("button.cancel"))
+            VStack(spacing: 8) {
+                Button {
+                    commitFavoriteRename(favorite.id)
+                } label: {
+                    Image(systemName: "checkmark")
+                        .accessibilityLabel(L10n.tr("button.save"))
+                }
+                .buttonStyle(.plain)
+                .disabled(editingFavoriteContent.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                Button {
+                    cancelFavoriteEditing()
+                } label: {
+                    Image(systemName: "xmark")
+                        .accessibilityLabel(L10n.tr("button.cancel"))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
-        .padding(.horizontal, 8)
-        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        .padding(8)
+        .frame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
         .background(Color.accentColor.opacity(0.16))
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .onAppear {
-            focusFolderField(.favorite(favorite.id))
+            focusFolderField(.favoriteTitle(favorite.id))
         }
     }
 

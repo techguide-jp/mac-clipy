@@ -174,6 +174,16 @@ private struct HistoryPopupRow: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
+
+                if let folderNames = result.folderNames {
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Image(systemName: "folder.fill")
+                        Text(verbatim: ListFormatter.localizedString(byJoining: folderNames))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                }
             }
 
             Spacer(minLength: 8)

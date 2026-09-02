@@ -5,7 +5,8 @@ struct FavoritesManagementView: View {
         case newFolder
         case newFavoriteContent
         case existingFolder(UUID)
-        case favorite(UUID)
+        case favoriteTitle(UUID)
+        case favoriteContent(UUID)
     }
 
     enum DeletionConfirmation: Identifiable {
@@ -35,6 +36,7 @@ struct FavoritesManagementView: View {
     @State var editingFolderName = ""
     @State var editingFavoriteID: UUID?
     @State var editingFavoriteTitle = ""
+    @State var editingFavoriteContent = ""
     @State var deletionConfirmation: DeletionConfirmation?
     @State var keyboardFocus: FavoritesKeyboardFocus = .folders
     @FocusState var focusedFolderField: FolderFieldFocus?
