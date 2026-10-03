@@ -241,3 +241,17 @@
 "shortcutRecorder.toolTip" = "Click, then press the key combination you want to use.";
 "shortcutRecorder.unsupportedKey" = "This key is not supported. Use letters, numbers, Space, Tab, or Return.";
 "shortcutRecorder.willActivate" = "%@ will be active after you save.";
+
+"menu.monthlyMessage" = "This Month’s Message…";
+"menu.monthlyMessageUnread" = "This Month’s Message (New)…";
+"monthly.windowTitle" = "MacClipy Monthly";
+"monthly.surveyHelp" = "This optional survey opens in your browser. No name or email address is required.";
+"monthly.answerSurvey" = "Answer Survey";
+"monthly.close" = "Close";
+"monthly.loading" = "Loading message…";
+"monthly.fetchFailed" = "The message could not be loaded. Check your connection and try again.";
+"monthly.unavailable" = "Monthly messages are available in the official distribution.";
+"monthly.retry" = "Retry";
+"monthly.settingsTitle" = "Monthly Messages";
+"monthly.settingsHelp" = "Receive a message and an optional survey once a month. Message contents and survey answers are not sent to usage analytics.";
+"monthly.enabled" = "Show monthly messages automatically";

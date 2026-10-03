@@ -101,6 +101,14 @@ workflow には Developer ID 証明書、Apple notarization 認証情報、Spark
 
 送信は `設定 > 一般 > 匿名の利用状況` から停止できます。ローカルbuild、テスト、`make run`では送信しません。詳細は [MacClipyプライバシーポリシー](https://techguide.jp/macclipy/privacy/) を確認してください。
 
+## 月初のお知らせ・アンケート（導入準備）
+
+月初に当月のお知らせを取得し、端末ごとに月1回だけ自動案内する機能を追加しています。閉じた後もメニューバーの「今月のお知らせ」から確認でき、「設定 > 一般 > 月初のお知らせ」で自動表示を停止できます。日本時間の月を基準にし、アプリが終了中なら次回起動時に取得します。
+
+本文と追加のアンケート質問はTechGuideの月次管理画面で変更します。未設定の月は既定内容を配信し、回答は任意です。名前・メールアドレス・クリップボードの内容・匿名計測IDは回答に含めません。
+
+Webの保存先と管理認証を本番確認するまで、自動案内のbuild設定は無効です。確認後はRelease workflowの `monthly_messages` 入力、repository variableの `MONTHLY_MESSAGES_ENABLED=1`、または配布スクリプトの同名環境変数で有効にできます。設計は [月次フィードバック設計](docs/superpowers/specs/2026-10-02-monthly-feedback-design.md) を参照してください。
+
 ## ショートカット
 
 履歴メニューの既定値は `Shift + Command + V`、お気に入りメニューの既定値は `Option + Command + V` です。

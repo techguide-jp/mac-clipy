@@ -77,6 +77,11 @@ if [[ "$EXPECTED_ANALYTICS_ENABLED" == "1" ]]; then
 else
   test "$(plutil -extract MacClipyAnalyticsEnabled raw dist/MacClipy.app/Contents/Info.plist)" = "false"
 fi
+if [[ "${MONTHLY_MESSAGES_ENABLED:-0}" == "1" ]]; then
+  test "$(plutil -extract MacClipyMonthlyMessagesEnabled raw dist/MacClipy.app/Contents/Info.plist)" = "true"
+else
+  test "$(plutil -extract MacClipyMonthlyMessagesEnabled raw dist/MacClipy.app/Contents/Info.plist)" = "false"
+fi
 plutil -lint dist/MacClipy.app/Contents/Resources/PrivacyInfo.xcprivacy
 test "$(plutil -extract NSPrivacyTracking raw dist/MacClipy.app/Contents/Resources/PrivacyInfo.xcprivacy)" = "false"
 test "$(plutil -extract NSPrivacyCollectedDataTypes.0.NSPrivacyCollectedDataType raw dist/MacClipy.app/Contents/Resources/PrivacyInfo.xcprivacy)" = "NSPrivacyCollectedDataTypeDeviceID"

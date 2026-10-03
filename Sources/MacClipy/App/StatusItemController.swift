@@ -45,6 +45,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     private let onClearHistory: () -> Void
     private let onShowSettings: () -> Void
     private let onShowAbout: () -> Void
+    private let onShowMonthlyMessage: () -> Void
+    private let hasUnreadMonthlyMessage: () -> Bool
     private let canCheckForUpdates: () -> Bool
     private let onCheckForUpdates: () -> Void
     private let onQuit: () -> Void
@@ -63,6 +65,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         onClearHistory: @escaping () -> Void,
         onShowSettings: @escaping () -> Void,
         onShowAbout: @escaping () -> Void,
+        onShowMonthlyMessage: @escaping () -> Void,
+        hasUnreadMonthlyMessage: @escaping () -> Bool,
         canCheckForUpdates: @escaping () -> Bool,
         onCheckForUpdates: @escaping () -> Void,
         onQuit: @escaping () -> Void
@@ -78,6 +82,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         self.onClearHistory = onClearHistory
         self.onShowSettings = onShowSettings
         self.onShowAbout = onShowAbout
+        self.onShowMonthlyMessage = onShowMonthlyMessage
+        self.hasUnreadMonthlyMessage = hasUnreadMonthlyMessage
         self.canCheckForUpdates = canCheckForUpdates
         self.onCheckForUpdates = onCheckForUpdates
         self.onQuit = onQuit
@@ -186,6 +192,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
 
     private func addCommandItems(to menu: NSMenu) {
+        let title = L10n.tr(hasUnreadMonthlyMessage() ? "menu.monthlyMessageUnread" : "menu.monthlyMessage")
+        let monthlyItem = NSMenuItem(title: title, action: #selector(showMonthlyMessage), keyEquivalent: "")
+        monthlyItem.target = self
+        menu.addItem(monthlyItem)
         for item in Self.commandItemOrder {
             switch item {
             case .settings:
@@ -295,6 +305,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     @objc private func showAbout() {
         onShowAbout()
+    }
+
+    @objc private func showMonthlyMessage() {
+        onShowMonthlyMessage()
     }
 
     @objc private func checkForUpdates() {
