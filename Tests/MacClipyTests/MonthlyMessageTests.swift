@@ -48,7 +48,9 @@ final class MonthlyMessageTests: XCTestCase {
         var attempts = 0
         let center = MonthlyMessageCenter(allowsFetching: true, fetch: {
             attempts += 1
-            if attempts == 1 { throw URLError(.notConnectedToInternet) }
+            if attempts == 1 {
+                throw URLError(.notConnectedToInternet)
+            }
             return message
         })
         center.onAutomaticPresentation = { true }

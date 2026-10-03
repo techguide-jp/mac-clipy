@@ -54,10 +54,14 @@ final class MonthlyMessageCenter {
             lastAttempt = nil
         }
         if !force, let lastSuccessfulFetch, date.timeIntervalSince(lastSuccessfulFetch) < 6 * 3600 {
-            if automatically { presentAutomaticallyIfNeeded() }
+            if automatically {
+                presentAutomaticallyIfNeeded()
+            }
             return
         }
-        if !force, let lastAttempt, date.timeIntervalSince(lastAttempt) < 60 { return }
+        if !force, let lastAttempt, date.timeIntervalSince(lastAttempt) < 60 {
+            return
+        }
         lastAttempt = date
         isLoading = true
         errorMessage = ""
@@ -70,7 +74,9 @@ final class MonthlyMessageCenter {
             }
             message = received
             lastSuccessfulFetch = date
-            if automatically { presentAutomaticallyIfNeeded() }
+            if automatically {
+                presentAutomaticallyIfNeeded()
+            }
         } catch {
             errorMessage = L10n.tr("monthly.fetchFailed")
         }

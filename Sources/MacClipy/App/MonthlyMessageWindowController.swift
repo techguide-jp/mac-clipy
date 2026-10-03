@@ -12,7 +12,9 @@ final class MonthlyMessageWindowController: NSObject, NSWindowDelegate {
 
     func show(automatically: Bool) {
         if let window {
-            if !automatically { window.makeKeyAndOrderFront(nil) }
+            if !automatically {
+                window.makeKeyAndOrderFront(nil)
+            }
             return
         }
         let window = NSPanel(
