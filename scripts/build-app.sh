@@ -10,6 +10,7 @@ APP_VERSION="${APP_VERSION:-0.1.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
 DEVELOPMENT_CRASH_MODAL_ENABLED="${DEVELOPMENT_CRASH_MODAL_ENABLED:-0}"
 ANALYTICS_ENABLED="${ANALYTICS_ENABLED:-0}"
+MONTHLY_MESSAGES_ENABLED="${MONTHLY_MESSAGES_ENABLED:-0}"
 ANALYTICS_ENDPOINT="${ANALYTICS_ENDPOINT:-https://techguide.jp/api/macclipy/analytics}"
 SIGNING_MODE="${SIGNING_MODE:-adhoc}"
 CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:-${DEVELOPER_ID_APPLICATION:-}}"
@@ -73,6 +74,16 @@ if [[ "$ANALYTICS_ENABLED" == "1" ]]; then
   ANALYTICS_ENABLED_PLIST_VALUE="<true/>"
 else
   ANALYTICS_ENABLED_PLIST_VALUE="<false/>"
+fi
+
+if [[ "$MONTHLY_MESSAGES_ENABLED" != "0" && "$MONTHLY_MESSAGES_ENABLED" != "1" ]]; then
+  echo "MONTHLY_MESSAGES_ENABLED must be 0 or 1." >&2
+  exit 1
+fi
+if [[ "$MONTHLY_MESSAGES_ENABLED" == "1" ]]; then
+  MONTHLY_MESSAGES_PLIST_VALUE="<true/>"
+else
+  MONTHLY_MESSAGES_PLIST_VALUE="<false/>"
 fi
 
 "${SWIFT_BUILD_ARGS[@]}"
@@ -140,6 +151,8 @@ cat > "$CONTENTS_DIR/Info.plist" <<PLIST
   <true/>
   <key>MacClipyDevelopmentCrashModalEnabled</key>
   ${DEVELOPMENT_CRASH_MODAL_PLIST_VALUE}
+  <key>MacClipyMonthlyMessagesEnabled</key>
+  ${MONTHLY_MESSAGES_PLIST_VALUE}
   <key>MacClipyAnalyticsEnabled</key>
   ${ANALYTICS_ENABLED_PLIST_VALUE}
   <key>MacClipyAnalyticsEndpoint</key>

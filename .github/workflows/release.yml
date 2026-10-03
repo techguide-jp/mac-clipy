@@ -7,6 +7,10 @@ on:
         description: Release version without the leading v
         required: true
         default: "0.1.0"
+      monthly_messages:
+        description: 月次のお知らせを有効にする（Web本番確認後）
+        type: boolean
+        default: false
   push:
     tags:
       - "v*"
@@ -86,6 +90,7 @@ jobs:
           REQUIRE_SWIFTLINT: "1"
           REQUIRE_SWIFTFORMAT: "1"
           SIGNING_MODE: developer-id
+          MONTHLY_MESSAGES_ENABLED: ${{ (inputs.monthly_messages || vars.MONTHLY_MESSAGES_ENABLED == '1') && '1' || '0' }}
           DEVELOPER_ID_APPLICATION: ${{ secrets.DEVELOPER_ID_APPLICATION }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}

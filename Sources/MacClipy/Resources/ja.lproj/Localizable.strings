@@ -241,3 +241,17 @@
 "shortcutRecorder.toolTip" = "クリックして、使いたいキーの組み合わせを押してください。";
 "shortcutRecorder.unsupportedKey" = "このキーは使えません。英数字、Space、Tab、Return を使ってください。";
 "shortcutRecorder.willActivate" = "保存すると %@ が有効になります。";
+
+"menu.monthlyMessage" = "今月のお知らせ…";
+"menu.monthlyMessageUnread" = "今月のお知らせ（新着）…";
+"monthly.windowTitle" = "MacClipy便り";
+"monthly.surveyHelp" = "任意のアンケートです。ブラウザで開きます。名前・メールアドレスの入力は不要です。";
+"monthly.answerSurvey" = "アンケートに回答する";
+"monthly.close" = "閉じる";
+"monthly.loading" = "お知らせを取得中…";
+"monthly.fetchFailed" = "お知らせを取得できませんでした。通信状況を確認して再試行してください。";
+"monthly.unavailable" = "月次のお知らせは公式配布版で利用できます。";
+"monthly.retry" = "再試行";
+"monthly.settingsTitle" = "月初のお知らせ";
+"monthly.settingsHelp" = "月に1回、お知らせと任意のアンケートを案内します。内容や回答を匿名の利用状況の計測に送ることはありません。";
+"monthly.enabled" = "月初のお知らせを自動で表示";

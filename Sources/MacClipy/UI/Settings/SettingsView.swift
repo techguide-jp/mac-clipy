@@ -11,6 +11,8 @@ struct SettingsView: View {
             GeneralSettingsView(
                 settingsModel: appModel.settingsModel,
                 updater: appModel.appUpdater,
+                monthlyMessageCenter: appModel.monthlyMessageCenter,
+                onShowMonthlyMessage: appModel.showMonthlyMessage,
                 onShortcutChange: appModel.refreshStatusMenu,
                 onShowOnboarding: appModel.showOnboarding,
                 onShowKeyboardHelp: appModel.showKeyboardHelp
@@ -128,6 +130,8 @@ private struct AboutSettingsView: View {
 private struct GeneralSettingsView: View {
     @Bindable var settingsModel: SettingsModel
     @Bindable var updater: AppUpdater
+    @Bindable var monthlyMessageCenter: MonthlyMessageCenter
+    let onShowMonthlyMessage: () -> Void
     let onShortcutChange: () -> Void
     let onShowOnboarding: () -> Void
     let onShowKeyboardHelp: () -> Void
@@ -212,6 +216,17 @@ private struct GeneralSettingsView: View {
                             Label(L10n.tr("settings.updates.checkNow"), systemImage: "arrow.down.circle")
                         }
                         .disabled(!updater.canCheckForUpdates)
+                    }
+                }
+
+                SettingsSection(
+                    title: L10n.tr("monthly.settingsTitle"),
+                    description: L10n.tr("monthly.settingsHelp"),
+                    systemImage: "envelope"
+                ) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Toggle(L10n.tr("monthly.enabled"), isOn: $monthlyMessageCenter.isAutomaticMessagesEnabled)
+                        Button(L10n.tr("menu.monthlyMessage"), action: onShowMonthlyMessage)
                     }
                 }
 

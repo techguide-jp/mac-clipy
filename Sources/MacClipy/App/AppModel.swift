@@ -1,4 +1,5 @@
 import AppKit
+import Defaults
 import KeyboardShortcuts
 import Observation
 
@@ -15,6 +16,7 @@ final class AppModel {
     let favoritesModel: FavoritesModel
     let historyPopupModel: HistoryPopupModel
     let appUpdater: AppUpdater
+    let monthlyMessageCenter = MonthlyMessageCenter()
 
     private var monitor: ClipboardMonitor?
     private var statusItemController: StatusItemController?
@@ -24,6 +26,8 @@ final class AppModel {
     @ObservationIgnored private let developmentCrashReporter = DevelopmentCrashReporter()
     @ObservationIgnored private let anonymousAnalyticsRecorder: (any AnonymousAnalyticsRecording)?
     @ObservationIgnored private var analyticsTask: Task<Void, Never>?
+    @ObservationIgnored private var monthlyMessageTask: Task<Void, Never>?
+    @ObservationIgnored private var monthlyMessageWindowController: MonthlyMessageWindowController?
     private var pasteDestinationApplication: NSRunningApplication?
     var isKeyboardHelpPresented = false
     var developmentCrashReport: DevelopmentCrashReport?
@@ -100,6 +104,14 @@ final class AppModel {
             self?.recordEngagement(at: date)
         }
         settingsWindowController = SettingsWindowController(appModel: self)
+        monthlyMessageWindowController = MonthlyMessageWindowController(center: monthlyMessageCenter)
+        monthlyMessageCenter.onAutomaticPresentation = { [weak self] in
+            guard let self, !Defaults[.isOnboardingPending], NSApp.keyWindow == nil, NSApp.modalWindow == nil else {
+                return false
+            }
+            monthlyMessageWindowController?.show(automatically: true)
+            return true
+        }
         onboardingWindowController = OnboardingWindowController(
             isAccessibilityTrusted: { PasteController.isAccessibilityTrusted },
             requestAccessibilityPermission: { PasteController.requestAccessibilityPermission() },
@@ -135,10 +147,15 @@ final class AppModel {
         } else if let previousCrashReport {
             showDevelopmentCrashReport(previousCrashReport)
         }
+        monthlyMessageTask = Task { [weak self] in
+            await self?.monthlyMessageCenter.refresh()
+            self?.refreshStatusMenu()
+        }
     }
 
     func applicationWillTerminate() {
         analyticsTask?.cancel()
+        monthlyMessageTask?.cancel()
         monitor?.stop()
         developmentCrashReporter.markCleanTermination()
     }
@@ -149,6 +166,8 @@ final class AppModel {
 
     func applicationDidConfirmRunning(at date: Date = Date()) async {
         await anonymousAnalyticsRecorder?.recordRunning(at: date)
+        await monthlyMessageCenter.refresh()
+        refreshStatusMenu()
     }
 
     func showHistoryPopup() {
@@ -234,6 +253,8 @@ final class AppModel {
             onClearHistory: { [weak self] in self?.clearHistory() },
             onShowSettings: { [weak self] in self?.showSettings() },
             onShowAbout: { [weak self] in self?.showAbout() },
+            onShowMonthlyMessage: { [weak self] in self?.showMonthlyMessage() },
+            hasUnreadMonthlyMessage: { [weak self] in self?.monthlyMessageCenter.hasUnreadMessage == true },
             canCheckForUpdates: { [weak self] in self?.appUpdater.canCheckForUpdates == true },
             onCheckForUpdates: { [weak self] in self?.checkForUpdates() },
             onQuit: {
@@ -412,6 +433,17 @@ final class AppModel {
 
         if alert.runModal() == .alertFirstButtonReturn {
             PasteController.requestAccessibilityPermission()
+        }
+    }
+}
+
+extension AppModel {
+    func showMonthlyMessage() {
+        monthlyMessageWindowController?.show(automatically: false)
+        monthlyMessageTask = Task { [weak self] in
+            await self?.monthlyMessageCenter.refresh(automatically: false, force: true)
+            self?.monthlyMessageCenter.markPresented()
+            self?.refreshStatusMenu()
         }
     }
 }
